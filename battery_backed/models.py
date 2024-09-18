@@ -42,6 +42,13 @@ class TodayManager(models.Manager):
         today_end = str(tomorrow)+'T'+'00:00:00Z'
         return super().get_queryset().filter(timestamp__gt = today_start, timestamp__lt = today_end).order_by('timestamp')
 
+class DayAheadManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        today = datetime.now(timezone('Europe/Sofia')).date()
+        after_tomorrow = today + timedelta(2)
+        timeframe_start = str(today)+'T'+'00:00:00Z'
+        timeframe_end = str(after_tomorrow)+'T'+'01:00:00Z'
+        return super().get_queryset().filter(timestamp__gt = timeframe_start, timestamp__lt = timeframe_end).order_by('timestamp')
 
 
 class BatteryLiveStatus(models.Model):
@@ -52,12 +59,15 @@ class BatteryLiveStatus(models.Model):
     invertor_power = models.FloatField(default=0)
     today = TodayManager()
     month = MonthManager()
-    year = YearManager()
+    year = YearManager()    
     objects = models.Manager()
+
 
 class BatterySchedule(models.Model):
     devId = models.CharField(default='batt1', max_length=20)
     timestamp = models.DateTimeField()
+    dam = DayAheadManager()
+    objects = models.Manager()
     invertor = models.FloatField(default=0)
 
     
