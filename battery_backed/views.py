@@ -56,7 +56,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     queryset = BatterySchedule.objects.all().order_by('timestamp')
     def get_queryset(self):
         queryset = super().get_queryset()
-        dam = self.request.query_params.get('dam')
-        if dam:
-            queryset = BatteryLiveStatus.month.all()        
+        date_range = self.request.query_params.get('date_range', None)
+        if date_range:
+            if date_range == "dam":
+                queryset = BatteryLiveStatus.month.all()        
         return queryset
