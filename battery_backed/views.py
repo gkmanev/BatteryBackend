@@ -59,5 +59,5 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         date_range = self.request.query_params.get('date_range', None)
         if date_range:
             if date_range == "dam":
-                queryset = BatteryLiveStatus.month.all()        
+                queryset = BatterySchedule.dam.all()        
         return queryset
