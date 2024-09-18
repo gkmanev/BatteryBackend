@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Fills the BatteryLiveStatus model with data from a specified timestamp range'
 
     def handle(self, *args, **kwargs):
-        BatteryLiveStatus.today.all().delete()
+        #BatteryLiveStatus.today.all().delete()
         start_time = "2024-09-18 00:00"
         end_time = "2024-09-18 15:05"
         
