@@ -1,0 +1,86 @@
+version: '1'
+
+services:
+
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: gunicorn battery_app.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - '8000:8000'
+    environment:
+      - POSTGRES_DB=postgres_latest
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DEBUG=1
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,85.14.6.37,[::1]
+    depends_on:
+      - db    
+    restart: always
+  
+  mqtt:    
+    build:
+      context: ./
+    command: python manage.py mqtt_command    
+    environment:
+      - POSTGRES_DB=postgres_latest
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DEBUG=1
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,85.14.6.37,[::1]
+    depends_on:
+      - web
+      - db    
+    restart: always
+
+  db:
+    image: postgres
+    volumes:
+      - postgres_data_new:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres_latest
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: always
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+
+  celery_worker:
+    build:
+      context: ./
+    command: celery -A battery_app worker -l info
+    environment:
+      - POSTGRES_DB=postgres_latest
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DEBUG=1
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,85.14.6.37,[::1]
+    depends_on:
+      - redis
+      - web
+      - db    
+    restart: always
+
+  celery_beat:
+    build:
+      context: ./
+    command: celery -A battery_app beat -l info
+    environment:
+      - POSTGRES_DB=postgres_latest
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DEBUG=1
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,85.14.6.37,[::1]
+    depends_on:
+      - redis    
+    restart: always
+
+volumes:
+  postgres_data_new:

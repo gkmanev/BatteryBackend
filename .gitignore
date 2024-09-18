@@ -1,0 +1,21 @@
+# Ignore virtual environment
+battery_back_venv/
+
+# Python bytecode files
+__pycache__/
+*.py[cod]
+
+# VS Code settings
+.vscode/
+
+# Environment variables file
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Log files
+*.log
+
+# macOS system files
+.DS_Store
