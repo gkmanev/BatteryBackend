@@ -179,10 +179,13 @@ class ForecastProcessor:
         self.gmail_service = GmailService()
 
     def proceed_forecast(self, clearing=False):
-        now = datetime.now()  - timedelta(days=5)
+        now = datetime.now() - timedelta(days=5)
+        temp_date = datetime.now() - timedelta(days=4)
+
         after_date = now.strftime("%Y/%m/%d")
+        before_date = temp_date.strftime("%Y/%m/%d")
         sender_email = "verzhinia.ivanova@entra.energy"
-        query_str = f"from:{sender_email} after:{after_date}"        
+        query_str = f"from:{sender_email} after:{after_date} before:{before_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
         for msg in results:
