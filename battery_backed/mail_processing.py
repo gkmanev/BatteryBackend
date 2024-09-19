@@ -107,7 +107,7 @@ class FileManager:
     
 
     def get_file_name(self, file):
-        tomorrow = date.today() - timedelta(days=1) # Use the schedule that is 2 days ago (should adjust it into the search query too)
+        tomorrow = date.today() - timedelta(days=4) # Use the schedule that is 2 days ago (should adjust it into the search query too)
         d1 = tomorrow.strftime("%Y-%m-%d")
         file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0]      
@@ -117,12 +117,11 @@ class FileManager:
     def process_files(self):
         try:           
             fn = "schedules"
-            for root, dirs, files in os.walk(fn):                
-                print(f"files:{files}")                
+            for root, dirs, files in os.walk(fn):               
+                             
                 xlsfiles = [f for f in files if f.endswith('.xls')]                
                 for xlsfile in xlsfiles:                    
-                    my_file = self.get_file_name(xlsfile)   
-                    print(f"my_file:{my_file}")                                
+                    my_file = self.get_file_name(xlsfile)                                               
                     if my_file:                       
                         filepath = os.path.join(fn, xlsfile)                        
                         excel_workbook = xlrd.open_workbook(filepath)
@@ -178,7 +177,7 @@ class ForecastProcessor:
         self.gmail_service = GmailService()
 
     def proceed_forecast(self, clearing=False):
-        now = datetime.now()  - timedelta(days=2)
+        now = datetime.now()  - timedelta(days=5)
         after_date = now.strftime("%Y/%m/%d")
         sender_email = "verzhinia.ivanova@entra.energy"
         query_str = f"from:{sender_email} after:{after_date}"        
