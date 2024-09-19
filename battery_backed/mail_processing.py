@@ -107,7 +107,7 @@ class FileManager:
     
 
     def get_file_name(self, file):
-        tomorrow = date.today()
+        tomorrow = date.today() - timedelta(days=2) # Use the schedule that is 2 days ago (should adjust it into the search query too)
         d1 = tomorrow.strftime("%Y-%m-%d")
         file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0]      
@@ -147,8 +147,7 @@ class FileManager:
             
     def save_to_db(self, df):
         try:
-            first_timestamp = df.index[0] - timedelta(minutes=15)
-            print(f"first timestamp is: {first_timestamp}")
+            first_timestamp = df.index[0] - timedelta(minutes=15) # get the last datapoint before new schedule            
             last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').first()
             if last_before_new_schedule:
                 soc = last_before_new_schedule.soc
