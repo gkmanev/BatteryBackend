@@ -69,9 +69,16 @@ class GmailService:
                                 attachment = service.users().messages().attachments().get(id=attachment_id, userId='me', messageId=message['id']).execute()
                                 data = attachment.get("data")
                                 filepath = os.path.join(folder_name, filename)
-                                if data:
-                                    with open(filepath, "wb") as f:
-                                        f.write(urlsafe_b64decode(data))
+                                # skip creating new file if exist
+                                for root, dirs, files in os.walk("schedules"):                           
+                                    xlsfiles = [f for f in files if f.endswith('.xls')]
+                                    for xlsfile in xlsfiles:
+                                        if xlsfile == filename:
+                                            pass
+                                        else:
+                                            if data:
+                                                with open(filepath, "wb") as f:
+                                                    f.write(urlsafe_b64decode(data))
 
     def read_message(self, message, price_clearing=False):
         msg = self.service.users().messages().get(userId='me', id=message['id'], format='full').execute()
