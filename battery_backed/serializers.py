@@ -29,4 +29,4 @@ class BatteryScheduleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = BatterySchedule
-        fields = ('devId', 'timestamp', 'invertor')
+        fields = ('devId', 'timestamp', 'invertor','soc','flow')
