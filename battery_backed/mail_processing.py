@@ -21,8 +21,7 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 class GmailService:
     def __init__(self, token_file="token.json", credentials="credentials.json"):        
         
-        self.credentials_file = os.path.join(os.getcwd(), credentials)
-        
+        self.credentials_file = os.path.join(os.getcwd(), credentials)        
         self.service = self.authenticate(token_file, self.credentials_file)
         
     def authenticate(self, token_file, credentials_file):
@@ -104,15 +103,16 @@ class GmailService:
 class FileManager:
     def __init__(self) -> None:
         self.devId = ""
+        self.file_date = ""
     
 
     def get_file_name(self, file):
         tomorrow = date.today() - timedelta(days=4) # Use the schedule that is 2 days ago (should adjust it into the search query too)
         d1 = tomorrow.strftime("%Y-%m-%d")
-        file_date = file.split("_")[1].split(".")[0]
+        self.file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0]      
-        print(f"Name Date: {file_date} || {d1}")
-        return file_date == d1
+        print(f"Name Date: {self.file_date} || {d1}")
+        return self.file_date == d1
 
     def process_files(self):
         try:           
@@ -126,8 +126,9 @@ class FileManager:
                         filepath = os.path.join(fn, xlsfile)                        
                         excel_workbook = xlrd.open_workbook(filepath)
                         excel_worksheet = excel_workbook.sheet_by_index(0)  
-                        #Day ahead!!!
-                        xl_date = date.today() + timedelta(days=1)
+                        #Day ahead from file date!!!
+                        date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
+                        xl_date = date_obj + timedelta(days=1)
                         xl_date_time = str(xl_date) + "T01:15:00"
                         period = (24 * 4) 
                         schedule_list = []
