@@ -129,7 +129,7 @@ class FileManager:
                         excel_worksheet = excel_workbook.sheet_by_index(0)  
                         #Day ahead from file date!!!
                         date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
-                        xl_date = date_obj #+ timedelta(days=1)
+                        xl_date = date_obj + timedelta(days=1)
                         xl_date_time = str(xl_date) + "T01:15:00"
                         period = (24 * 4) 
                         schedule_list = []
@@ -148,12 +148,12 @@ class FileManager:
             
     def save_to_db(self, df):
         try:
-            first_timestamp = df.index[0] - timedelta(minutes=15) # get the last datapoint before new schedule            
-            last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').first()
-            if last_before_new_schedule:
-                soc = last_before_new_schedule.soc
-            else:
-                soc = 0
+            # first_timestamp = df.index[0] - timedelta(minutes=15) # get the last datapoint before new schedule            
+            # last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').first()
+            # if last_before_new_schedule:
+            #     soc = last_before_new_schedule.soc
+            # else:
+            soc = 0
             for row in df.itertuples():
                 invertor = row.schedule          
                 flow = invertor/60*15
