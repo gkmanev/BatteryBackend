@@ -45,10 +45,11 @@ class TodayManager(models.Manager):
 class DayAheadManager(models.Manager):
     def get_queryset(self) -> models.QuerySet:
         today = datetime.now(timezone('Europe/Sofia')).date()
-        after_tomorrow = today + timedelta(2)
-        timeframe_start = str(today)+'T'+'00:00:00Z'
-        timeframe_end = str(after_tomorrow)+'T'+'01:00:00Z'
-        return super().get_queryset().filter(timestamp__gt = timeframe_start, timestamp__lt = timeframe_end).order_by('timestamp')
+        tomorrow = today + timedelta(1)
+        #after_tomorrow = today + timedelta(2)
+        timeframe_start = str(tomorrow)+'T'+'00:00:00Z'
+        #timeframe_end = str(after_tomorrow)+'T'+'01:00:00Z'
+        return super().get_queryset().filter(timestamp__gt = timeframe_start).order_by('timestamp')
 
 
 class BatteryLiveStatus(models.Model):
