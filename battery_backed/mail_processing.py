@@ -68,17 +68,10 @@ class GmailService:
                                 attachment_id = body.get("attachmentId")
                                 attachment = service.users().messages().attachments().get(id=attachment_id, userId='me', messageId=message['id']).execute()
                                 data = attachment.get("data")
-                                filepath = os.path.join(folder_name, filename)
-                                # skip creating new file if exist
-                                for root, dirs, files in os.walk("schedules"):                           
-                                    xlsfiles = [f for f in files if f.endswith('.xls')]
-                                    for xlsfile in xlsfiles:
-                                        if xlsfile == filename:
-                                            pass
-                                        else:
-                                            if data:
-                                                with open(filepath, "wb") as f:
-                                                    f.write(urlsafe_b64decode(data))
+                                filepath = os.path.join(folder_name, filename)                                
+                                if data:
+                                    with open(filepath, "wb") as f:
+                                        f.write(urlsafe_b64decode(data))
 
     def read_message(self, message, price_clearing=False):
         msg = self.service.users().messages().get(userId='me', id=message['id'], format='full').execute()
@@ -114,7 +107,7 @@ class FileManager:
     
 
     def get_file_name(self, file):
-        tomorrow = date.today() - timedelta(days=5) # Use the schedule that is 2 days ago (should adjust it into the search query too)
+        tomorrow = date.today() #- timedelta(days=5) # Use the schedule that is # days ago (should adjust it into the search query too)
         d1 = tomorrow.strftime("%Y-%m-%d")
         self.file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0]      
@@ -186,13 +179,13 @@ class ForecastProcessor:
         self.gmail_service = GmailService()
 
     def proceed_forecast(self, clearing=False):
-        now = datetime.now() - timedelta(days=5)
-        temp_date = datetime.now() - timedelta(days=4)
+        now = datetime.now() - timedelta(days=1)
+        #temp_date = datetime.now() - timedelta(days=4)
 
         after_date = now.strftime("%Y/%m/%d")
-        before_date = temp_date.strftime("%Y/%m/%d")
+        #before_date = temp_date.strftime("%Y/%m/%d")
         sender_email = "verzhinia.ivanova@entra.energy"
-        query_str = f"from:{sender_email} after:{after_date} before:{before_date}"        
+        query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
         for msg in results:
