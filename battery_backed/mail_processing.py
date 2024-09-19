@@ -129,7 +129,7 @@ class FileManager:
                         excel_worksheet = excel_workbook.sheet_by_index(0)  
                         #Day ahead from file date!!!
                         date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
-                        xl_date = date_obj + timedelta(days=1)
+                        xl_date = date_obj #+ timedelta(days=1)
                         xl_date_time = str(xl_date) + "T01:15:00"
                         period = (24 * 4) 
                         schedule_list = []
