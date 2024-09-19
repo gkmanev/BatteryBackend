@@ -150,17 +150,25 @@ class FileManager:
             first_timestamp = df.index[0] - timedelta(minutes=15)
             print(f"first timestamp is: {first_timestamp}")
             last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').first()
-            print(f"last: {last_before_new_schedule.timestamp}")
-            # for row in df.itertuples():                
-            #     exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
-                # if exist:
-                #     exist.update(invertor=row.schedule)
-                # else:
-                #     BatterySchedule.objects.create(
-                #     devId=self.devId, 
-                #     timestamp=row.Index,
-                #     invertor=row.schedule                    
-                # )                    
+            if last_before_new_schedule:
+                soc = last_before_new_schedule.soc
+            else:
+                soc = 0
+            for row in df.itertuples():
+                invertor = row.schedule          
+                flow = invertor/60*15
+                soc += flow 
+                exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
+                if exist:
+                    exist.update(invertor=invertor,soc=soc,flow=flow)
+                else:
+                    BatterySchedule.objects.create(
+                    devId=self.devId, 
+                    timestamp=row.Index,
+                    invertor=invertor,
+                    flow=flow,
+                    soc=soc
+                )                    
         except Exception as e:
             print(f"Error saving status to DB: {e}")
 
@@ -171,7 +179,7 @@ class ForecastProcessor:
         self.gmail_service = GmailService()
 
     def proceed_forecast(self, clearing=False):
-        now = datetime.now()  - timedelta(days=1)
+        now = datetime.now()  - timedelta(days=2)
         after_date = now.strftime("%Y/%m/%d")
         sender_email = "verzhinia.ivanova@entra.energy"
         query_str = f"from:{sender_email} after:{after_date}"        
