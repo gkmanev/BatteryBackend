@@ -114,13 +114,13 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 
 # Celery Beat Configuration
-CELERY_BEAT_SCHEDULE = {
-    'batt_schedule_update_via_mail': {
-        'task': 'battery_backed.tasks.task_mail_scheduling',
-        'schedule': crontab(),
+# CELERY_BEAT_SCHEDULE = {
+#     'batt_schedule_update_via_mail': {
+#         'task': 'battery_backed.tasks.task_mail_scheduling',
+#         'schedule': crontab(),
         
-    },
-}
+#     },
+# }
 
 
 # celery setting.
