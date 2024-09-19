@@ -152,14 +152,14 @@ class FileManager:
             print(f"last: {last_before_new_schedule.timestamp}")
             for row in df.itertuples():                
                 exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
-                if exist:
-                    exist.update(invertor=row.schedule)
-                else:
-                    BatterySchedule.objects.create(
-                    devId=self.devId, 
-                    timestamp=row.Index,
-                    invertor=row.schedule                    
-                )                    
+                # if exist:
+                #     exist.update(invertor=row.schedule)
+                # else:
+                #     BatterySchedule.objects.create(
+                #     devId=self.devId, 
+                #     timestamp=row.Index,
+                #     invertor=row.schedule                    
+                # )                    
         except Exception as e:
             print(f"Error saving status to DB: {e}")
 
