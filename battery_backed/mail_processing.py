@@ -123,7 +123,8 @@ class FileManager:
                 for xlsfile in xlsfiles:                    
                     my_file = self.get_file_name(xlsfile)                                               
                     if my_file:                       
-                        filepath = os.path.join(fn, xlsfile)                        
+                        filepath = os.path.join(fn, xlsfile) 
+                        print(f"Filepath is: {filepath}")                       
                         excel_workbook = xlrd.open_workbook(filepath)
                         excel_worksheet = excel_workbook.sheet_by_index(0)  
                         #Day ahead from file date!!!
