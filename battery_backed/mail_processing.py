@@ -139,8 +139,7 @@ class FileManager:
                             xl_schedule = excel_worksheet.cell_value(10, 2 + i)  
                             schedule_list.append(xl_schedule)
                         df = pd.DataFrame(schedule_list, index=timeIndex)
-                        df.columns = ['schedule']
-                        print(df.head())
+                        df.columns = ['schedule']                        
                         self.save_to_db(df)
 
         except Exception as e:
@@ -148,8 +147,10 @@ class FileManager:
             
     def save_to_db(self, df):
         try:
-            for row in df.itertuples():
-                # Use update_or_create to either update an existing record or create a new one
+            first_timestamp = df.index[0]
+            last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').first()
+            print(last_before_new_schedule.timestamp)
+            for row in df.itertuples():                
                 exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
                 if exist:
                     exist.update(invertor=row.schedule)
