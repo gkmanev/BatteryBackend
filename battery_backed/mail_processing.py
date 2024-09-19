@@ -107,7 +107,7 @@ class FileManager:
     
 
     def get_file_name(self, file):
-        tomorrow = date.today() - timedelta(days=4) # Use the schedule that is 2 days ago (should adjust it into the search query too)
+        tomorrow = date.today() - timedelta(days=5) # Use the schedule that is 2 days ago (should adjust it into the search query too)
         d1 = tomorrow.strftime("%Y-%m-%d")
         self.file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0]      
