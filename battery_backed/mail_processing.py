@@ -148,10 +148,11 @@ class FileManager:
     def save_to_db(self, df):
         try:
             first_timestamp = df.index[0]
-            last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').last()
+            print(f"first timestamp is: {first_timestamp}")
+            last_before_new_schedule = BatterySchedule.objects.filter(timestamp__lt=first_timestamp).order_by('-timestamp').first()
             print(f"last: {last_before_new_schedule.timestamp}")
-            for row in df.itertuples():                
-                exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
+            # for row in df.itertuples():                
+            #     exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
                 # if exist:
                 #     exist.update(invertor=row.schedule)
                 # else:
