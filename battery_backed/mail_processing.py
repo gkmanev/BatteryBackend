@@ -123,8 +123,7 @@ class FileManager:
                 for xlsfile in xlsfiles:                    
                     my_file = self.get_file_name(xlsfile)                                               
                     if my_file:                       
-                        filepath = os.path.join(fn, xlsfile) 
-                        print(f"Filepath is: {filepath}")                       
+                        filepath = os.path.join(fn, xlsfile)                                            
                         excel_workbook = xlrd.open_workbook(filepath)
                         excel_worksheet = excel_workbook.sheet_by_index(0)  
                         #Day ahead from file date!!!
@@ -184,7 +183,7 @@ class ForecastProcessor:
 
         after_date = now.strftime("%Y/%m/%d")
         #before_date = temp_date.strftime("%Y/%m/%d")
-        sender_email = "verzhinia.ivanova@entra.energy"
+        sender_email = "gk.manev@gmail.com"
         query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
