@@ -71,9 +71,9 @@ class BatteryCumulativeDataView(APIView):
             if date_range == 'today':
                 cumulative_data = BatteryLiveStatus.today.get_cumulative_data_today()
             elif date_range == 'month':
-                cumulative_data = BatteryLiveStatus.today.get_cumulative_data_month()
+                cumulative_data = BatteryLiveStatus.month.get_cumulative_data_month()
             else:
-                cumulative_data = BatteryLiveStatus.today.get_cumulative_data_year()
+                cumulative_data = BatteryLiveStatus.year.get_cumulative_data_year()
         serializer = BatteryCumulativeSerializer(cumulative_data, many=True)
         return Response(serializer.data)
 
