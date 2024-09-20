@@ -178,7 +178,7 @@ class ForecastProcessor:
         self.gmail_service = GmailService()
 
     def proceed_forecast(self, clearing=False):
-        now = datetime.now() - timedelta(days=1)
+        now = datetime.now() - timedelta(days=2)
         #temp_date = datetime.now() - timedelta(days=4)
 
         after_date = now.strftime("%Y/%m/%d")
