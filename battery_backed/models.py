@@ -89,8 +89,8 @@ class DayAheadManager(models.Manager):
         # Aggregate cumulative data
         return queryset.values('timestamp').annotate(
             total_state_of_charge=Sum('soc'),
-            total_flow_last_min=Sum('invertor'),
-            total_invertor_power=Sum('flow')
+            total_flow_last_min=Sum('flow'),
+            total_invertor_power=Sum('invertor')
         )
 
     
