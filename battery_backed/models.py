@@ -53,9 +53,6 @@ class YearManager(models.Manager):
             total_flow_last_min=Round(Sum('flow_last_min'), 2)
         )
 
-
-
-
 class TodayManager(models.Manager):
     def get_queryset(self):
         today = datetime.now(timezone('Europe/Sofia')).date()
@@ -76,10 +73,10 @@ class TodayManager(models.Manager):
         )
 
 class DayAheadManager(models.Manager):
+
     def get_queryset(self) -> models.QuerySet:
-        today = datetime.now(timezone('Europe/Sofia')).date()
-        tomorrow = today + timedelta(1)        
-        timeframe_start = str(tomorrow)+'T'+'00:00:00Z'     
+        today = datetime.now(timezone('Europe/Sofia')).date()         
+        timeframe_start = str(today)+'T'+'00:00:00Z'     
         return super().get_queryset().filter(timestamp__gte=timeframe_start).order_by('timestamp')
     
     def get_cumulative_data_dam(self):
@@ -92,9 +89,7 @@ class DayAheadManager(models.Manager):
             total_flow_last_min=Sum('flow'),
             total_invertor_power=Sum('invertor')
         )
-
-    
-
+   
 
 class BatteryLiveStatus(models.Model):
     devId = models.CharField(default='batt-0001', max_length=20)
