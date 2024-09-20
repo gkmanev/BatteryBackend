@@ -35,12 +35,14 @@ class BatteryScheduleSerializer(serializers.ModelSerializer):
 class BatteryCumulativeSerializer(serializers.Serializer):
     timestamp = serializers.DateTimeField()
     total_state_of_charge = serializers.FloatField()
-    total_flow_last_min = serializers.FloatField()
     total_invertor_power = serializers.FloatField()
+    total_flow_last_min = serializers.FloatField()
+    
 
 
 class ScheduleCumulativeSerializer(serializers.Serializer):
     timestamp = serializers.DateTimeField()
     total_sched_soc = serializers.FloatField()
-    total_sched_flow = serializers.FloatField()
     total_sched_invertor = serializers.FloatField()
+    total_sched_flow = serializers.FloatField()
+    
