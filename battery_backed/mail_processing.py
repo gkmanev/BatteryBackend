@@ -107,7 +107,7 @@ class FileManager:
     
 
     def get_file_name(self, file):
-        tomorrow = date.today() # + timedelta(days=1) #- timedelta(days=5) # Use the schedule that is # days ago (should adjust it into the search query too)
+        tomorrow = date.today() - timedelta(days=1) # + timedelta(days=1) #- timedelta(days=5) # Use the schedule that is # days ago (should adjust it into the search query too)
         d1 = tomorrow.strftime("%Y-%m-%d")
         self.file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0]      
@@ -178,7 +178,7 @@ class ForecastProcessor:
         self.gmail_service = GmailService()
 
     def proceed_forecast(self, clearing=False):
-        now = datetime.now() - timedelta(days=2)
+        now = datetime.now() - timedelta(days=1)
         #temp_date = datetime.now() - timedelta(days=4)
 
         after_date = now.strftime("%Y/%m/%d")
