@@ -24,9 +24,9 @@ class MonthManager(models.Manager):
         
         # Aggregate cumulative data
         return queryset.values('timestamp').annotate(
-            total_state_of_charge=Sum('state_of_charge'),
-            total_flow_last_min=Sum('invertor_power'),
-            total_invertor_power=Sum('flow_last_min')
+            total_state_of_charge=Round(Sum('state_of_charge'), 2),
+            total_invertor_power=Round(Sum('invertor_power'), 2),
+            total_flow_last_min=Round(Sum('flow_last_min'), 2)
         )
 
 
@@ -48,10 +48,11 @@ class YearManager(models.Manager):
         
         # Aggregate cumulative data
         return queryset.values('timestamp').annotate(
-            total_state_of_charge=Sum('state_of_charge'),
-            total_flow_last_min=Sum('invertor_power'),
-            total_invertor_power=Sum('flow_last_min')
+            total_state_of_charge=Round(Sum('state_of_charge'), 2),
+            total_invertor_power=Round(Sum('invertor_power'), 2),
+            total_flow_last_min=Round(Sum('flow_last_min'), 2)
         )
+
 
 
 
@@ -69,9 +70,9 @@ class TodayManager(models.Manager):
         
         # Aggregate cumulative data
         return queryset.values('timestamp').annotate(
-            total_state_of_charge=Sum('state_of_charge'),
-            total_flow_last_min=Sum('invertor_power'),
-            total_invertor_power=Sum('flow_last_min')
+            total_state_of_charge=Round(Sum('state_of_charge'), 2),
+            total_invertor_power=Round(Sum('invertor_power'), 2),
+            total_flow_last_min=Round(Sum('flow_last_min'), 2)
         )
 
 class DayAheadManager(models.Manager):
