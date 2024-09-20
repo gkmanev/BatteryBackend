@@ -1,6 +1,6 @@
 from django.db import models
 from datetime import datetime, timedelta
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from django.db.models.functions import TruncDay, TruncHour, Round
 from pytz import timezone
 
@@ -17,7 +17,17 @@ class MonthManager(models.Manager):
             flow_last_min=Round(Avg('flow_last_min'), 2),
             invertor_power=Round(Avg('invertor_power'), 2)
         ).order_by('truncated_timestamp')
-
+    
+    def get_cumulative_data_month(self):
+        # Get today's data
+        queryset = self.get_queryset()
+        
+        # Aggregate cumulative data
+        return queryset.values('timestamp').annotate(
+            total_state_of_charge=Sum('state_of_charge'),
+            total_flow_last_min=Sum('invertor_power'),
+            total_invertor_power=Sum('flow_last_min')
+        )
 
 
 class YearManager(models.Manager):
@@ -31,6 +41,17 @@ class YearManager(models.Manager):
             flow_last_min=Round(Avg('flow_last_min'), 2),
             invertor_power=Round(Avg('invertor_power'), 2)
         ).order_by('truncated_timestamp')
+    
+    def get_cumulative_data_year(self):
+        # Get today's data
+        queryset = self.get_queryset()
+        
+        # Aggregate cumulative data
+        return queryset.values('timestamp').annotate(
+            total_state_of_charge=Sum('state_of_charge'),
+            total_flow_last_min=Sum('invertor_power'),
+            total_invertor_power=Sum('flow_last_min')
+        )
 
 
 
@@ -41,6 +62,17 @@ class TodayManager(models.Manager):
         today_start = str(today)+'T'+'00:00:00Z'
         today_end = str(tomorrow)+'T'+'00:00:00Z'
         return super().get_queryset().filter(timestamp__gt = today_start, timestamp__lt = today_end).order_by('timestamp')
+    
+    def get_cumulative_data_today(self):
+        # Get today's data
+        queryset = self.get_queryset()
+        
+        # Aggregate cumulative data
+        return queryset.values('timestamp').annotate(
+            total_state_of_charge=Sum('state_of_charge'),
+            total_flow_last_min=Sum('invertor_power'),
+            total_invertor_power=Sum('flow_last_min')
+        )
 
 class DayAheadManager(models.Manager):
     def get_queryset(self) -> models.QuerySet:
@@ -48,8 +80,20 @@ class DayAheadManager(models.Manager):
         tomorrow = today + timedelta(1)        
         timeframe_start = str(tomorrow)+'T'+'00:00:00Z'     
         return super().get_queryset().filter(timestamp__gte=timeframe_start).order_by('timestamp')
+    
+    def get_cumulative_data_dam(self):
+        # Get today's data
+        queryset = self.get_queryset()
+        
+        # Aggregate cumulative data
+        return queryset.values('timestamp').annotate(
+            total_state_of_charge=Sum('soc'),
+            total_flow_last_min=Sum('invertor'),
+            total_invertor_power=Sum('flow')
+        )
 
-       
+    
+
 
 class BatteryLiveStatus(models.Model):
     devId = models.CharField(default='batt-0001', max_length=20)
@@ -59,7 +103,7 @@ class BatteryLiveStatus(models.Model):
     invertor_power = models.FloatField(default=0)
     today = TodayManager()
     month = MonthManager()
-    year = YearManager()    
+    year = YearManager()  
     objects = models.Manager()
 
 
@@ -67,10 +111,9 @@ class BatterySchedule(models.Model):
     devId = models.CharField(default='batt1', max_length=20)
     timestamp = models.DateTimeField()
     dam = DayAheadManager()
-    objects = models.Manager()
+    objects = models.Manager()    
     invertor = models.FloatField(default=0)
     soc = models.FloatField(default=0)
     flow = models.FloatField(default=0)
 
-    
     

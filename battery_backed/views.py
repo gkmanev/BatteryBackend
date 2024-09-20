@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from .models import BatteryLiveStatus, BatterySchedule
-from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer
+from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer
 from django.db.models import Case, When, Value, F, FloatField
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -61,3 +61,34 @@ class ScheduleViewSet(viewsets.ModelViewSet):
             if date_range == "dam":
                 queryset = BatterySchedule.dam.all()        
         return queryset
+    
+
+class BatteryCumulativeDataView(APIView):
+    def get(self, request, *args, **kwargs):
+        cumulative_data = None
+        date_range = self.request.query_params.get('date_range', None)
+        if date_range:
+            if date_range == 'today':
+                cumulative_data = BatteryLiveStatus.today.get_cumulative_data_today()
+            elif date_range == 'month':
+                cumulative_data = BatteryLiveStatus.today.get_cumulative_data_month()
+            else:
+                cumulative_data = BatteryLiveStatus.today.get_cumulative_data_year()
+        serializer = BatteryCumulativeSerializer(cumulative_data, many=True)
+        return Response(serializer.data)
+
+
+class ScheduleCumulativeDataView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        cumulative_data = None
+        date_range = self.request.query_params.get('date_range', None)
+        if date_range:
+            if date_range == 'dam':
+                cumulative_data = BatterySchedule.dam.get_cumulative_data_dam()            
+        serializer = BatteryCumulativeSerializer(cumulative_data, many=True)
+        return Response(serializer.data)
+
+
+
+
