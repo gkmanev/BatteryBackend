@@ -122,7 +122,8 @@ class StateViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         else:
-            if cumulative:                
+            if cumulative: 
+                queryset = self.get_queryset()                
                 cumulative_data = queryset.get_cumulative_data_month()
                 return Response(serializer.cumulative_data, status=status.HTTP_200_OK)
                 
