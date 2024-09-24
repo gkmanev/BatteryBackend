@@ -101,9 +101,15 @@ class StateViewSet(viewsets.ModelViewSet):
         if cumulative:
             # Group by timestamp and calculate cumulative sum of state_of_charge
             df_cumulative = df_combined.groupby('timestamp').agg(
-                cumulative_soc=('state_of_charge', 'sum')
+            cumulative_soc=('state_of_charge', 'sum'),
+            cumulative_flow_last_min=('flow_last_min', 'sum'),
+            cumulative_invertor_power=('invertor_power', 'sum')
             ).reset_index()
-
+            # Round the cumulative sums to 2 decimal places
+            df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
+            df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
+            df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
+            
             # Convert back to a list of dictionaries
             cumulative_result = df_cumulative.to_dict(orient='records')
             return Response(cumulative_result, status=status.HTTP_200_OK)
