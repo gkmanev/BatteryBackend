@@ -102,6 +102,10 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         # Sort by timestamp
         df_combined = df_combined.sort_values(by='timestamp')
 
+        # Round numerical columns to 2 decimal places
+        numeric_columns = ['invertor', 'soc', 'flow']  # Adjust based on your data fields
+        df_combined[numeric_columns] = df_combined[numeric_columns].round(2)
+
         # Convert back to a list of dictionaries
         resampled_result = df_combined.to_dict(orient='records')
         serializer = self.get_serializer(resampled_result, many=True)
