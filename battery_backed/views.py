@@ -58,6 +58,7 @@ class StateViewSet(viewsets.ModelViewSet):
 
         date_range = self.request.query_params.get('date_range', 'false').lower() == 'true'
         cumulative = self.request.query_params.get('cumulative', 'false').lower() == 'true'
+
         if date_range == 'today' or date_range == 'dam':
             
             queryset = self.get_queryset() 
@@ -121,21 +122,13 @@ class StateViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         else:
-            if cumulative:
-                # Group by timestamp and calculate cumulative sum of state_of_charge
-                df_cumulative = df_combined.groupby('timestamp').agg(
-                cumulative_soc=('state_of_charge', 'sum'),
-                cumulative_flow_last_min=('flow_last_min', 'sum'),
-                cumulative_invertor_power=('invertor_power', 'sum')
-                ).reset_index()
-                # Round the cumulative sums to 2 decimal places
-                df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
-                df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
-                df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
+            if cumulative:                
+                cumulative_data = queryset.get_cumulative_data_month()
+                return Response(serializer.cumulative_data, status=status.HTTP_200_OK)
                 
-                # Convert back to a list of dictionaries
-                cumulative_result = df_cumulative.to_dict(orient='records')
-                return Response(cumulative_result, status=status.HTTP_200_OK)
+               
+                
+
 
 
    
