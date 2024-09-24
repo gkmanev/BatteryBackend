@@ -99,6 +99,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 
         # Combine resampled data
         df_combined = pd.concat(resampled_data)
+        # Sort by timestamp
+        df_combined = df_combined.sort_values(by='timestamp')
 
         # Convert back to a list of dictionaries
         resampled_result = df_combined.to_dict(orient='records')
