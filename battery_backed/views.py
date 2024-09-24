@@ -29,6 +29,7 @@ class StateViewSet(viewsets.ModelViewSet):
         # Applying filters based on query parameters
         date_range = self.request.query_params.get('date_range', None)     
         dev_id = self.request.query_params.get('devId', None)
+        
 
         if date_range:
             if date_range == 'today':
@@ -54,6 +55,11 @@ class StateViewSet(viewsets.ModelViewSet):
         return queryset
     
     def list(self, request, *args, **kwargs):
+
+        cumulative = self.request.query_params.get('cumulative', 'false').lower() == 'true'
+
+
+
         queryset = self.get_queryset() 
         # Convert queryset to a list of dictionaries
         data = list(queryset.values())
@@ -91,6 +97,16 @@ class StateViewSet(viewsets.ModelViewSet):
         # Round numerical columns to 2 decimal places
         numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2)
+
+        if cumulative:
+            # Group by timestamp and calculate cumulative sum of state_of_charge
+            df_cumulative = df_combined.groupby('timestamp').agg(
+                cumulative_soc=('state_of_charge', 'sum')
+            ).reset_index()
+
+            # Convert back to a list of dictionaries
+            cumulative_result = df_cumulative.to_dict(orient='records')
+            return Response(cumulative_result, status=status.HTTP_200_OK)
 
         # Convert back to a list of dictionaries
         resampled_result = df_combined.to_dict(orient='records')
