@@ -54,71 +54,71 @@ class StateViewSet(viewsets.ModelViewSet):
 
         return queryset
     
-    def list(self, request, *args, **kwargs):
+    # def list(self, request, *args, **kwargs):
 
-        cumulative = self.request.query_params.get('cumulative', 'false').lower() == 'true'
+    #     cumulative = self.request.query_params.get('cumulative', 'false').lower() == 'true'
 
 
 
-        queryset = self.get_queryset() 
-        # Convert queryset to a list of dictionaries
-        data = list(queryset.values())
-        if not data:
-            return Response([], status=status.HTTP_200_OK)
+    #     queryset = self.get_queryset() 
+    #     # Convert queryset to a list of dictionaries
+    #     data = list(queryset.values())
+    #     if not data:
+    #         return Response([], status=status.HTTP_200_OK)
 
-        # Convert data to pandas DataFrame
-        df = pd.DataFrame(data)
-        # Convert 'timestamp' field to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-        # Set the timestamp as index for resampling
-        df.set_index('timestamp', inplace=True)
-        # Resample for each device separately (assuming there's a 'devId' field)
-        resampled_data = []
-        for dev_id in df['devId'].unique():
-            df_device = df[df['devId'] == dev_id]
+    #     # Convert data to pandas DataFrame
+    #     df = pd.DataFrame(data)
+    #     # Convert 'timestamp' field to datetime
+    #     df['timestamp'] = pd.to_datetime(df['timestamp'])
+    #     # Set the timestamp as index for resampling
+    #     df.set_index('timestamp', inplace=True)
+    #     # Resample for each device separately (assuming there's a 'devId' field)
+    #     resampled_data = []
+    #     for dev_id in df['devId'].unique():
+    #         df_device = df[df['devId'] == dev_id]
 
-            # Resample to 1-minute intervals and interpolate missing data
-            df_resampled = df_device.resample('1T').interpolate()
+    #         # Resample to 1-minute intervals and interpolate missing data
+    #         df_resampled = df_device.resample('1T').interpolate()
 
-            # Add 'devId' column back
-            df_resampled['devId'] = dev_id
+    #         # Add 'devId' column back
+    #         df_resampled['devId'] = dev_id
 
-            # Reset index to make 'timestamp' a column again
-            df_resampled = df_resampled.reset_index()
+    #         # Reset index to make 'timestamp' a column again
+    #         df_resampled = df_resampled.reset_index()
 
-            # Append to the resampled data list
-            resampled_data.append(df_resampled)
+    #         # Append to the resampled data list
+    #         resampled_data.append(df_resampled)
 
-        # Combine resampled data
-        df_combined = pd.concat(resampled_data)
-        # Sort by timestamp
-        df_combined = df_combined.sort_values(by='timestamp')
+    #     # Combine resampled data
+    #     df_combined = pd.concat(resampled_data)
+    #     # Sort by timestamp
+    #     df_combined = df_combined.sort_values(by='timestamp')
 
-        # Round numerical columns to 2 decimal places
-        numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
-        df_combined[numeric_columns] = df_combined[numeric_columns].round(2)
+    #     # Round numerical columns to 2 decimal places
+    #     numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
+    #     df_combined[numeric_columns] = df_combined[numeric_columns].round(2)
 
-        if cumulative:
-            # Group by timestamp and calculate cumulative sum of state_of_charge
-            df_cumulative = df_combined.groupby('timestamp').agg(
-            cumulative_soc=('state_of_charge', 'sum'),
-            cumulative_flow_last_min=('flow_last_min', 'sum'),
-            cumulative_invertor_power=('invertor_power', 'sum')
-            ).reset_index()
-            # Round the cumulative sums to 2 decimal places
-            df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
-            df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
-            df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
+    #     if cumulative:
+    #         # Group by timestamp and calculate cumulative sum of state_of_charge
+    #         df_cumulative = df_combined.groupby('timestamp').agg(
+    #         cumulative_soc=('state_of_charge', 'sum'),
+    #         cumulative_flow_last_min=('flow_last_min', 'sum'),
+    #         cumulative_invertor_power=('invertor_power', 'sum')
+    #         ).reset_index()
+    #         # Round the cumulative sums to 2 decimal places
+    #         df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
+    #         df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
+    #         df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
             
-            # Convert back to a list of dictionaries
-            cumulative_result = df_cumulative.to_dict(orient='records')
-            return Response(cumulative_result, status=status.HTTP_200_OK)
+    #         # Convert back to a list of dictionaries
+    #         cumulative_result = df_cumulative.to_dict(orient='records')
+    #         return Response(cumulative_result, status=status.HTTP_200_OK)
 
-        # Convert back to a list of dictionaries
-        resampled_result = df_combined.to_dict(orient='records')
-        serializer = self.get_serializer(resampled_result, many=True)
-        # Return a custom response
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     # Convert back to a list of dictionaries
+    #     resampled_result = df_combined.to_dict(orient='records')
+    #     serializer = self.get_serializer(resampled_result, many=True)
+    #     # Return a custom response
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
    
 
