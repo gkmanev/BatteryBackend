@@ -122,10 +122,10 @@ class StateViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         else:
-            if cumulative: 
-                queryset = self.get_queryset()                
-                cumulative_data = queryset.get_cumulative_data_month()
-                return Response(serializer.cumulative_data, status=status.HTTP_200_OK)
+            if cumulative:
+                if date_range == 'month': 
+                    queryset = BatteryLiveStatus.month.get_cumulative_data_month()                  
+                    return Response(serializer.queryset, status=status.HTTP_200_OK)
                 
                
                 
