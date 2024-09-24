@@ -4,6 +4,9 @@ from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, Batte
 from django.db.models import Case, When, Value, F, FloatField
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
+import pandas as pd
+
 
 
 class StateViewSet(viewsets.ModelViewSet):
@@ -59,9 +62,51 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         date_range = self.request.query_params.get('date_range', None)
         if date_range:
             if date_range == "dam":
-                queryset = BatterySchedule.dam.all()        
-        return queryset
-    
+                queryset = BatterySchedule.dam.all()
+        return queryset     
+        
+        
+        
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset() 
+        # Convert queryset to a list of dictionaries
+        data = list(queryset.values())
+        if not data:
+            return queryset
+
+        # Convert data to pandas DataFrame
+        df = pd.DataFrame(data)
+        # Convert 'timestamp' field to datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        # Set the timestamp as index for resampling
+        df.set_index('timestamp', inplace=True)
+        # Resample for each device separately (assuming there's a 'devId' field)
+        resampled_data = []
+        for dev_id in df['devId'].unique():
+            df_device = df[df['devId'] == dev_id]
+
+            # Resample to 1-minute intervals and interpolate missing data
+            df_resampled = df_device.resample('1T').interpolate()
+
+            # Add 'devId' column back
+            df_resampled['devId'] = dev_id
+
+            # Reset index to make 'timestamp' a column again
+            df_resampled = df_resampled.reset_index()
+
+            # Append to the resampled data list
+            resampled_data.append(df_resampled)
+
+        # Combine resampled data
+        df_combined = pd.concat(resampled_data)
+
+        # Convert back to a list of dictionaries
+        resampled_result = df_combined.to_dict(orient='records')
+        serializer = self.get_serializer(resampled_result, many=True)
+        # Return a custom response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 class BatteryCumulativeDataView(APIView):
     def get(self, request, *args, **kwargs):
