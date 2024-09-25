@@ -139,16 +139,45 @@ class DayAheadManager(models.Manager):
         timeframe_start = str(today)+'T'+'00:00:00Z'     
         return super().get_queryset().filter(timestamp__gte=timeframe_start).order_by('timestamp')
     
-    def get_cumulative_data_dam(self):
-        # Get today's data
+    def prepare_consistent_response_dam(self, cumulative=False):        
         queryset = self.get_queryset()
-        
-        # Aggregate cumulative data
-        return queryset.values('timestamp').annotate(
-            total_state_of_charge=Sum('soc'),
-            total_flow_last_min=Sum('flow'),
-            total_invertor_power=Sum('invertor')
-        )
+        data = list(queryset.values())
+        if not data:
+            return []
+        # Convert data to pandas DataFrame
+        df = pd.DataFrame(data)
+        # Convert 'timestamp' field to datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        # Set the timestamp as index for resampling
+        df.set_index('timestamp', inplace=True)
+        # Resample for each device separately (assuming there's a 'devId' field)
+        resampled_data = []
+        for dev_id in df['devId'].unique():
+            df_device = df[df['devId'] == dev_id]
+
+            # Resample to 1-minute intervals and interpolate missing data
+            df_resampled = df_device.resample('1T').interpolate()
+
+            # Add 'devId' column back
+            df_resampled['devId'] = dev_id
+
+            # Reset index to make 'timestamp' a column again
+            df_resampled = df_resampled.reset_index()
+
+            # Append to the resampled data list
+            resampled_data.append(df_resampled)
+
+        # Combine resampled data
+        df_combined = pd.concat(resampled_data)
+        # Sort by timestamp
+        df_combined = df_combined.sort_values(by='timestamp')
+
+        # Round numerical columns to 2 decimal places
+        numeric_columns = ['invertor', 'soc', 'flow']  # Adjust based on your data fields
+        df_combined[numeric_columns] = df_combined[numeric_columns].round(2)     
+
+        resampled_result = df_combined.to_dict(orient='records')
+        return resampled_result
    
 
 class BatteryLiveStatus(models.Model):
