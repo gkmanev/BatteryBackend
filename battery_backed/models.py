@@ -144,7 +144,7 @@ class TodayManager(models.Manager):
 class DayAheadManager(models.Manager):
 
     def get_queryset(self) -> models.QuerySet:
-        now = datetime.now(timezone('Europe/Sofia'))    
+        now = datetime.now()    
         return super().get_queryset().filter(timestamp__gte=now).order_by('timestamp')
     
     def prepare_consistent_response_dam(self, cumulative=False):        
