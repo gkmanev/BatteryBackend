@@ -28,13 +28,17 @@ class StateViewSet(viewsets.ModelViewSet):
         # Applying filters based on query parameters
         date_range = self.request.query_params.get('date_range', None)
         dev_id = self.request.query_params.get('devId', None)        
+        cumulative = self.request.query_params.get('cumulative', None)
         
         # Handle date range filtering
         if date_range:
             if date_range == 'today':
                 queryset = BatteryLiveStatus.today.all()
             elif date_range == 'month':
-                queryset = BatteryLiveStatus.month.all()
+                if cumulative:
+                    queryset = BatteryLiveStatus.month.get_cumulative_data_month()
+                else: 
+                    queryset = BatteryLiveStatus.month.all()
             elif date_range == 'year':
                 queryset = BatteryLiveStatus.year.all()
         # Apply dev_id filter if provided
