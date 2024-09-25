@@ -144,7 +144,7 @@ class TodayManager(models.Manager):
 class DayAheadManager(models.Manager):
 
     def get_queryset(self) -> models.QuerySet:
-        today = datetime.now(timezone('Europe/Sofia')).date()   
+        today = datetime.now().date()   
         today_start = str(today)+'T'+'00:00:00Z'        
         return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
     
@@ -156,11 +156,11 @@ class DayAheadManager(models.Manager):
         # Convert data to pandas DataFrame
         df = pd.DataFrame(data)
         # Convert 'timestamp' field to datetime
-       
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
         # Set the timestamp as index for resampling
-        df['timestamp'] = pd.to_datetime(df['timestamp']).dt.tz_localize('UTC').dt.tz_convert('Europe/Sofia')
+
         # Get the current time in the specified timezone
-        now = datetime.now(timezone('Europe/Sofia'))
+        now = datetime.now()
 
         # Filter the DataFrame to include only records after the current time
         df = df[df['timestamp'] > now]       
