@@ -158,6 +158,14 @@ class DayAheadManager(models.Manager):
         # Convert 'timestamp' field to datetime
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         # Set the timestamp as index for resampling
+
+        # Get the current time in the specified timezone
+        now = datetime.now(timezone('Europe/Sofia'))
+
+        # Filter the DataFrame to include only records after the current time
+        df = df[df['timestamp'] > now]       
+        
+        
         df.set_index('timestamp', inplace=True)
         # Resample for each device separately (assuming there's a 'devId' field)
         resampled_data = []
