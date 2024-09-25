@@ -50,7 +50,7 @@ class StateViewSet(viewsets.ModelViewSet):
         cumulative = self.request.query_params.get('cumulative', None)
 
         # If it's today and cumulative is requested
-        if date_range == 'today' and cumulative is not None:
+        if date_range == 'today' and cumulative == True:
             # Fetch cumulative response directly from manager
             response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=True)
             return Response(response, status=status.HTTP_200_OK)

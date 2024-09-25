@@ -175,7 +175,7 @@ class DayAheadManager(models.Manager):
         # Round numerical columns to 2 decimal places
         numeric_columns = ['invertor', 'soc', 'flow']  # Adjust based on your data fields        
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2) 
-        df_combined = df.drop('id', axis=1)    
+        
 
         resampled_result = df_combined.to_dict(orient='records')
         return resampled_result
