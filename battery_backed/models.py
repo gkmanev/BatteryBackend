@@ -31,17 +31,23 @@ class MonthManager(models.Manager):
         return queryset
     
     def get_cumulative_data_month(self):
-        # Get today's data
-        aggregated_data = self.get_queryset()
-        
-        # Then calculate the cumulative sums directly from the aggregated data
-        cumulative_data = aggregated_data.values('truncated_timestamp').annotate(
-            total_state_of_charge=Round(Sum('state_of_charge'), 2),
-            total_invertor_power=Round(Sum('invertor_power'), 2),
-            total_flow_last_min=Round(Sum('flow_last_min'), 2)
-        ).order_by('truncated_timestamp')  # Order by timestamp if necessary
-        
-        return cumulative_data
+    # Get the aggregated monthly data
+        aggregated_data = self.get_queryset()  # This contains avg values
+        df = pd.DataFrame(aggregated_data)
+
+        # Calculate cumulative sums on the average values
+        df['cumulative_soc'] = df['state_of_charge'].cumsum()
+        df['cumulative_flow_last_min'] = df['flow_last_min'].cumsum()
+        df['cumulative_invertor_power'] = df['invertor_power'].cumsum()
+
+        # Select the relevant columns
+        cumulative_result = df[['truncated_timestamp', 'cumulative_soc', 'cumulative_flow_last_min', 'cumulative_invertor_power']]
+
+        # Round the cumulative sums to 2 decimal places
+        cumulative_result = cumulative_result.round(2)
+
+        # Convert back to a list of dictionaries
+        return cumulative_result.to_dict(orient='records')
 
 
 class YearManager(models.Manager):
