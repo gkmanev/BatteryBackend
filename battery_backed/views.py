@@ -34,11 +34,8 @@ class StateViewSet(viewsets.ModelViewSet):
         if date_range:
             if date_range == 'today':
                 queryset = BatteryLiveStatus.today.all()
-            elif date_range == 'month':
-                if cumulative:
-                    queryset = BatteryLiveStatus.month.get_cumulative_data_month()
-                else: 
-                    queryset = BatteryLiveStatus.month.all()
+            elif date_range == 'month':               
+                queryset = BatteryLiveStatus.month.all()
             elif date_range == 'year':
                 queryset = BatteryLiveStatus.year.all()
         # Apply dev_id filter if provided
