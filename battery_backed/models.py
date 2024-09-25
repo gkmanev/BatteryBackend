@@ -32,14 +32,16 @@ class MonthManager(models.Manager):
     
     def get_cumulative_data_month(self):
         # Get today's data
-        queryset = self.get_queryset()
+        aggregated_data = self.get_queryset()
         
-        # Aggregate cumulative data
-        return queryset.values('timestamp').annotate(
+        # Then calculate the cumulative sums directly from the aggregated data
+        cumulative_data = aggregated_data.values('truncated_timestamp').annotate(
             total_state_of_charge=Round(Sum('state_of_charge'), 2),
             total_invertor_power=Round(Sum('invertor_power'), 2),
             total_flow_last_min=Round(Sum('flow_last_min'), 2)
-        )
+        ).order_by('truncated_timestamp')  # Order by timestamp if necessary
+        
+        return cumulative_data
 
 
 class YearManager(models.Manager):
