@@ -155,6 +155,7 @@ class DayAheadManager(models.Manager):
         for dev_id in df['devId'].unique():
             df_device = df[df['devId'] == dev_id]
 
+            df_no_id = df_device.drop(columns=['id'])
             # Resample to 1-minute intervals and interpolate missing data
             df_resampled = df_device.resample('1T').interpolate()
 
@@ -177,7 +178,7 @@ class DayAheadManager(models.Manager):
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2) 
         
 
-        resampled_result = df_combined.to_dict(orient='records')
+        resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')
         return resampled_result
    
 
