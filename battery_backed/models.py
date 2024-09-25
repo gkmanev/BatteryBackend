@@ -161,7 +161,7 @@ class DayAheadManager(models.Manager):
         df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
 
         # Get the current time in the specified timezone
-        now = datetime.now(pytz.UTC)             
+        now = datetime.now(pytz.UTC) - timedelta(minutes=15)             
         
         
         df.set_index('timestamp', inplace=True)
