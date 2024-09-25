@@ -2,9 +2,10 @@ from django.db import models
 from datetime import datetime, timedelta
 from django.db.models import Avg, Sum, Case, When, Value, F, FloatField
 from django.db.models.functions import TruncDay, TruncHour, Round
-
 from pytz import timezone
 import pandas as pd
+import pytz
+
 
 
 class MonthManager(models.Manager):
@@ -155,19 +156,18 @@ class DayAheadManager(models.Manager):
             return []
         # Convert data to pandas DataFrame
         df = pd.DataFrame(data)
-        # Convert 'timestamp' field to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-        # Set the timestamp as index for resampling
+        # Convert 'timestamp' field to datetime        
+        
+        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
 
         # Get the current time in the specified timezone
-        now = datetime.now()
-
-        # Filter the DataFrame to include only records after the current time
-        df = df[df['timestamp'] > now]       
+        now = datetime.now(pytz.UTC)             
         
         
         df.set_index('timestamp', inplace=True)
         # Resample for each device separately (assuming there's a 'devId' field)
+        df = df[df.index > now]  # Use df.index for the comparison
+
         resampled_data = []
         for dev_id in df['devId'].unique():
             df_device = df[df['devId'] == dev_id]
