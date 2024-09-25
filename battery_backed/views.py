@@ -82,6 +82,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+# Bellow is not needed
+
 class BatteryCumulativeDataView(APIView):
     def get(self, request, *args, **kwargs):
         cumulative_data = None

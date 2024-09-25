@@ -9,7 +9,8 @@ import pandas as pd
 
 class MonthManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().annotate(
+        
+        queryset = super().get_queryset().annotate(
             truncated_timestamp=TruncHour('timestamp')  # Annotate with a unique name
         ).values(
             'devId', 'truncated_timestamp'
@@ -18,6 +19,16 @@ class MonthManager(models.Manager):
             flow_last_min=Round(Avg('flow_last_min'), 2),
             invertor_power=Round(Avg('invertor_power'), 2)
         ).order_by('truncated_timestamp')
+
+        queryset = queryset.annotate(
+            adjusted_soc=Case(
+                When(state_of_charge__lte=0, then=Value(0)),
+                When(state_of_charge__gte=100, then=Value(100)),
+                default=F('state_of_charge'),
+                output_field=FloatField()
+            )
+        )
+        return queryset
     
     def get_cumulative_data_month(self):
         # Get today's data
@@ -33,7 +44,8 @@ class MonthManager(models.Manager):
 
 class YearManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().annotate(
+
+        queryset = super().get_queryset().annotate(
             truncated_timestamp=TruncDay('timestamp')  # Annotate with a unique name
         ).values(
             'devId', 'truncated_timestamp'
@@ -42,6 +54,16 @@ class YearManager(models.Manager):
             flow_last_min=Round(Avg('flow_last_min'), 2),
             invertor_power=Round(Avg('invertor_power'), 2)
         ).order_by('truncated_timestamp')
+                # Ensure there are no data below 0 and above 100
+        queryset = queryset.annotate(
+            adjusted_soc=Case(
+                When(state_of_charge__lte=0, then=Value(0)),
+                When(state_of_charge__gte=100, then=Value(100)),
+                default=F('state_of_charge'),
+                output_field=FloatField()
+            )
+        )
+        return queryset
     
     def get_cumulative_data_year(self):
         # Get today's data
@@ -53,6 +75,10 @@ class YearManager(models.Manager):
             total_invertor_power=Round(Sum('invertor_power'), 2),
             total_flow_last_min=Round(Sum('flow_last_min'), 2)
         )
+
+
+
+
 
 class TodayManager(models.Manager):
     def get_queryset(self):
