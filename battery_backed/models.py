@@ -99,7 +99,7 @@ class TodayManager(models.Manager):
         )
         return queryset
     
-    def prepare_consistent_response(self, cumulative=False):
+    def prepare_consistent_response(self, cumulative=None):
         
         queryset = self.get_queryset()
         data = list(queryset.values())
