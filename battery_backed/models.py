@@ -156,9 +156,9 @@ class DayAheadManager(models.Manager):
         # Convert data to pandas DataFrame
         df = pd.DataFrame(data)
         # Convert 'timestamp' field to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+       
         # Set the timestamp as index for resampling
-
+        df['timestamp'] = pd.to_datetime(df['timestamp']).dt.tz_localize('UTC').dt.tz_convert('Europe/Sofia')
         # Get the current time in the specified timezone
         now = datetime.now(timezone('Europe/Sofia'))
 
