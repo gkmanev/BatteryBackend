@@ -75,8 +75,9 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
 
         date_range = self.request.query_params.get('date_range', None)
-        if date_range == "dam":
-            response = BatterySchedule.dam.prepare_consistent_response_dam()
+        cumulative = self.request.query_params.get('cumulative', None)
+        if date_range == "dam" and cumulative:           
+            response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=True)            
             return Response(response, status=status.HTTP_200_OK)
         # Otherwise, use the standard queryset and serialization
         return super().list(request, *args, **kwargs)

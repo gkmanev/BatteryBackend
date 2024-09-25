@@ -192,10 +192,25 @@ class DayAheadManager(models.Manager):
 
         # Round numerical columns to 2 decimal places
         numeric_columns = ['invertor', 'soc', 'flow']  # Adjust based on your data fields        
-        df_combined[numeric_columns] = df_combined[numeric_columns].round(2) 
-        
+        df_combined[numeric_columns] = df_combined[numeric_columns].round(2)
 
-        resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')
+        if cumulative is not None:
+            # Group by timestamp and calculate cumulative sum of state_of_charge
+            df_cumulative = df_combined.groupby('timestamp').agg(
+            cumulative_soc=('soc', 'sum'),
+            cumulative_flow_last_min=('flow', 'sum'),
+            cumulative_invertor_power=('invertor', 'sum')
+            ).reset_index()
+            # Round the cumulative sums to 2 decimal places
+            df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
+            df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
+            df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
+            
+            # Convert back to a list of dictionaries
+            cumulative_result = df_cumulative.to_dict(orient='records')
+            return cumulative_result
+
+        resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')       
         return resampled_result
    
 
