@@ -95,29 +95,85 @@ class MonthManager(models.Manager):
 
 class YearManager(models.Manager):
     def get_queryset(self):
-
-        queryset = super().get_queryset().annotate(
-            truncated_timestamp=TruncDay('timestamp')  # Annotate with a unique name
-        ).values(
-            'devId', 'truncated_timestamp'
-        ).annotate(
-            state_of_charge=Round(Avg('state_of_charge'), 2),
-            flow_last_min=Round(Avg('flow_last_min'), 2),
-            invertor_power=Round(Avg('invertor_power'), 2)
-        ).order_by('truncated_timestamp')
-                # Ensure there are no data below 0 and above 100
-        queryset = queryset.annotate(
-            adjusted_soc=Case(
-                When(state_of_charge__lte=0, then=Value(0)),
-                When(state_of_charge__gte=100, then=Value(100)),
-                default=F('state_of_charge'),
-                output_field=FloatField()
-            )
-        )
-        return queryset
+        return super().get_queryset()
     
-    def get_cumulative_data_year(self):        
-        pass
+    
+    def get_cumulative_data_year(self, cumulative=None):
+        queryset = self.get_queryset()
+
+        data = list(queryset.values())
+        if not data:
+            return []
+        
+        df = pd.DataFrame(data)
+        # Convert 'timestamp' field to datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        # Group by 'devId' and 'timestamp', aggregating to handle duplicates
+        df = df.groupby(['devId', 'timestamp']).agg({
+            'state_of_charge': 'mean',  # Adjust the aggregation as needed
+            'flow_last_min': 'mean',
+            'invertor_power': 'mean'
+        }).reset_index()
+
+        # Set the timestamp as index for resampling
+        df.set_index('timestamp', inplace=True)
+        
+        # Resample for each device separately
+        resampled_data = []
+        for dev_id in df['devId'].unique():
+            df_device = df[df['devId'] == dev_id]
+
+            # Resample to 1-hour intervals and interpolate missing data
+            df_resampled = df_device.resample('1D').interpolate()
+
+            # Add 'devId' column back
+            df_resampled['devId'] = dev_id
+
+            # Reset index to make 'timestamp' a column again
+            df_resampled = df_resampled.reset_index()
+
+            # Append to the resampled data list
+            resampled_data.append(df_resampled)
+
+        # Combine resampled data
+        df_combined = pd.concat(resampled_data)
+        # Sort by timestamp
+        df_combined = df_combined.sort_values(by='timestamp')
+
+        # Round numerical columns to 2 decimal places
+        numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
+        df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
+        
+        resampled_result = df_combined.to_dict(orient='records')
+        
+        # Check if cumulative is requested
+        if cumulative:
+            # Calculate cumulative sums across all devIds for each timestamp
+            df_cumulative = df_combined.groupby('timestamp').agg({
+                'state_of_charge': 'sum',
+                'flow_last_min': 'sum',
+                'invertor_power': 'sum'
+            }).reset_index()
+
+            # Optionally, add devId as a representative (you could choose the first or leave it out)
+            df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
+
+            # Rename cumulative columns with the specified prefix
+            df_cumulative.rename(columns={
+                'state_of_charge': 'cumulative_state_of_charge',
+                'flow_last_min': 'cumulative_flow_last_min',
+                'invertor_power': 'cumulative_invertor_power'
+            }, inplace=True)
+            
+            # Round numerical columns to 2 decimal places
+            numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
+            df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
+
+            resampled_result = df_cumulative.to_dict(orient='records')
+        
+        return resampled_result
+
 
 
 class TodayManager(models.Manager):

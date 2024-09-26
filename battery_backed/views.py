@@ -65,6 +65,13 @@ class StateViewSet(viewsets.ModelViewSet):
             else:
                 response = BatteryLiveStatus.month.get_cumulative_data_month()
             return Response(response, status=status.HTTP_200_OK)
+        if date_range == 'year':
+            if cumulative is not None:
+                response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
+            else:
+                response = BatteryLiveStatus.year.get_cumulative_data_year()
+            return Response(response, status=status.HTTP_200_OK)
+
                 
 
 
