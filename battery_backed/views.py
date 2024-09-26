@@ -18,31 +18,9 @@ class StateViewSet(viewsets.ModelViewSet):
         if date_range == 'year' or date_range == 'month':
             return BatteryLiveSerializer  # Use the serializer for yearly aggregation (by day)
         else:
-            return BatteryLiveSerializerToday       
-        
+            return BatteryLiveSerializerToday 
 
-    def get_queryset(self):
-
-        queryset = super().get_queryset()
-        
-        # Applying filters based on query parameters
-        date_range = self.request.query_params.get('date_range', None)
-        dev_id = self.request.query_params.get('devId', None)        
-        cumulative = self.request.query_params.get('cumulative', None)
-        
-        # Handle date range filtering
-        if date_range:
-            if date_range == 'today':
-                queryset = BatteryLiveStatus.today.all()
-            elif date_range == 'month':               
-                queryset = BatteryLiveStatus.month.all()
-            elif date_range == 'year':
-                queryset = BatteryLiveStatus.year.all()
-        # Apply dev_id filter if provided
-        if dev_id:
-            queryset = queryset.filter(devId=dev_id)
-
-        return queryset
+    
     
     def list(self, request, *args, **kwargs):
         
@@ -58,6 +36,28 @@ class StateViewSet(viewsets.ModelViewSet):
             else:
                 response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
                 return Response(response, status=status.HTTP_200_OK)
+        # Handle month with cumulative or non-cumulative response
+        elif date_range == 'month':
+            if cumulative:
+                pass
+            else:
+                queryset = BatteryLiveStatus.month.all()
+                serializer = self.get_serializer_class(queryset, many=True)
+                response = serializer.data
+            return Response(response, status=status.HTTP_200_OK)
+
+        # Handle year with cumulative or non-cumulative response
+        elif date_range == 'year':
+            if cumulative:
+                pass
+            else:
+                queryset = BatteryLiveStatus.year.all()
+                serializer = self.get_serializer_class(queryset, many=True)
+                response = serializer.data
+            return Response(response, status=status.HTTP_200_OK)
+        
+        return super().list(request, *args, **kwargs)
+    
     
 #DAM             
 class ScheduleViewSet(viewsets.ModelViewSet):
