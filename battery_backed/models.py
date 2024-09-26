@@ -32,12 +32,15 @@ class MonthManager(models.Manager):
         return queryset
     
     def get_cumulative_data_month(self):
-        queryset = super().get_queryset().values(
+        # Access the raw model's manager instead of the aggregated queryset
+        queryset = BatteryLiveStatus.objects.values(
             'devId'
         ).annotate(
             cumulative_state_of_charge=Sum('state_of_charge'),
             cumulative_flow_last_min=Sum('flow_last_min'),
             cumulative_invertor_power=Sum('invertor_power')
+        ).annotate(
+            timestamp=None  # You can choose to keep or remove the timestamp
         )
         return queryset
 
