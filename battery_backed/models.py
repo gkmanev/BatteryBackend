@@ -62,6 +62,25 @@ class MonthManager(models.Manager):
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
         
         resampled_result = df_combined.to_dict(orient='records')
+        
+        # Check if cumulative is requested
+        if cumulative:
+            # Calculate cumulative sums across all devIds for each timestamp
+            df_cumulative = df_combined.groupby('timestamp').agg({
+                'state_of_charge': 'sum',
+                'flow_last_min': 'sum',
+                'invertor_power': 'sum'
+            }).reset_index()
+
+            # Optionally, add devId as a representative (you could choose the first or leave it out)
+            df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
+            
+            # Round numerical columns to 2 decimal places
+            numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']
+            df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
+
+            resampled_result = df_cumulative.to_dict(orient='records')
+        
         return resampled_result
 
         
