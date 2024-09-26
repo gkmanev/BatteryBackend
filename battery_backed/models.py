@@ -32,7 +32,14 @@ class MonthManager(models.Manager):
         return queryset
     
     def get_cumulative_data_month(self):
-        pass
+        queryset = super().get_queryset().values(
+            'devId'
+        ).annotate(
+            cumulative_state_of_charge=Sum('state_of_charge'),
+            cumulative_flow_last_min=Sum('flow_last_min'),
+            cumulative_invertor_power=Sum('invertor_power')
+        )
+        return queryset
 
         
 

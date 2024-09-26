@@ -29,17 +29,19 @@ class StateViewSet(viewsets.ModelViewSet):
 
         # If it's today and cumulative is requested
         if date_range == 'today':
-            if cumulative:
+            if cumulative is not None:
                 # Fetch cumulative response directly from manager
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-                return Response(response, status=status.HTTP_200_OK)
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)                
             else:
                 response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-                return Response(response, status=status.HTTP_200_OK)
+            return Response(response, status=status.HTTP_200_OK)
         # Handle month with cumulative or non-cumulative response
         elif date_range == 'month':
-            if cumulative:
-                pass
+            if cumulative is not None:
+                queryset = BatteryLiveStatus.month.get_cumulative_data_month()
+                serializer_class = self.get_serializer_class()  # Retrieve the serializer class
+                serializer = serializer_class(queryset, many=True)  # Instantiate the serializer
+                response = serializer.data
             else:
                 queryset = BatteryLiveStatus.month.all()
                 serializer_class = self.get_serializer_class()  # Retrieve the serializer class
@@ -63,23 +65,13 @@ class StateViewSet(viewsets.ModelViewSet):
     
 #DAM             
 class ScheduleViewSet(viewsets.ModelViewSet):
-    serializer_class = BatteryScheduleSerializer
-    queryset = BatterySchedule.objects.all().order_by('timestamp')
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        date_range = self.request.query_params.get('date_range', None)
-        if date_range:
-            if date_range == "dam":
-                queryset = BatterySchedule.dam.all()
-        return queryset             
-        
+    serializer_class = BatteryScheduleSerializer      
         
     def list(self, request, *args, **kwargs):
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
         if date_range == "dam":
-            print(f"CUMULATIVE PARM:{cumulative}")
+           
             if cumulative is not None:
                 response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative)            
                 return Response(response, status=status.HTTP_200_OK)
