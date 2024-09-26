@@ -149,7 +149,7 @@ class DayAheadManager(models.Manager):
         today_start = str(today)+'T'+'00:00:00Z'        
         return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
     
-    def prepare_consistent_response_dam(self, cumulative=False):        
+    def prepare_consistent_response_dam(self, cumulative=None):        
         queryset = self.get_queryset()
         data = list(queryset.values())
         if not data:

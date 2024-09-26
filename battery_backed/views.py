@@ -51,12 +51,12 @@ class StateViewSet(viewsets.ModelViewSet):
 
         # If it's today and cumulative is requested
         if date_range == 'today':
-            if cumulative == "true":
+            if cumulative:
                 # Fetch cumulative response directly from manager
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=True)
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
                 return Response(response, status=status.HTTP_200_OK)
             else:
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=False)
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
                 return Response(response, status=status.HTTP_200_OK)
     
 #DAM             
@@ -77,11 +77,12 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
         if date_range == "dam":
-            if cumulative == "true":
-                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=True)            
+            print(f"CUMULATIVE PARM:{cumulative}")
+            if cumulative is not None:
+                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative)            
                 return Response(response, status=status.HTTP_200_OK)
             else:
-                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=False) 
+                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative) 
                 return Response(response, status=status.HTTP_200_OK)     
 
 
