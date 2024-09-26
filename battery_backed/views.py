@@ -59,7 +59,7 @@ class StateViewSet(viewsets.ModelViewSet):
                 response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=False)
                 return Response(response, status=status.HTTP_200_OK)
     
-              
+#DAM             
 class ScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = BatteryScheduleSerializer
     queryset = BatterySchedule.objects.all().order_by('timestamp')
@@ -81,7 +81,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
                 response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=True)            
                 return Response(response, status=status.HTTP_200_OK)
             else:
-                return BatterySchedule.dam.prepare_consistent_response_dam(cumulative=False)      
+                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=False) 
+                return Response(response, status=status.HTTP_200_OK)     
 
 
 # Bellow is not needed
