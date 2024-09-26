@@ -74,9 +74,16 @@ class MonthManager(models.Manager):
 
             # Optionally, add devId as a representative (you could choose the first or leave it out)
             df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
+
+            # Rename cumulative columns with the specified prefix
+            df_cumulative.rename(columns={
+                'state_of_charge': 'cumulative_state_of_charge',
+                'flow_last_min': 'cumulative_flow_last_min',
+                'invertor_power': 'cumulative_invertor_power'
+            }, inplace=True)
             
             # Round numerical columns to 2 decimal places
-            numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']
+            numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
             df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
 
             resampled_result = df_cumulative.to_dict(orient='records')
