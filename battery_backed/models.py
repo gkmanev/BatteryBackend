@@ -14,23 +14,33 @@ class MonthManager(models.Manager):
         return super().get_queryset()
     
     def get_cumulative_data_month(self, cumulative=None):
-        # Access the raw model's manager instead of the aggregated queryset
+       # Access the raw model's manager instead of the aggregated queryset
         queryset = self.get_queryset()
 
         data = list(queryset.values())
         if not data:
             return []
+        
         df = pd.DataFrame(data)
         # Convert 'timestamp' field to datetime
         df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        # Group by 'devId' and 'timestamp', aggregating to handle duplicates
+        df = df.groupby(['devId', 'timestamp']).agg({
+            'state_of_charge': 'mean',  # Adjust the aggregation as needed
+            'flow_last_min': 'mean',
+            'invertor_power': 'mean'
+        }).reset_index()
+
         # Set the timestamp as index for resampling
         df.set_index('timestamp', inplace=True)
-        # Resample for each device separately (assuming there's a 'devId' field)
+        
+        # Resample for each device separately
         resampled_data = []
         for dev_id in df['devId'].unique():
             df_device = df[df['devId'] == dev_id]
 
-            # Resample to 1-minute intervals and interpolate missing data
+            # Resample to 1-hour intervals and interpolate missing data
             df_resampled = df_device.resample('1H').interpolate()
 
             # Add 'devId' column back
@@ -52,8 +62,7 @@ class MonthManager(models.Manager):
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
         
         resampled_result = df_combined.to_dict(orient='records')
-        return resampled_result     
-        
+        return resampled_result
 
         
 
