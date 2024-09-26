@@ -61,7 +61,10 @@ class StateViewSet(viewsets.ModelViewSet):
             
         if date_range == 'month':
             if cumulative:
-                pass
+                queryset = BatteryLiveStatus.month.get_cumulative_data_month()
+                serializer_class = self.get_serializer_class()
+                serializer = serializer_class(queryset, many=True)
+                return Response(serializer.data)
             else:
                 queryset = BatteryLiveStatus.month.all()
                 serializer_class = self.get_serializer_class()
