@@ -50,13 +50,14 @@ class StateViewSet(viewsets.ModelViewSet):
         cumulative = self.request.query_params.get('cumulative', None)
 
         # If it's today and cumulative is requested
-        if date_range == 'today' and cumulative:
-            # Fetch cumulative response directly from manager
-            response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=True)
-            return Response(response, status=status.HTTP_200_OK)
-
-        # Otherwise, use the standard queryset and serialization
-        return super().list(request, *args, **kwargs)
+        if date_range == 'today':
+            if cumulative:
+                # Fetch cumulative response directly from manager
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=True)
+                return Response(response, status=status.HTTP_200_OK)
+            else:
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative=False)
+                return Response(response, status=status.HTTP_200_OK)
     
               
 class ScheduleViewSet(viewsets.ModelViewSet):
@@ -73,14 +74,14 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         
         
     def list(self, request, *args, **kwargs):
-
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
-        if date_range == "dam" and cumulative:           
-            response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=True)            
-            return Response(response, status=status.HTTP_200_OK)
-        # Otherwise, use the standard queryset and serialization
-        return super().list(request, *args, **kwargs)
+        if date_range == "dam":
+            if cumulative:
+                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=True)            
+                return Response(response, status=status.HTTP_200_OK)
+            else:
+                return BatterySchedule.dam.prepare_consistent_response_dam(cumulative=False)      
 
 
 # Bellow is not needed

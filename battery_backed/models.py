@@ -161,12 +161,12 @@ class DayAheadManager(models.Manager):
         df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
 
         # Get the current time in the specified timezone
-        now = datetime.now(pytz.UTC) + timedelta(hours=2, minutes=45)       
+        # now = datetime.now(pytz.UTC) + timedelta(hours=2, minutes=45)       
         
         
         df.set_index('timestamp', inplace=True)
         # Resample for each device separately (assuming there's a 'devId' field)
-        df = df[df.index > now]  # Use df.index for the comparison
+        #df = df[df.index > now]  # Use df.index for the comparison
 
         resampled_data = []
         for dev_id in df['devId'].unique():
