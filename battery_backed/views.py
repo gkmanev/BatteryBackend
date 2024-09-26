@@ -42,7 +42,8 @@ class StateViewSet(viewsets.ModelViewSet):
                 pass
             else:
                 queryset = BatteryLiveStatus.month.all()
-                serializer = self.get_serializer_class(queryset, many=True)
+                serializer_class = self.get_serializer_class()  # Retrieve the serializer class
+                serializer = serializer_class(queryset, many=True)  # Instantiate the serializer
                 response = serializer.data
             return Response(response, status=status.HTTP_200_OK)
 
@@ -52,7 +53,8 @@ class StateViewSet(viewsets.ModelViewSet):
                 pass
             else:
                 queryset = BatteryLiveStatus.year.all()
-                serializer = self.get_serializer_class(queryset, many=True)
+                serializer_class = self.get_serializer_class()  # Retrieve the serializer class
+                serializer = serializer_class(queryset, many=True)  # Instantiate the serializer
                 response = serializer.data
             return Response(response, status=status.HTTP_200_OK)
         
