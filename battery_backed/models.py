@@ -21,7 +21,7 @@ class MonthManager(models.Manager):
         cached_data = cache.get(cache_key)
 
         if cached_data is not None:
-            print(f"We Have Cached Data")
+            print(f"We Have Cached Data Month")
             return cached_data  # Return cached result if available
 
 
@@ -119,7 +119,7 @@ class YearManager(models.Manager):
         cached_data = cache.get(cache_key)
 
         if cached_data is not None:
-            print(f"We Have Cached Data")
+            print(f"We Have Cached Data Year")
             return cached_data  # Return cached result if available
         
         queryset = self.get_queryset()
@@ -309,7 +309,7 @@ class DayAheadManager(models.Manager):
         cached_data = cache.get(cache_key)
 
         if cached_data is not None:
-            print(f"We Have Cached Data")
+            print(f"We Have Cached Data DAM")
             return cached_data  # Return cached result if available
 
         queryset = self.get_queryset()
