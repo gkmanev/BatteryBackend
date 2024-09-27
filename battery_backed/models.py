@@ -110,11 +110,11 @@ class MonthManager(models.Manager):
 
 class YearManager(models.Manager):
     def get_queryset(self):
-        # Get the start of the year
+        # Get the start of the current year
         today = datetime.today()
         start_of_year = datetime(today.year, 1, 1)
 
-        # Truncate timestamp to day and aggregate data for each day
+        # Query the dataset, truncate timestamp to day, and aggregate data
         dataset = super().get_queryset().filter(timestamp__gte=start_of_year).annotate(
             truncated_timestamp=TruncDay('timestamp')  # Truncate timestamp to day
         ).values('devId', 'truncated_timestamp').annotate(

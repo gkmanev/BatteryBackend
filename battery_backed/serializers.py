@@ -9,7 +9,7 @@ class BatteryLiveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BatteryLiveStatus
-        fields = ('devId', 'timestamp', 'state_of_charge', 'flow_last_min', 'invertor_power')
+        fields = ('devId', 'timestamp', 'state_of_charge_avg', 'flow_last_min_avg', 'invertor_power_avg')
 
     def get_timestamp(self, obj):
         # Since 'truncated_timestamp' is an annotated field, access it directly from the object dictionary
