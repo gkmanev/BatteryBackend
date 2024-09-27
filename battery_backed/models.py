@@ -214,8 +214,14 @@ class TodayManager(models.Manager):
         for dev_id in df['devId'].unique():
             df_device = df[df['devId'] == dev_id]
 
+            df_device.drop(columns=['id'])
+
             # Resample to 1-minute intervals and interpolate missing data
-            df_resampled = df_device.resample('1T').interpolate()
+            df_resampled = df_device.resample('1T').asfreq()
+
+            df_resampled['state_of_charge'] = df_resampled['state_of_charge'].interpolate()
+            df_resampled['flow_last_min'] = df_resampled['flow_last_min'].bfill()
+            df_resampled['invertor_power'] = df_resampled['invertor_power'].bfill()
 
             # Add 'devId' column back
             df_resampled['devId'] = dev_id
