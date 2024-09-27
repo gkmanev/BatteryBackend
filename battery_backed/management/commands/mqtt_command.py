@@ -57,7 +57,7 @@ class Command(BaseCommand):
                             flow_last_min= flow_last_min, 
                             invertor_power= invertor
                         )
-                        print(battery)
+                        
                         battery.save()
 
 

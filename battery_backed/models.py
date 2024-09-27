@@ -286,7 +286,7 @@ class DayAheadManager(models.Manager):
 
             df_no_id = df_device.drop(columns=['id'])
             # Resample to 1-minute intervals and interpolate missing data
-            df_resampled = df_device.resample('1T').interpolate()
+            df_resampled = df_device.resample('1T').bfill()
 
             # Add 'devId' column back
             df_resampled['devId'] = dev_id
