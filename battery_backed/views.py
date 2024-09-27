@@ -1,10 +1,13 @@
+
+import pandas as pd
 from rest_framework import viewsets
 from .models import BatteryLiveStatus, BatterySchedule
 from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-import pandas as pd
+from .tasks import process_battery_data  # Import the Celery task
+
 
 
 
@@ -49,31 +52,35 @@ class StateViewSet(viewsets.ModelViewSet):
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
 
-        # If it's today and cumulative is requested
-        if date_range == 'today':
-            if cumulative:
-                # Fetch cumulative response directly from manager
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-                return Response(response, status=status.HTTP_200_OK)
-            else:                
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)                
-                return Response(response, status=status.HTTP_200_OK)
+        if date_range in ['today', 'month', 'year']:
+            # Trigger Celery task asynchronously
+            process_battery_data.delay(date_range, cumulative)
+
+            # Return an immediate response
+            return Response({"status": "Processing"}, status=status.HTTP_202_ACCEPTED)
+
+        # # If it's today and cumulative is requested
+        # if date_range == 'today':
+        #     if cumulative:
+        #         # Fetch cumulative response directly from manager
+        #         response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
+        #         return Response(response, status=status.HTTP_200_OK)
+        #     else:                
+        #         response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)                
+        #         return Response(response, status=status.HTTP_200_OK)
             
-        if date_range == 'month':
-            if cumulative is not None:
-               response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
-            else:
-                response = BatteryLiveStatus.month.get_cumulative_data_month()
-            return Response(response, status=status.HTTP_200_OK)
-        if date_range == 'year':
-            if cumulative is not None:
-                response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
-            else:
-                response = BatteryLiveStatus.year.get_cumulative_data_year()
-            return Response(response, status=status.HTTP_200_OK)
-
-                
-
+        # if date_range == 'month':
+        #     if cumulative is not None:
+        #        response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
+        #     else:
+        #         response = BatteryLiveStatus.month.get_cumulative_data_month()
+        #     return Response(response, status=status.HTTP_200_OK)
+        # if date_range == 'year':
+        #     if cumulative is not None:
+        #         response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
+        #     else:
+        #         response = BatteryLiveStatus.year.get_cumulative_data_year()
+        #     return Response(response, status=status.HTTP_200_OK)
 
         return super().list(request, *args, **kwargs)
     
