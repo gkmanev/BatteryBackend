@@ -269,6 +269,7 @@ class DayAheadManager(models.Manager):
         cached_data = cache.get(cache_key)
 
         if cached_data is not None:
+            print(f"We Have Cached Data")
             return cached_data  # Return cached result if available
 
         queryset = self.get_queryset()
