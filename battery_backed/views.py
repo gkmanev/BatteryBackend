@@ -52,35 +52,32 @@ class StateViewSet(viewsets.ModelViewSet):
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
 
-        if date_range in ['today', 'month', 'year']:
-            # Trigger Celery task asynchronously
-            process_battery_data.delay(date_range, cumulative)
-
-            # Return an immediate response
-            return Response({"status": "Processing"}, status=status.HTTP_202_ACCEPTED)
-
-        # # If it's today and cumulative is requested
-        # if date_range == 'today':
-        #     if cumulative:
-        #         # Fetch cumulative response directly from manager
-        #         response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-        #         return Response(response, status=status.HTTP_200_OK)
-        #     else:                
-        #         response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)                
-        #         return Response(response, status=status.HTTP_200_OK)
+        # If it's today and cumulative is requested
+        if date_range == 'today':
+            if cumulative:
+                # Fetch cumulative response directly from manager
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
+                return Response(response, status=status.HTTP_200_OK)
+            else:                
+                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)                
+                return Response(response, status=status.HTTP_200_OK)
             
-        # if date_range == 'month':
-        #     if cumulative is not None:
-        #        response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
-        #     else:
-        #         response = BatteryLiveStatus.month.get_cumulative_data_month()
-        #     return Response(response, status=status.HTTP_200_OK)
-        # if date_range == 'year':
-        #     if cumulative is not None:
-        #         response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
-        #     else:
-        #         response = BatteryLiveStatus.year.get_cumulative_data_year()
-        #     return Response(response, status=status.HTTP_200_OK)
+        if date_range == 'month':
+            if cumulative is not None:
+               response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
+            else:
+                response = BatteryLiveStatus.month.get_cumulative_data_month()
+            return Response(response, status=status.HTTP_200_OK)
+        if date_range == 'year':
+            if cumulative is not None:
+                pass
+                #response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
+            else:
+                response = BatteryLiveStatus.year.all()
+                serializer_class = self.get_serializer_class()
+                serializer = serializer_class(response, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            #return Response(response, status=status.HTTP_200_OK)
 
         return super().list(request, *args, **kwargs)
     
