@@ -16,6 +16,15 @@ class MonthManager(models.Manager):
         return super().get_queryset()
     
     def get_cumulative_data_month(self, cumulative=None):
+
+        cache_key = f"month_data_{cumulative}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            print(f"We Have Cached Data")
+            return cached_data  # Return cached result if available
+
+
        # Access the raw model's manager instead of the aggregated queryset
         queryset = self.get_queryset()
 
@@ -62,8 +71,10 @@ class MonthManager(models.Manager):
         # Round numerical columns to 2 decimal places
         numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
-        
+        df_combined.fillna(0, inplace=True)
         resampled_result = df_combined.to_dict(orient='records')
+
+        cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
         
         # Check if cumulative is requested
         if cumulative:
@@ -87,8 +98,10 @@ class MonthManager(models.Manager):
             # Round numerical columns to 2 decimal places
             numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
             df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
-
-            resampled_result = df_cumulative.to_dict(orient='records')
+            df_cumulative.fillna(0, inplace=True)
+            cumulative_result = df_cumulative.to_dict(orient='records')
+            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes
+            return cumulative_result   
         
         return resampled_result
 
@@ -101,6 +114,14 @@ class YearManager(models.Manager):
     
     
     def get_cumulative_data_year(self, cumulative=None):
+        
+        cache_key = f"year_data_{cumulative}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            print(f"We Have Cached Data")
+            return cached_data  # Return cached result if available
+        
         queryset = self.get_queryset()
 
         data = list(queryset.values())
@@ -146,8 +167,9 @@ class YearManager(models.Manager):
         # Round numerical columns to 2 decimal places
         numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
-        
+        df_combined.fillna(0, inplace=True)        
         resampled_result = df_combined.to_dict(orient='records')
+        cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
         
         # Check if cumulative is requested
         if cumulative:
@@ -171,8 +193,10 @@ class YearManager(models.Manager):
             # Round numerical columns to 2 decimal places
             numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
             df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
-
-            resampled_result = df_cumulative.to_dict(orient='records')
+            df_cumulative.fillna(0, inplace=True)
+            cumulative_result = df_cumulative.to_dict(orient='records')
+            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes   
+            return cumulative_result
         
         return resampled_result
 
@@ -198,6 +222,13 @@ class TodayManager(models.Manager):
         return queryset
     
     def prepare_consistent_response(self, cumulative=None):
+
+        cache_key = f"today_data_{cumulative}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            print(f"We Have Cached Data")
+            return cached_data  # Return cached result if available
         
         queryset = self.get_queryset()
         data = list(queryset.values())
@@ -253,13 +284,15 @@ class TodayManager(models.Manager):
             df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
             df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
             df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
-            
+            df_cumulative.fillna(0, inplace=True)
             # Convert back to a list of dictionaries
             cumulative_result = df_cumulative.to_dict(orient='records')
+            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes   
             return cumulative_result
         
         df_combined.fillna(0, inplace=True)
         resampled_result = df_combined.to_dict(orient='records')
+        cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
         return resampled_result
   
 
@@ -343,11 +376,10 @@ class DayAheadManager(models.Manager):
             df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
             df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
             df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
-            
+            df_cumulative.fillna(0, inplace=True)
             # Convert back to a list of dictionaries
             cumulative_result = df_cumulative.to_dict(orient='records')
-            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes
-
+            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes    
             return cumulative_result
 
         resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')   
