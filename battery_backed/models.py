@@ -286,7 +286,12 @@ class DayAheadManager(models.Manager):
 
             df_no_id = df_device.drop(columns=['id'])
             # Resample to 1-minute intervals and interpolate missing data
-            df_resampled = df_device.resample('1T').bfill()
+             # Interpolate 'soc' and 'flow' columns
+            df_resampled['soc'] = df_resampled['soc'].interpolate()
+            df_resampled['flow'] = df_resampled['flow'].interpolate()
+
+            # Backward fill 'invertor' column
+            df_resampled['invertor'] = df_resampled['invertor'].bfill()
 
             # Add 'devId' column back
             df_resampled['devId'] = dev_id
