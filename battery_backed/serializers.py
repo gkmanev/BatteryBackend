@@ -5,14 +5,15 @@ from .models import BatteryLiveStatus, BatterySchedule
 
 
 class BatteryLiveSerializer(serializers.ModelSerializer):
-    timestamp = serializers.SerializerMethodField()  # Use SerializerMethodField to rename
+    timestamp = serializers.SerializerMethodField()  # Use SerializerMethodField to rename the truncated timestamp
 
     class Meta:
         model = BatteryLiveStatus
-        fields = ('devId', 'timestamp', 'state_of_charge', 'flow_last_min', 'invertor_power')
+        fields = ('devId', 'timestamp', 'state_of_charge_avg', 'flow_last_min_avg', 'invertor_power_avg')
 
     def get_timestamp(self, obj):
-        return obj.get('truncated_timestamp')  # Access the annotated field from the dictionary
+        # Since 'truncated_timestamp' is an annotated field, access it directly from the object dictionary
+        return obj.get('truncated_timestamp')
 
 
 

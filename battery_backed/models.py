@@ -110,7 +110,20 @@ class MonthManager(models.Manager):
 
 class YearManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset()
+        # Get the start of the year
+        today = datetime.today()
+        start_of_year = datetime(today.year, 1, 1)
+
+        # Truncate timestamp to day and aggregate data for each day
+        dataset = super().get_queryset().filter(timestamp__gte=start_of_year).annotate(
+            truncated_timestamp=TruncDay('timestamp')  # Truncate timestamp to day
+        ).values('devId', 'truncated_timestamp').annotate(
+            state_of_charge_avg=Avg('state_of_charge'),
+            flow_last_min_avg=Avg('flow_last_min'),
+            invertor_power_avg=Avg('invertor_power')
+        ).order_by('truncated_timestamp')
+
+        return dataset
     
     
     # def get_cumulative_data_year(self, cumulative=None):
