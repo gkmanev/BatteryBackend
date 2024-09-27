@@ -257,7 +257,8 @@ class TodayManager(models.Manager):
             # Convert back to a list of dictionaries
             cumulative_result = df_cumulative.to_dict(orient='records')
             return cumulative_result
-
+        
+        df_combined.fillna(0, inplace=True)
         resampled_result = df_combined.to_dict(orient='records')
         return resampled_result
   
