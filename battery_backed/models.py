@@ -291,6 +291,9 @@ class DayAheadManager(models.Manager):
             df_resampled['soc'] = df_resampled['soc'].interpolate()
             df_resampled['flow'] = df_resampled['flow'].bfill()
 
+            # Divide the flow by 15 to have it per min
+            df_resampled['flow'] = df_resampled['flow']/15
+
             # Backward fill 'invertor' column
             df_resampled['invertor'] = df_resampled['invertor'].bfill()
 
