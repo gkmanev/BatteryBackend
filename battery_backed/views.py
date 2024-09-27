@@ -57,7 +57,7 @@ class StateViewSet(viewsets.ModelViewSet):
                 return Response(response, status=status.HTTP_200_OK)
             else:                
                 response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-                print(f"Results from Just Today: {response} ")
+                
                 return Response(response, status=status.HTTP_200_OK)
             
         if date_range == 'month':
