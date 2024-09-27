@@ -1,7 +1,7 @@
 from celery.utils.log import get_task_logger 
 from celery import shared_task 
 from .utils import mail_schedule
-from .models import BatteryLiveStatus
+
 
 logger = get_task_logger(__name__)
 
