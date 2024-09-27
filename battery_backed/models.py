@@ -289,7 +289,7 @@ class DayAheadManager(models.Manager):
             df_resampled = df_device.resample('1T').asfreq()
              # Interpolate 'soc' and 'flow' columns
             df_resampled['soc'] = df_resampled['soc'].interpolate()
-            df_resampled['flow'] = df_resampled['flow'].interpolate()
+            df_resampled['flow'] = df_resampled['flow'].bfill()
 
             # Backward fill 'invertor' column
             df_resampled['invertor'] = df_resampled['invertor'].bfill()
