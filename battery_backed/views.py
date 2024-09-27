@@ -57,8 +57,10 @@ class StateViewSet(viewsets.ModelViewSet):
                 return Response(response, status=status.HTTP_200_OK)
             else:
                 response = BatteryLiveStatus.today.all()
+                serializer_class = self.get_serializer_class()
+                serializer = serializer_class(response, many=True)
                 #response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-                return Response(response, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             
         if date_range == 'month':
             if cumulative is not None:
