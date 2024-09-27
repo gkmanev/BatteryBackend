@@ -12,98 +12,111 @@ from django.core.cache import cache
 
 class MonthManager(models.Manager):
     
-    def get_queryset(self):        
-        return super().get_queryset()
+     def get_queryset(self):
+        # Get the start of the month
+        today = datetime.today()
+        start_of_month = datetime(today.year, today.month, 1)
+
+        # Truncate timestamp to hour and aggregate data for each hour
+        dataset = super().get_queryset().filter(timestamp__gte=start_of_month).annotate(
+            truncated_timestamp=TruncHour('timestamp')  # Truncate timestamp to hour
+        ).values('devId', 'truncated_timestamp').annotate(
+            state_of_charge_avg=Avg('state_of_charge'),
+            flow_last_min_avg=Avg('flow_last_min'),
+            invertor_power_avg=Avg('invertor_power')
+        ).order_by('truncated_timestamp')
+
+        return dataset
     
-    def get_cumulative_data_month(self, cumulative=None):
+    # def get_cumulative_data_month(self, cumulative=None):
 
-        cache_key = f"month_data_{cumulative}"
-        cached_data = cache.get(cache_key)
+    #     cache_key = f"month_data_{cumulative}"
+    #     cached_data = cache.get(cache_key)
 
-        if cached_data is not None:
-            print(f"We Have Cached Data Month")
-            return cached_data  # Return cached result if available
+    #     if cached_data is not None:
+    #         print(f"We Have Cached Data Month")
+    #         return cached_data  # Return cached result if available
 
 
-       # Access the raw model's manager instead of the aggregated queryset
-        queryset = self.get_queryset()
+    #    # Access the raw model's manager instead of the aggregated queryset
+    #     queryset = self.get_queryset()
 
-        data = list(queryset.values())
-        if not data:
-            return []
+    #     data = list(queryset.values())
+    #     if not data:
+    #         return []
         
-        df = pd.DataFrame(data)
-        # Convert 'timestamp' field to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+    #     df = pd.DataFrame(data)
+    #     # Convert 'timestamp' field to datetime
+    #     df['timestamp'] = pd.to_datetime(df['timestamp'])
         
-        # Group by 'devId' and 'timestamp', aggregating to handle duplicates
-        df = df.groupby(['devId', 'timestamp']).agg({
-            'state_of_charge': 'mean',  # Adjust the aggregation as needed
-            'flow_last_min': 'mean',
-            'invertor_power': 'mean'
-        }).reset_index()
+    #     # Group by 'devId' and 'timestamp', aggregating to handle duplicates
+    #     df = df.groupby(['devId', 'timestamp']).agg({
+    #         'state_of_charge': 'mean',  # Adjust the aggregation as needed
+    #         'flow_last_min': 'mean',
+    #         'invertor_power': 'mean'
+    #     }).reset_index()
 
-        # Set the timestamp as index for resampling
-        df.set_index('timestamp', inplace=True)
+    #     # Set the timestamp as index for resampling
+    #     df.set_index('timestamp', inplace=True)
         
-        # Resample for each device separately
-        resampled_data = []
-        for dev_id in df['devId'].unique():
-            df_device = df[df['devId'] == dev_id]
+    #     # Resample for each device separately
+    #     resampled_data = []
+    #     for dev_id in df['devId'].unique():
+    #         df_device = df[df['devId'] == dev_id]
 
-            # Resample to 1-hour intervals and interpolate missing data
-            df_resampled = df_device.resample('1H').interpolate()
+    #         # Resample to 1-hour intervals and interpolate missing data
+    #         df_resampled = df_device.resample('1H').interpolate()
 
-            # Add 'devId' column back
-            df_resampled['devId'] = dev_id
+    #         # Add 'devId' column back
+    #         df_resampled['devId'] = dev_id
 
-            # Reset index to make 'timestamp' a column again
-            df_resampled = df_resampled.reset_index()
+    #         # Reset index to make 'timestamp' a column again
+    #         df_resampled = df_resampled.reset_index()
 
-            # Append to the resampled data list
-            resampled_data.append(df_resampled)
+    #         # Append to the resampled data list
+    #         resampled_data.append(df_resampled)
 
-        # Combine resampled data
-        df_combined = pd.concat(resampled_data)
-        # Sort by timestamp
-        df_combined = df_combined.sort_values(by='timestamp')
+    #     # Combine resampled data
+    #     df_combined = pd.concat(resampled_data)
+    #     # Sort by timestamp
+    #     df_combined = df_combined.sort_values(by='timestamp')
 
-        # Round numerical columns to 2 decimal places
-        numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
-        df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
-        df_combined.fillna(0, inplace=True)
-        resampled_result = df_combined.to_dict(orient='records')
+    #     # Round numerical columns to 2 decimal places
+    #     numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
+    #     df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
+    #     df_combined.fillna(0, inplace=True)
+    #     resampled_result = df_combined.to_dict(orient='records')
 
-        cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
+    #     cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
         
-        # Check if cumulative is requested
-        if cumulative:
-            # Calculate cumulative sums across all devIds for each timestamp
-            df_cumulative = df_combined.groupby('timestamp').agg({
-                'state_of_charge': 'sum',
-                'flow_last_min': 'sum',
-                'invertor_power': 'sum'
-            }).reset_index()
+    #     # Check if cumulative is requested
+    #     if cumulative:
+    #         # Calculate cumulative sums across all devIds for each timestamp
+    #         df_cumulative = df_combined.groupby('timestamp').agg({
+    #             'state_of_charge': 'sum',
+    #             'flow_last_min': 'sum',
+    #             'invertor_power': 'sum'
+    #         }).reset_index()
 
-            # Optionally, add devId as a representative (you could choose the first or leave it out)
-            df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
+    #         # Optionally, add devId as a representative (you could choose the first or leave it out)
+    #         df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
 
-            # Rename cumulative columns with the specified prefix
-            df_cumulative.rename(columns={
-                'state_of_charge': 'cumulative_state_of_charge',
-                'flow_last_min': 'cumulative_flow_last_min',
-                'invertor_power': 'cumulative_invertor_power'
-            }, inplace=True)
+    #         # Rename cumulative columns with the specified prefix
+    #         df_cumulative.rename(columns={
+    #             'state_of_charge': 'cumulative_state_of_charge',
+    #             'flow_last_min': 'cumulative_flow_last_min',
+    #             'invertor_power': 'cumulative_invertor_power'
+    #         }, inplace=True)
             
-            # Round numerical columns to 2 decimal places
-            numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
-            df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
-            df_cumulative.fillna(0, inplace=True)
-            cumulative_result = df_cumulative.to_dict(orient='records')
-            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes
-            return cumulative_result   
+    #         # Round numerical columns to 2 decimal places
+    #         numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
+    #         df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
+    #         df_cumulative.fillna(0, inplace=True)
+    #         cumulative_result = df_cumulative.to_dict(orient='records')
+    #         cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes
+    #         return cumulative_result   
         
-        return resampled_result
+    #     return resampled_result
 
         
 

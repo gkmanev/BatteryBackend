@@ -64,10 +64,14 @@ class StateViewSet(viewsets.ModelViewSet):
             
         if date_range == 'month':
             if cumulative is not None:
-               response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
+                pass
+               #response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
             else:
-                response = BatteryLiveStatus.month.get_cumulative_data_month()
-            return Response(response, status=status.HTTP_200_OK)
+                response = BatteryLiveStatus.month.all()
+                serializer_class = self.get_serializer_class()
+                serializer = serializer_class(response, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            #return Response(response, status=status.HTTP_200_OK)
         if date_range == 'year':
             if cumulative is not None:
                 pass
