@@ -21,9 +21,9 @@ class MonthManager(models.Manager):
         dataset = super().get_queryset().filter(timestamp__gte=start_of_month).annotate(
             truncated_timestamp=TruncHour('timestamp')  # Truncate timestamp to hour
         ).values('devId', 'truncated_timestamp').annotate(
-            state_of_charge_avg=Avg('state_of_charge'),
-            flow_last_min_avg=Avg('flow_last_min'),
-            invertor_power_avg=Avg('invertor_power')
+            state_of_charge_avg=Round(Avg('state_of_charge'), 2),
+            flow_last_min_avg=Round(Avg('flow_last_min'), 2),
+            invertor_power_avg=Round(Avg('invertor_power'), 2)
         ).order_by('truncated_timestamp')
 
         return dataset
@@ -131,9 +131,9 @@ class YearManager(models.Manager):
         dataset = super().get_queryset().filter(timestamp__gte=start_of_year).annotate(
             truncated_timestamp=TruncDay('timestamp')  # Truncate timestamp to day
         ).values('devId', 'truncated_timestamp').annotate(
-            state_of_charge_avg=Avg('state_of_charge'),
-            flow_last_min_avg=Avg('flow_last_min'),
-            invertor_power_avg=Avg('invertor_power')
+            state_of_charge_avg=Round(Avg('state_of_charge'), 2),
+            flow_last_min_avg=Round(Avg('flow_last_min'), 2),
+            invertor_power_avg=Round(Avg('invertor_power'), 2)
         ).order_by('truncated_timestamp')
 
         return dataset
