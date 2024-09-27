@@ -5,15 +5,30 @@ from .models import BatteryLiveStatus, BatterySchedule
 
 
 class BatteryLiveSerializer(serializers.ModelSerializer):
-    timestamp = serializers.SerializerMethodField()  # Use SerializerMethodField to rename the truncated timestamp
+    timestamp = serializers.SerializerMethodField()  # Use SerializerMethodField to rename 'truncated_timestamp'
+    state_of_charge = serializers.SerializerMethodField()
+    flow_last_min = serializers.SerializerMethodField()
+    invertor_power = serializers.SerializerMethodField()
 
     class Meta:
         model = BatteryLiveStatus
-        fields = ('devId', 'timestamp', 'state_of_charge_avg', 'flow_last_min_avg', 'invertor_power_avg')
+        fields = ('devId', 'timestamp', 'state_of_charge', 'flow_last_min', 'invertor_power')
 
     def get_timestamp(self, obj):
-        # Since 'truncated_timestamp' is an annotated field, access it directly from the object dictionary
+        # Access the annotated 'truncated_timestamp' field
         return obj.get('truncated_timestamp')
+
+    def get_state_of_charge(self, obj):
+        # Access the annotated 'state_of_charge_avg' field
+        return obj.get('state_of_charge_avg')
+
+    def get_flow_last_min(self, obj):
+        # Access the annotated 'flow_last_min_avg' field
+        return obj.get('flow_last_min_avg')
+
+    def get_invertor_power(self, obj):
+        # Access the annotated 'invertor_power_avg' field
+        return obj.get('invertor_power_avg')
 
 
 
