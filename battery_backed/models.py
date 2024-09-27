@@ -5,6 +5,8 @@ from django.db.models.functions import TruncDay, TruncHour, Round
 from pytz import timezone
 import pandas as pd
 import pytz
+from django.core.cache import cache
+
 
 
 
@@ -261,7 +263,14 @@ class DayAheadManager(models.Manager):
         today_start = str(today)+'T'+'00:00:00Z'        
         return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
     
-    def prepare_consistent_response_dam(self, cumulative=None):        
+    def prepare_consistent_response_dam(self, cumulative=None):   
+
+        cache_key = f"dam_data_{cumulative}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            return cached_data  # Return cached result if available
+
         queryset = self.get_queryset()
         data = list(queryset.values())
         if not data:
@@ -329,9 +338,12 @@ class DayAheadManager(models.Manager):
             
             # Convert back to a list of dictionaries
             cumulative_result = df_cumulative.to_dict(orient='records')
+            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes
+
             return cumulative_result
 
-        resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')       
+        resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')   
+        cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes         
         return resampled_result
    
 
