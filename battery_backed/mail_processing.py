@@ -183,23 +183,23 @@ class FileManager:
                 flow = invertor/60*15
                 soc += flow 
                 # Convert the index (Sofia time or Warzaw time) to UTC before save to DB
-                utc_timestamp = row.Index.astimezone(pytz.UTC)
+                utc_timestamp = row.Index.astimezone(pytz.timezone('Europe/Sofia'))
 
                 exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=utc_timestamp)
-                # if exist:                    
-                #     now = datetime.now(tz=pytz.UTC)                 
-                #     if utc_timestamp > now:
-                #         print(f"Exist Found: {utc_timestamp} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
-                #         exist.update(invertor=invertor, soc=soc, flow=flow)
-                # else:
-                #     print(f"Exist NOT Found: {utc_timestamp}")
-                #     BatterySchedule.objects.create(
-                #         devId=self.devId, 
-                #         timestamp=utc_timestamp,  # Save in UTC
-                #         invertor=invertor,
-                #         flow=flow,
-                #         soc=soc
-                #     )                    
+                if exist:                    
+                    now = datetime.now(tz=pytz.timezone('Europe/Sofia'))                 
+                    if utc_timestamp > now:
+                        print(f"Exist Found: {utc_timestamp} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
+                        exist.update(invertor=invertor, soc=soc, flow=flow)
+                else:
+                    print(f"Exist NOT Found: {utc_timestamp}")
+                    BatterySchedule.objects.create(
+                        devId=self.devId, 
+                        timestamp=utc_timestamp,  # Save in UTC
+                        invertor=invertor,
+                        flow=flow,
+                        soc=soc
+                    )                    
         except Exception as e:
             print(f"Error saving status to DB: {e}")
 
