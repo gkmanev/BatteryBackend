@@ -23,6 +23,7 @@ class GmailService:
         
         self.credentials_file = os.path.join(os.getcwd(), credentials)        
         self.service = self.authenticate(token_file, self.credentials_file)
+        self.files_names_array = []
         
     def authenticate(self, token_file, credentials_file):
         creds = None
@@ -61,19 +62,29 @@ class GmailService:
                 if part.get("parts"):
                     self.parse_parts(service, part.get("parts"), folder_name, mail_date, message)
                 else:
+                    print(f"Number of Files:{len(part_headers)}")
                     for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")                        
                         if part_header_name == "Content-Disposition":
-                            if "attachment" in part_header_value:
-                                print(f"FILES:{mail_date} || {filename}")
+                            if "attachment" in part_header_value:                                
+                                
                                 attachment_id = body.get("attachmentId")
                                 attachment = service.users().messages().attachments().get(id=attachment_id, userId='me', messageId=message['id']).execute()
                                 data = attachment.get("data")
-                                filepath = os.path.join(folder_name, filename)                                                                
+                                filepath = os.path.join(folder_name, filename)  
+                                self.files_names_array.append({
+                                    "filename":{
+                                        "file_name":filename,
+                                        "mail_date":mail_date,
+                                        "data":data
+                                        }
+                                })                                                              
                                 if data:                                    
                                     with open(filepath, "wb") as f:
                                         f.write(urlsafe_b64decode(data))
+
+    
 
     def read_message(self, message, price_clearing=False):
         
@@ -121,8 +132,7 @@ class FileManager:
         today_date = today.strftime("%Y-%m-%d")
         self.file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0] 
-        if self.file_date >= today_date:
-            print(f"FILE DATE: {self.file_date}")
+        if self.file_date >= today_date:            
             return True
         else:
             return False
