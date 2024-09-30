@@ -85,17 +85,14 @@ class GmailService:
         mail_hour = None
         mail_date = None
         if headers:
-            for header in headers:  
-                h_name = header.get("name")
-                h_value = header.get("value")           
-                print(f"header_data:{h_name} || {h_value}")
+            for header in headers:                 
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
-                    date = header.get("value") 
+                    mail_date = header.get("value") 
                     #print(f"MAIL DATE IS: {date}")                  
                     local_tz = pytz.timezone('Europe/Sofia')
-                    date_obj = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
+                    date_obj = datetime.strptime(mail_date, "%a, %d %b %Y %H:%M:%S %z")
                     date_obj = date_obj.astimezone(local_tz)
                     mail_hour = date_obj.hour               
         
@@ -103,8 +100,8 @@ class GmailService:
             if mail_hour and mail_hour >=13:  # Filter additional mails with clearings from EnPro
                 self.parse_parts(self.service, parts, folder_name, message)
                 print("=" * 50)
-        else:
-                        
+        else: 
+            print(f"mail_date:{mail_date}")                       
             self.parse_parts(self.service, parts, folder_name, message)
             print("=" * 50)
 
