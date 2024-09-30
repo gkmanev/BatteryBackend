@@ -82,7 +82,7 @@ class GmailService:
                                 if data:                                    
                                     with open(filepath, "wb") as f:
                                         f.write(urlsafe_b64decode(data))
-            print(self.files_names_array)
+            
 
     
 
@@ -218,6 +218,8 @@ class ForecastProcessor:
         print(f"Found {len(results)} results.")
         for msg in reversed(results):            
             self.gmail_service.read_message(msg, price_clearing=clearing)
+
+        print(self.gmail_service.files_names_array)
 
 # if __name__ == "__main__":
 #     #processor = ForecastProcessor()
