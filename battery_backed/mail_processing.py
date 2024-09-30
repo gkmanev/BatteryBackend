@@ -167,10 +167,12 @@ class FileManager:
                 soc += flow 
                 exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
                 if exist:
+                    print(f"Exist Found: {row.Index}")
                     # now = datetime.now()
                     # if row.Index > now:
                     exist.update(invertor=invertor,soc=soc,flow=flow)
                 else:
+                    print(f"Exist NOT Found: {row.Index}")
                     BatterySchedule.objects.create(
                     devId=self.devId, 
                     timestamp=row.Index,
