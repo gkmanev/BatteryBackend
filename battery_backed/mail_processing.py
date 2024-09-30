@@ -70,8 +70,7 @@ class GmailService:
                                 
                                 attachment_id = body.get("attachmentId")
                                 attachment = service.users().messages().attachments().get(id=attachment_id, userId='me', messageId=message['id']).execute()
-                                data = attachment.get("data")
-                                filepath = os.path.join(folder_name, filename)  
+                                data = attachment.get("data")                                
                                 self.files_names_array.append({
                                     "filename":{
                                         "file_name":filename,
@@ -225,7 +224,7 @@ class ForecastProcessor:
             with open(filepath, "wb") as f:
                 f.write(urlsafe_b64decode(file_data))
 
-            print(f"Attachment saved: {filepath} (Mail date: {mail_date})")
+            print(f"Attachment saved: {filepath}")
 
     def proceed_forecast(self, clearing=False):
         now = datetime.now() - timedelta(days=1)
