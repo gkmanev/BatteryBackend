@@ -63,11 +63,8 @@ class GmailService:
                 else:
                     for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
-                        part_header_value = part_header.get("value")
-                        print(f"part_header_name:{part_header_name}")                            
-                        print(f"PART_HEADER_VALUE:{part_header_value}")
+                        part_header_value = part_header.get("value")                        
                         if part_header_name == "Content-Disposition":
-
                             if "attachment" in part_header_value:
                                 #print(f"FILES:{mail_date} || {filename}")
                                 attachment_id = body.get("attachmentId")
@@ -88,7 +85,10 @@ class GmailService:
         mail_hour = None
         mail_date = None
         if headers:
-            for header in headers:                
+            for header in headers:  
+                h_name = header.get("name")
+                h_value = header.get("value")           
+                print(f"header_data:{h_name} || {h_value}")
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
