@@ -139,9 +139,6 @@ class FileManager:
     def process_files(self):
         try:           
             fn = "schedules"
-            # Define Time Zone Of The Schedule
-            # warzaw_tz = ......
-            sofia_tz = pytz.timezone('Europe/Sofia')
             for root, dirs, files in os.walk(fn):               
                              
                 xlsfiles = [f for f in files if f.endswith('.xls')]                
@@ -158,7 +155,7 @@ class FileManager:
                         period = (24 * 4) 
                         schedule_list = []
                         i = 0
-                        timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min")
+                        timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz="UTC")
                         while i < period:
                             i += 1
                             xl_schedule = excel_worksheet.cell_value(10, 2 + i)  
@@ -182,24 +179,21 @@ class FileManager:
                 invertor = row.schedule          
                 flow = invertor/60*15
                 soc += flow 
-                # Convert the index (Sofia time or Warzaw time) to UTC before save to DB
-                utc_timestamp = row.Index.astimezone(pytz.UTC)
-
-                exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=utc_timestamp)
+                exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
                 if exist:                    
                     now = datetime.now(tz=pytz.UTC)                 
-                    if utc_timestamp > now:
-                        print(f"Exist Found: {utc_timestamp} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
-                        exist.update(invertor=invertor, soc=soc, flow=flow)
+                    if row.Index > now:
+                        print(f"Exist Found: {row.Index} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
+                        exist.update(invertor=invertor,soc=soc,flow=flow)
                 else:
-                    print(f"Exist NOT Found: {utc_timestamp}")
+                    print(f"Exist NOT Found: {row.Index}")
                     BatterySchedule.objects.create(
-                        devId=self.devId, 
-                        timestamp=utc_timestamp,  # Save in UTC
-                        invertor=invertor,
-                        flow=flow,
-                        soc=soc
-                    )                    
+                    devId=self.devId, 
+                    timestamp=row.Index,
+                    invertor=invertor,
+                    flow=flow,
+                    soc=soc
+                )                    
         except Exception as e:
             print(f"Error saving status to DB: {e}")
 
