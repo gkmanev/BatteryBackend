@@ -47,7 +47,7 @@ class GmailService:
             messages.extend(result.get('messages', []))
         return messages
 
-    def parse_parts(self, service, parts, folder_name, message):
+    def parse_parts(self, service, parts, folder_name, mail_date, message):
         if parts:
             for part in parts:
                 filename = part.get("filename")
@@ -59,7 +59,7 @@ class GmailService:
                 mail_date = None
 
                 if part.get("parts"):
-                    self.parse_parts(service, part.get("parts"), folder_name, message)
+                    self.parse_parts(service, part.get("parts"), folder_name, mail_date, message)
                 else:
                     for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
@@ -86,12 +86,14 @@ class GmailService:
         parts = payload.get("parts")        
         folder_name = "email"
         mail_hour = None
+        mail_date = None
         if headers:
             for header in headers:                
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
                     date = header.get("value")
+                    mail_date = date
                     local_tz = pytz.timezone('Europe/Sofia')
                     date_obj = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
                     date_obj = date_obj.astimezone(local_tz)
@@ -99,7 +101,7 @@ class GmailService:
         
         if price_clearing:
             if mail_hour and mail_hour >=13:  # Filter additional mails with clearings from EnPro
-                self.parse_parts(self.service, parts, folder_name, message)
+                self.parse_parts(self.service, parts, folder_name, mail_date, message)
                 print("=" * 50)
         else:
                         
