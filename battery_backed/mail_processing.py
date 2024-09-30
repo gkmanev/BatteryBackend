@@ -74,16 +74,16 @@ class GmailService:
                                         f.write(urlsafe_b64decode(data))
 
     def read_message(self, message, price_clearing=False):
-        print("HEREEEEEE")
+        
         msg = self.service.users().messages().get(userId='me', id=message['id'], format='full').execute()
         payload = msg['payload']
         headers = payload.get("headers")
-        parts = payload.get("parts")
-        print(f"PARTS:{parts}")
+        parts = payload.get("parts")        
         folder_name = "email"
         mail_hour = None
         if headers:
             for header in headers:
+                print(f"Header: {header}")
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
