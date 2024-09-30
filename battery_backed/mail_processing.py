@@ -56,21 +56,25 @@ class GmailService:
                 data = body.get("data")
                 file_size = body.get("size")
                 part_headers = part.get("headers")
+                mail_date = None
 
                 if part.get("parts"):
                     self.parse_parts(service, part.get("parts"), folder_name, message)
                 else:
-                    for part_header in part_headers:
-                        print(f"PART HEADER: {part_header}")
+                    for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")
+                        if part_header_name == "Date":
+                            mail_date = part_header_value
                         if part_header_name == "Content-Disposition":
+
                             if "attachment" in part_header_value:
+                                print(f"FILES:{mail_date} || {filename}")
                                 attachment_id = body.get("attachmentId")
                                 attachment = service.users().messages().attachments().get(id=attachment_id, userId='me', messageId=message['id']).execute()
                                 data = attachment.get("data")
-                                filepath = os.path.join(folder_name, filename)                                
-                                if data:
+                                filepath = os.path.join(folder_name, filename)                                                                
+                                if data:                                    
                                     with open(filepath, "wb") as f:
                                         f.write(urlsafe_b64decode(data))
 
