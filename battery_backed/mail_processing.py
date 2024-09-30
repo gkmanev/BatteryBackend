@@ -167,6 +167,8 @@ class FileManager:
                 soc += flow 
                 exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
                 if exist:
+                    # now = datetime.now()
+                    # if row.Index > now:
                     exist.update(invertor=invertor,soc=soc,flow=flow)
                 else:
                     BatterySchedule.objects.create(
