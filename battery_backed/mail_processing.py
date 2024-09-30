@@ -201,7 +201,7 @@ class ForecastProcessor:
         query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
-        for msg in results:
+        for msg in reversed(results):
             self.gmail_service.read_message(msg, price_clearing=clearing)
 
 # if __name__ == "__main__":
