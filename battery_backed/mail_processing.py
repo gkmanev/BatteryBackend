@@ -64,12 +64,12 @@ class GmailService:
                     for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")
-                        if part_header_name == "date":
-                            print(f"PART_HEADER_VALUE:{part_header_value}")
+                        print(f"part_header_name:{part_header_name}")                            
+                        print(f"PART_HEADER_VALUE:{part_header_value}")
                         if part_header_name == "Content-Disposition":
 
                             if "attachment" in part_header_value:
-                                print(f"FILES:{mail_date} || {filename}")
+                                #print(f"FILES:{mail_date} || {filename}")
                                 attachment_id = body.get("attachmentId")
                                 attachment = service.users().messages().attachments().get(id=attachment_id, userId='me', messageId=message['id']).execute()
                                 data = attachment.get("data")
@@ -93,7 +93,7 @@ class GmailService:
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
                     date = header.get("value") 
-                    print(f"MAIL DATE IS: {date}")                  
+                    #print(f"MAIL DATE IS: {date}")                  
                     local_tz = pytz.timezone('Europe/Sofia')
                     date_obj = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
                     date_obj = date_obj.astimezone(local_tz)
