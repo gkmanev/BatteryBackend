@@ -247,14 +247,7 @@ class TodayManager(models.Manager):
         )
         return queryset
     
-    def prepare_consistent_response(self, cumulative=None):
-
-        cache_key = f"today_data_{cumulative}"
-        cached_data = cache.get(cache_key)
-
-        if cached_data is not None:
-            print(f"We Have Cached Data")
-            return cached_data  # Return cached result if available
+    def prepare_consistent_response(self, cumulative=None):        
         
         queryset = self.get_queryset()
         data = list(queryset.values())
@@ -313,12 +306,11 @@ class TodayManager(models.Manager):
             df_cumulative.fillna(0, inplace=True)
             # Convert back to a list of dictionaries
             cumulative_result = df_cumulative.to_dict(orient='records')
-            cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes   
+           
             return cumulative_result
         
         df_combined.fillna(0, inplace=True)
-        resampled_result = df_combined.to_dict(orient='records')
-        cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
+        resampled_result = df_combined.to_dict(orient='records')        
         return resampled_result
   
 
