@@ -65,7 +65,7 @@ class GmailService:
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")
                         if part_header_name == "Date":
-                            mail_date = part_header_value
+                            print(f"PART_HEADER_VALUE:{part_header_value}")
                         if part_header_name == "Content-Disposition":
 
                             if "attachment" in part_header_value:
@@ -207,8 +207,7 @@ class ForecastProcessor:
         query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
-        for msg in reversed(results):
-            print(f"MSG: {msg}")
+        for msg in reversed(results):            
             self.gmail_service.read_message(msg, price_clearing=clearing)
 
 # if __name__ == "__main__":
