@@ -180,22 +180,20 @@ class FileManager:
                 flow = invertor/60*15
                 soc += flow 
                 exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=row.Index)
-                # if exist:                    
-                #     now = datetime.now()
-                #     stamp = row.Index
-                #     print(f"Type:{type(stamp)} || {stamp}")
-                #     if row.Index > now:
-                #         print(f"Exist Found: {row.Index} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
-                #         exist.update(invertor=invertor,soc=soc,flow=flow)
-                # else:
-                #     print(f"Exist NOT Found: {row.Index}")
-                #     BatterySchedule.objects.create(
-                #     devId=self.devId, 
-                #     timestamp=row.Index,
-                #     invertor=invertor,
-                #     flow=flow,
-                #     soc=soc
-                # )                    
+                if exist:                    
+                    now = datetime.now(tz=pytz.UTC)                 
+                    if row.Index > now:
+                        print(f"Exist Found: {row.Index} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
+                        exist.update(invertor=invertor,soc=soc,flow=flow)
+                else:
+                    print(f"Exist NOT Found: {row.Index}")
+                    BatterySchedule.objects.create(
+                    devId=self.devId, 
+                    timestamp=row.Index,
+                    invertor=invertor,
+                    flow=flow,
+                    soc=soc
+                )                    
         except Exception as e:
             print(f"Error saving status to DB: {e}")
 
