@@ -112,7 +112,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
                 response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative) 
                 return Response(response, status=status.HTTP_200_OK)   
         else:
-            response = BatterySchedule.objects.all()
+            response = BatterySchedule.objects.all().order_by('timestamp')
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(response, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
