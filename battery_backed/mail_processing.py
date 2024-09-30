@@ -105,7 +105,7 @@ class GmailService:
                 print("=" * 50)
         else:
                         
-            self.parse_parts(self.service, parts, folder_name, message)
+            self.parse_parts(self.service, parts, folder_name, mail_date, message)
             print("=" * 50)
 
 class FileManager:
