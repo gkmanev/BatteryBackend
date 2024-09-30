@@ -175,6 +175,7 @@ class FileManager:
             #     soc = last_before_new_schedule.soc
             # else:
             soc = 0
+            existing_soc = 0
             for row in df.itertuples():
                 invertor = row.schedule          
                 flow = invertor/60*15
@@ -183,8 +184,10 @@ class FileManager:
                 if exist:                    
                     now = datetime.now(tz=pytz.UTC)                 
                     if row.Index > now:
+                        existing_flow = invertor/60*15
+                        existing_soc += existing_flow
                         print(f"Exist Found: {row.Index} || Invertor: {invertor} || DevId: {self.devId} || TimeNow: {now}")
-                        exist.update(invertor=invertor,soc=soc,flow=flow)
+                        exist.update(invertor=invertor,soc=existing_soc,flow=existing_flow)
                 else:
                     print(f"Exist NOT Found: {row.Index}")
                     BatterySchedule.objects.create(
