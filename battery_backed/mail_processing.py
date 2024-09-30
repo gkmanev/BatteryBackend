@@ -122,6 +122,7 @@ class FileManager:
         self.file_date = file.split("_")[1].split(".")[0]
         self.devId = file.split("_")[0] 
         if self.file_date >= today_date:
+            print(f"FILE DATE: {self.file_date}")
             return True
         else:
             return False
