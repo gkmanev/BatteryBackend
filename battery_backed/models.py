@@ -325,7 +325,7 @@ class TodayManager(models.Manager):
 class DayAheadManager(models.Manager):
 
     def get_queryset(self) -> models.QuerySet:
-        today = datetime.now().date()   
+        today = datetime.now(tz=pytz.UTC).date()   
         today_start = str(today)+'T'+'00:00:00Z'        
         return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
     
