@@ -79,9 +79,9 @@ class GmailService:
                                         "data":data
                                         }
                                 })                                                              
-                                if data:                                    
-                                    with open(filepath, "wb") as f:
-                                        f.write(urlsafe_b64decode(data))
+                                # if data:                                    
+                                #     with open(filepath, "wb") as f:
+                                #         f.write(urlsafe_b64decode(data))
             
 
     
@@ -206,6 +206,27 @@ class ForecastProcessor:
     def __init__(self):        
         self.gmail_service = GmailService()
 
+    def create_files_from_attachments(self):
+        # Create files from the collected attachment data in files_names_array
+        for file_info in self.gmail_service.files_names_array:
+            file_data = file_info['filename']['data']
+            file_name = file_info['filename']['file_name']
+            mail_date = file_info['filename']['mail_date']
+            
+            # Define the file path where the attachment should be saved
+            folder_name = "schedules"
+            filepath = os.path.join(folder_name, file_name)
+
+            # Ensure folder exists
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
+
+            # Write the decoded data to a file
+            with open(filepath, "wb") as f:
+                f.write(urlsafe_b64decode(file_data))
+
+            print(f"Attachment saved: {filepath} (Mail date: {mail_date})")
+
     def proceed_forecast(self, clearing=False):
         now = datetime.now() - timedelta(days=1)
         #temp_date = datetime.now() - timedelta(days=4)
@@ -219,7 +240,8 @@ class ForecastProcessor:
         for msg in reversed(results):            
             self.gmail_service.read_message(msg, price_clearing=clearing)
 
-        print(self.gmail_service.files_names_array)
+        print(f"There are {self.gmail_service.files_names_array} attachements ")
+        self.create_files_from_attachments()
 
 # if __name__ == "__main__":
 #     #processor = ForecastProcessor()
