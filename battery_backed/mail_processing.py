@@ -107,12 +107,20 @@ class FileManager:
     
 
     def get_file_name(self, file):
-        tomorrow = date.today() + timedelta(days=1) #- timedelta(days=5) # Use the schedule that is # days ago (should adjust it into the search query too)
-        d1 = tomorrow.strftime("%Y-%m-%d")
+        # tomorrow = date.today() + timedelta(days=1) #- timedelta(days=5) # Use the schedule that is # days ago (should adjust it into the search query too)
+        # d1 = tomorrow.strftime("%Y-%m-%d")
+        # self.file_date = file.split("_")[1].split(".")[0]
+        # self.devId = file.split("_")[0]      
+        # print(f"Name Date: {self.file_date} || {d1}")
+        # return self.file_date == d1
+        today = date.today()
+        today_date = today.strftime("%Y-%m-%d")
         self.file_date = file.split("_")[1].split(".")[0]
-        self.devId = file.split("_")[0]      
-        print(f"Name Date: {self.file_date} || {d1}")
-        return self.file_date == d1
+        self.devId = file.split("_")[0] 
+        if self.file_date >= today_date:
+            return True
+        else:
+            return False
 
     def process_files(self):
         try:           
