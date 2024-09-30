@@ -78,6 +78,7 @@ class GmailService:
         payload = msg['payload']
         headers = payload.get("headers")
         parts = payload.get("parts")
+        print(f"PARTS:{parts}")
         folder_name = "email"
         mail_hour = None
         if headers:
@@ -89,9 +90,8 @@ class GmailService:
                     local_tz = pytz.timezone('Europe/Sofia')
                     date_obj = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
                     date_obj = date_obj.astimezone(local_tz)
-                    mail_hour = date_obj.hour
-               
-        print(f"mail_hour:{mail_hour}")
+                    mail_hour = date_obj.hour               
+        
         if price_clearing:
             if mail_hour and mail_hour >=13:  # Filter additional mails with clearings from EnPro
                 self.parse_parts(self.service, parts, folder_name, message)
@@ -202,6 +202,7 @@ class ForecastProcessor:
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
         for msg in reversed(results):
+            print(f"MSG: {msg}")
             self.gmail_service.read_message(msg, price_clearing=clearing)
 
 # if __name__ == "__main__":
