@@ -325,24 +325,12 @@ class TodayManager(models.Manager):
 class DayAheadManager(models.Manager):
 
     def get_queryset(self) -> models.QuerySet:
-        # today = datetime.now(tz=pytz.UTC).date()   
-        # print(f"today start with UTC: {today}")
-        # today_start = str(today)+'T'+'00:00:00Z'        
-        # return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
+        today = datetime.now(tz=pytz.UTC).date()   
+        print(f"today start with UTC: {today}")
+        today_start = str(today)+'T'+'00:00:00Z'        
+        return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
 
-        # Define local timezone (Europe/Sofia)
-        sofia_tz = pytz.timezone('Europe/Sofia')
-
-        # Get the current date in the local timezone
-        local_today = datetime.datetime.now(sofia_tz).date()
-
-        # Create a datetime object for the start of the day in the local timezone
-        local_today_start = sofia_tz.localize(datetime.datetime.combine(local_today, datetime.time.min))
-
-        # Convert to UTC
-        utc_today_start = local_today_start.astimezone(pytz.UTC)
-
-        print(f"Today start with UTC: {utc_today_start}")
+        
     
     def prepare_consistent_response_dam(self, cumulative=None):   
 
