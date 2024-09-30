@@ -61,6 +61,7 @@ class GmailService:
                     self.parse_parts(service, part.get("parts"), folder_name, message)
                 else:
                     for part_header in part_headers:
+                        print(f"PART HEADER: {part_header}")
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")
                         if part_header_name == "Content-Disposition":
@@ -82,8 +83,7 @@ class GmailService:
         folder_name = "email"
         mail_hour = None
         if headers:
-            for header in headers:
-                print(f"Header: {header}")
+            for header in headers:                
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
@@ -98,6 +98,7 @@ class GmailService:
                 self.parse_parts(self.service, parts, folder_name, message)
                 print("=" * 50)
         else:
+                        
             self.parse_parts(self.service, parts, folder_name, message)
             print("=" * 50)
 
