@@ -158,7 +158,7 @@ class FileManager:
                         period = (24 * 4) 
                         schedule_list = []
                         i = 0
-                        timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz=sofia_tz)
+                        timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min")
                         while i < period:
                             i += 1
                             xl_schedule = excel_worksheet.cell_value(10, 2 + i)  
