@@ -239,7 +239,7 @@ class ForecastProcessor:
         for msg in reversed(results):            
             self.gmail_service.read_message(msg, price_clearing=clearing)
 
-        print(f"There are {self.gmail_service.files_names_array} attachements ")
+        print(f"There are {len(self.gmail_service.files_names_array)} attachements ")
         self.create_files_from_attachments()
 
 # if __name__ == "__main__":
