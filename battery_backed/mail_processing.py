@@ -92,7 +92,8 @@ class GmailService:
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
-                    date = header.get("value")                   
+                    date = header.get("value") 
+                    print(f"MAIL DATE IS: {date}")                  
                     local_tz = pytz.timezone('Europe/Sofia')
                     date_obj = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
                     date_obj = date_obj.astimezone(local_tz)
