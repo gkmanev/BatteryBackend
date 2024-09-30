@@ -47,7 +47,7 @@ class GmailService:
             messages.extend(result.get('messages', []))
         return messages
 
-    def parse_parts(self, service, parts, folder_name, mail_date, message):
+    def parse_parts(self, service, parts, folder_name, message):
         if parts:
             for part in parts:
                 filename = part.get("filename")
@@ -59,12 +59,12 @@ class GmailService:
                 mail_date = None
 
                 if part.get("parts"):
-                    self.parse_parts(service, part.get("parts"), folder_name, mail_date, message)
+                    self.parse_parts(service, part.get("parts"), folder_name, message)
                 else:
                     for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")
-                        if part_header_name == "Date":
+                        if part_header_name == "date":
                             print(f"PART_HEADER_VALUE:{part_header_value}")
                         if part_header_name == "Content-Disposition":
 
@@ -92,8 +92,7 @@ class GmailService:
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
-                    date = header.get("value")
-                    mail_date = date
+                    date = header.get("value")                   
                     local_tz = pytz.timezone('Europe/Sofia')
                     date_obj = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
                     date_obj = date_obj.astimezone(local_tz)
@@ -101,11 +100,11 @@ class GmailService:
         
         if price_clearing:
             if mail_hour and mail_hour >=13:  # Filter additional mails with clearings from EnPro
-                self.parse_parts(self.service, parts, folder_name, mail_date, message)
+                self.parse_parts(self.service, parts, folder_name, message)
                 print("=" * 50)
         else:
                         
-            self.parse_parts(self.service, parts, folder_name, mail_date, message)
+            self.parse_parts(self.service, parts, folder_name, message)
             print("=" * 50)
 
 class FileManager:
