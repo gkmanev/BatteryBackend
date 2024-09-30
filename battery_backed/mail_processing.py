@@ -61,8 +61,7 @@ class GmailService:
 
                 if part.get("parts"):
                     self.parse_parts(service, part.get("parts"), folder_name, mail_date, message)
-                else:
-                    print(f"Number of Files:{len(part_headers)}")
+                else:                    
                     for part_header in part_headers:                        
                         part_header_name = part_header.get("name")
                         part_header_value = part_header.get("value")                        
@@ -96,7 +95,10 @@ class GmailService:
         mail_hour = None
         mail_date = None
         if headers:
-            for header in headers:                 
+            print(f"Number of Headers:{len(headers)}")
+            print(f"Number of Parts:{len(parts)}")
+            for header in headers: 
+
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
