@@ -82,6 +82,7 @@ class GmailService:
                                 if data:                                    
                                     with open(filepath, "wb") as f:
                                         f.write(urlsafe_b64decode(data))
+            print(self.files_names_array)
 
     
 
@@ -94,11 +95,8 @@ class GmailService:
         folder_name = "email"
         mail_hour = None
         mail_date = None
-        if headers:
-            print(f"Number of Headers:{len(headers)}")
-            print(f"Number of Parts:{len(parts)}")
+        if headers: 
             for header in headers: 
-
                 if header.get("name").lower() == "subject":
                     folder_name = "schedules"
                 elif header.get("name").lower() == "date":
