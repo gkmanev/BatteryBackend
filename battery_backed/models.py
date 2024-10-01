@@ -259,6 +259,10 @@ class TodayManager(models.Manager):
         df = pd.DataFrame(data)
         # Convert 'timestamp' field to datetime
         df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+        df = df.loc[df.groupby(['devId', 'timestamp'])['state_of_charge'].idxmax()]
+
+
         # Set the timestamp as index for resampling
         df.set_index('timestamp', inplace=True)
         # Resample for each device separately (assuming there's a 'devId' field)
