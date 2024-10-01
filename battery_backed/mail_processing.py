@@ -130,7 +130,8 @@ class FileManager:
         today = date.today()
         today_date = today.strftime("%Y-%m-%d")
         self.file_date = file.split("_")[1].split(".")[0]
-        self.devId = file.split("_")[0] 
+        batt_number_part = file.split("_")[0].split("batt")[1]
+        self.devId = f"batt-000{batt_number_part}" 
         if self.file_date >= today_date:            
             return True
         else:
