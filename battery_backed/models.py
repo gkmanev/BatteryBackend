@@ -247,9 +247,11 @@ class TodayManager(models.Manager):
         )
         return queryset
     
-    def prepare_consistent_response(self, cumulative=None):        
+    def prepare_consistent_response(self, cumulative=None, devId=None):        
         
         queryset = self.get_queryset()
+        if devId is not None:
+            queryset = queryset.filter(devId=devId)
         data = list(queryset.values())
         if not data:
             return []
@@ -324,7 +326,7 @@ class DayAheadManager(models.Manager):
 
         
     
-    def prepare_consistent_response_dam(self, cumulative=None):   
+    def prepare_consistent_response_dam(self, cumulative=None, devId=None):   
 
         cache_key = f"dam_data_{cumulative}"
         cached_data = cache.get(cache_key)
@@ -334,6 +336,8 @@ class DayAheadManager(models.Manager):
             return cached_data  # Return cached result if available
 
         queryset = self.get_queryset()
+        if devId is not None:
+            queryset=queryset.filter(devId=devId)
         data = list(queryset.values())
         if not data:
             return []

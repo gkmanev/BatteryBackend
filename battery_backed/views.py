@@ -51,6 +51,7 @@ class StateViewSet(viewsets.ModelViewSet):
         
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
+        dev_id = self.request.query_params.get('devId', None) 
 
         # If it's today and cumulative is requested
         if date_range == 'today':
@@ -58,30 +59,38 @@ class StateViewSet(viewsets.ModelViewSet):
                 # Fetch cumulative response directly from manager
                 response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
                 return Response(response, status=status.HTTP_200_OK)
-            else:                
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)                
+            else:  
+                if dev_id:
+                    response = BatteryLiveStatus.today.prepare_consistent_response(devId=dev_id)                    
+                else:              
+                    response = BatteryLiveStatus.today.prepare_consistent_response()                
                 return Response(response, status=status.HTTP_200_OK)
             
-        if date_range == 'month':
+        elif date_range == 'month':
             if cumulative is not None:
                 pass
                #response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
-            else:
-                response = BatteryLiveStatus.month.all()
+            else:                
+                if dev_id:
+                    response = BatteryLiveStatus.month.filter(devId=dev_id)     
+                else:       
+                    response = BatteryLiveStatus.month.all()
                 serializer_class = self.get_serializer_class()
                 serializer = serializer_class(response, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             #return Response(response, status=status.HTTP_200_OK)
-        if date_range == 'year':
+        elif date_range == 'year':
             if cumulative is not None:
                 pass
                 #response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
-            else:
-                response = BatteryLiveStatus.year.all()
+                if dev_id:
+                    response = BatteryLiveStatus.year.filter(devId=dev_id)     
+                else:       
+                    response = BatteryLiveStatus.year.all()
                 serializer_class = self.get_serializer_class()
                 serializer = serializer_class(response, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            #return Response(response, status=status.HTTP_200_OK)
+        
 
         return super().list(request, *args, **kwargs)
     
@@ -90,7 +99,6 @@ class StateViewSet(viewsets.ModelViewSet):
 class ScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = BatteryScheduleSerializer
     queryset = BatterySchedule.objects.all().order_by('timestamp')
-    
     def get_queryset(self):
         queryset = super().get_queryset()
         date_range = self.request.query_params.get('date_range', None)
@@ -103,13 +111,17 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         date_range = self.request.query_params.get('date_range', None)
         cumulative = self.request.query_params.get('cumulative', None)
-        if date_range == "dam":
-            print(f"CUMULATIVE PARM:{cumulative}")
+        dev_id = self.request.query_params.get('devId', None) 
+
+        if date_range == "dam":           
             if cumulative is not None:
                 response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative)            
                 return Response(response, status=status.HTTP_200_OK)
             else:
-                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative) 
+                if dev_id is not None:
+                    response = BatterySchedule.dam.prepare_consistent_response_dam(devId=dev_id)
+                else:
+                    response = BatterySchedule.dam.prepare_consistent_response_dam() 
                 return Response(response, status=status.HTTP_200_OK)   
         else:
             response = BatterySchedule.objects.all().order_by('timestamp')
