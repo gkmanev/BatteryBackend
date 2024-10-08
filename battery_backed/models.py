@@ -430,4 +430,7 @@ class BatterySchedule(models.Model):
     soc = models.FloatField(default=0)
     flow = models.FloatField(default=0)
 
+    class Meta:
+        unique_together = ('devId', 'timestamp')
+
     

@@ -8,7 +8,7 @@ from .models import BatterySchedule
 class PopulateForecast:
     def __init__(self, devId=None) -> None:
         self.devId = devId
-        
+
 
     def populate_battery_schedule(self):
         # Get the current time and round up to the next quarter-hour
@@ -28,13 +28,17 @@ class PopulateForecast:
             soc += flow
             
             # Create and save a new BatterySchedule entry
-            BatterySchedule.objects.create(
-                devId=self.devId,
-                timestamp=next_quarter_hour,
-                invertor=invertor_value,
-                flow=flow,
-                soc=soc
-            )
+            exist = BatterySchedule.objects.filter(devId=self.devId, timestamp=next_quarter_hour)
+            if exist:
+                exist.update(invertor=invertor_value,flow=flow,soc=soc )
+            else:
+                BatterySchedule.objects.create(
+                    devId=self.devId,
+                    timestamp=next_quarter_hour,
+                    invertor=invertor_value,
+                    flow=flow,
+                    soc=soc
+                )
             
             # Move to the next timestamp (15 minutes later)
             next_quarter_hour += timedelta(minutes=15)
