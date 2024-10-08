@@ -1,5 +1,5 @@
 from battery_backed.mail_processing import FileManager, ForecastProcessor
-from forecast_service import PopulateForecast
+from battery_backed.forecast_service import PopulateForecast
 
 def mail_schedule():
     processor = ForecastProcessor()
