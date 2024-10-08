@@ -9,7 +9,7 @@ def mail_schedule():
 
 
 def make_forecast():
-    forecast = PopulateForecast(devId='batt-0001')
+    forecast = PopulateForecast(devIds=['batt-0001', 'bat-0002'])
     forecast.populate_battery_schedule()
 
 
