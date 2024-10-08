@@ -433,4 +433,10 @@ class BatterySchedule(models.Model):
     class Meta:
         unique_together = ('devId', 'timestamp')
 
+
+
+
+
+
+
     
