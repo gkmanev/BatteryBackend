@@ -6,6 +6,7 @@ from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, Batte
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from .tasks import task_forecast_schedule_populate
 
 
 
@@ -64,7 +65,9 @@ class StateViewSet(viewsets.ModelViewSet):
                     response = BatteryLiveStatus.today.prepare_consistent_response(devId=dev_id)                    
                 else:              
                     response = BatteryLiveStatus.today.prepare_consistent_response()                
-                return Response(response, status=status.HTTP_200_OK)
+                return Response(response, status=status.HTTP_200_OK)      
+     
+
             
         elif date_range == 'month':
             if cumulative is not None:
@@ -128,6 +131,16 @@ class ScheduleViewSet(viewsets.ModelViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(response, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+class PopulateBatteryScheduleView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Trigger the Celery task
+        task = task_forecast_schedule_populate.delay()
+        return Response({'message': 'Task started', 'task_id': task.id}, status=status.HTTP_202_ACCEPTED)
+
+
 
 
 
