@@ -12,7 +12,7 @@ from django.core.cache import cache
 
 class MonthManager(models.Manager):
     
-     def get_queryset(self):
+    def get_queryset(self):
         # Get the start of the month
         today = datetime.today()
         start_of_month = datetime(today.year, today.month, 1)
@@ -28,97 +28,50 @@ class MonthManager(models.Manager):
 
         return dataset
     
-    # def get_cumulative_data_month(self, cumulative=None):
-
-    #     cache_key = f"month_data_{cumulative}"
-    #     cached_data = cache.get(cache_key)
-
-    #     if cached_data is not None:
-    #         print(f"We Have Cached Data Month")
-    #         return cached_data  # Return cached result if available
-
-
-    #    # Access the raw model's manager instead of the aggregated queryset
-    #     queryset = self.get_queryset()
-
-    #     data = list(queryset.values())
-    #     if not data:
-    #         return []
+    def get_cumulative_data_month(self):
         
-    #     df = pd.DataFrame(data)
-    #     # Convert 'timestamp' field to datetime
-    #     df['timestamp'] = pd.to_datetime(df['timestamp'])
+        # cache_key = f"year_data_{cumulative}"
+        # cached_data = cache.get(cache_key)
+
+        # if cached_data is not None:
+        #     print(f"We Have Cached Data Year")
+        #     return cached_data  # Return cached result if available
         
-    #     # Group by 'devId' and 'timestamp', aggregating to handle duplicates
-    #     df = df.groupby(['devId', 'timestamp']).agg({
-    #         'state_of_charge': 'mean',  # Adjust the aggregation as needed
-    #         'flow_last_min': 'mean',
-    #         'invertor_power': 'mean'
-    #     }).reset_index()
+        queryset = self.get_queryset()
 
-    #     # Set the timestamp as index for resampling
-    #     df.set_index('timestamp', inplace=True)
+        data = list(queryset.values())
+        if not data:
+            return []
         
-    #     # Resample for each device separately
-    #     resampled_data = []
-    #     for dev_id in df['devId'].unique():
-    #         df_device = df[df['devId'] == dev_id]
-
-    #         # Resample to 1-hour intervals and interpolate missing data
-    #         df_resampled = df_device.resample('1H').interpolate()
-
-    #         # Add 'devId' column back
-    #         df_resampled['devId'] = dev_id
-
-    #         # Reset index to make 'timestamp' a column again
-    #         df_resampled = df_resampled.reset_index()
-
-    #         # Append to the resampled data list
-    #         resampled_data.append(df_resampled)
-
-    #     # Combine resampled data
-    #     df_combined = pd.concat(resampled_data)
-    #     # Sort by timestamp
-    #     df_combined = df_combined.sort_values(by='timestamp')
-
-    #     # Round numerical columns to 2 decimal places
-    #     numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
-    #     df_combined[numeric_columns] = df_combined[numeric_columns].round(2)   
-    #     df_combined.fillna(0, inplace=True)
-    #     resampled_result = df_combined.to_dict(orient='records')
-
-    #     cache.set(cache_key, resampled_result, timeout=60 * 15)  # Cache for 15 minutes   
+        df = pd.DataFrame(data)
+        # Convert 'timestamp' field to datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'])        
         
-    #     # Check if cumulative is requested
-    #     if cumulative:
-    #         # Calculate cumulative sums across all devIds for each timestamp
-    #         df_cumulative = df_combined.groupby('timestamp').agg({
-    #             'state_of_charge': 'sum',
-    #             'flow_last_min': 'sum',
-    #             'invertor_power': 'sum'
-    #         }).reset_index()
+        df = df.sort_values(by='timestamp')
 
-    #         # Optionally, add devId as a representative (you could choose the first or leave it out)
-    #         df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
-
-    #         # Rename cumulative columns with the specified prefix
-    #         df_cumulative.rename(columns={
-    #             'state_of_charge': 'cumulative_state_of_charge',
-    #             'flow_last_min': 'cumulative_flow_last_min',
-    #             'invertor_power': 'cumulative_invertor_power'
-    #         }, inplace=True)
-            
-    #         # Round numerical columns to 2 decimal places
-    #         numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
-    #         df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
-    #         df_cumulative.fillna(0, inplace=True)
-    #         cumulative_result = df_cumulative.to_dict(orient='records')
-    #         cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes
-    #         return cumulative_result   
+        # Round numerical columns to 2 decimal places
+        numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
+        df[numeric_columns] = df[numeric_columns].round(2)   
+        df.fillna(0, inplace=True) 
         
-    #     return resampled_result
-
         
+        # Group by timestamp and calculate cumulative sum of state_of_charge
+        df_cumulative = df.groupby('timestamp').agg(
+        cumulative_soc=('state_of_charge', 'sum'),
+        cumulative_flow_last_min=('flow_last_min', 'sum'),
+        cumulative_invertor_power=('invertor_power', 'sum')
+        ).reset_index()
+        # Round the cumulative sums to 2 decimal places
+        df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
+        df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
+        df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
+        df_cumulative.fillna(0, inplace=True)
+        # Convert back to a list of dictionaries
+        cumulative_result = df_cumulative.to_dict(orient='records')
+        return cumulative_result
+        
+     
+           
 
 
 class YearManager(models.Manager):
