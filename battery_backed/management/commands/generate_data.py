@@ -3,6 +3,7 @@ from datetime import datetime
 from battery_backed.models import BatterySchedule, BatteryLiveStatus
 import os
 import csv
+from pandas import Timestamp
 
 class Command(BaseCommand):
     help = 'Fills the BatteryLiveStatus model with data'
@@ -20,19 +21,16 @@ class Command(BaseCommand):
             for row in reader:
                 try:
                     date_range = row['DateRange']  # Extracting using correct key
-                    invertor_power = float(row['Net Power (MW)'])  # Extracting using correct key
+                    invertor_power = float(row['INVertor Power (MW)'])  # Extracting using correct key
+                    soc = float(row['Soc'])
+                    flow = invertor_power*0.95
                 
                     start_time_str = date_range.split(' - ')[1]
                     timestamp = datetime.strptime(start_time_str, '%d.%m.%Y %H:%M')
                     #print(f"timestamp:{timestamp}||invertor:{net_power}")
                 except KeyError as e:
                     print(f"KeyError: {e} in row: {row}")
-                    continue  # Skip this row if the key is not found
-                # Calculate the flow
-                flow = (invertor_power / 60) * 15
-                
-                # Update state of charge
-                soc += flow
+                    continue  # Skip this row if the key is not found               
 
                 obj, created = BatteryLiveStatus.objects.get_or_create(
                         devId='batt-0001',
@@ -78,10 +76,10 @@ class Command(BaseCommand):
    
 
 #     # Define the timestamp range
-#     start_time = Timestamp('2024-10-09 01:00:00+0000', tz='UTC')
-#     end_time = Timestamp('2024-10-09 12:15:00+0000', tz='UTC')
+#     start_time = Timestamp('2024-10-08 00:00:00+0000', tz='UTC')
+#     end_time = Timestamp('2024-10-09 00:00:00+0000', tz='UTC')
 
-#     sched = BatterySchedule.dam.prepare_consistent_response_dam()
+#     sched = BatterySchedule.objects.filter(timestam__gte='2024-10-08 00:00:00+0000', timestamp__lte='2024-10-09 00:00:00+0000',devId=)
 
 #     filtered_data = [entry for entry in sched if start_time <= entry['timestamp'] <= end_time and entry['devId'] == 'batt-0002']
 
