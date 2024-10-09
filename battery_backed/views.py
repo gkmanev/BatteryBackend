@@ -13,7 +13,7 @@ from .tasks import task_forecast_schedule_populate
 
 
 class StateViewSet(viewsets.ModelViewSet):
-
+    
     queryset = BatteryLiveStatus.objects.all()   
     
     # def get_serializer_class(self):
@@ -92,8 +92,8 @@ class StateViewSet(viewsets.ModelViewSet):
                 else:       
                     response = BatteryLiveStatus.objects.all()
                 #serializer_class = self.get_serializer_class()
-                test = BatteryLiveSerializerYear
-                serializer_year = test(response, many=True)
+                serializer_class = BatteryLiveSerializerYear
+                serializer_year = serializer_class(response, many=True)
                 return Response(serializer_year.data, status=status.HTTP_200_OK)
         
 
