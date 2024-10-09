@@ -164,33 +164,22 @@ class YearManager(models.Manager):
         # Round numerical columns to 2 decimal places
         numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
         df[numeric_columns] = df[numeric_columns].round(2)   
-        df.fillna(0, inplace=True)
-
+        df.fillna(0, inplace=True) 
         
         
-        # Calculate cumulative sums across all devIds for each timestamp
-        df_cumulative = df.groupby('timestamp').agg({
-            'state_of_charge': 'sum',
-            'flow_last_min': 'sum',
-            'invertor_power': 'sum'
-        }).reset_index()
-
-        # Optionally, add devId as a representative (you could choose the first or leave it out)
-        df_cumulative['devId'] = 'all'  # Indicate this is the cumulative data
-
-        # Rename cumulative columns with the specified prefix
-        df_cumulative.rename(columns={
-            'state_of_charge': 'cumulative_state_of_charge',
-            'flow_last_min': 'cumulative_flow_last_min',
-            'invertor_power': 'cumulative_invertor_power'
-        }, inplace=True)
-        
-        # Round numerical columns to 2 decimal places
-        numeric_columns = ['cumulative_invertor_power', 'cumulative_state_of_charge', 'cumulative_flow_last_min']
-        df_cumulative[numeric_columns] = df_cumulative[numeric_columns].round(2)
+        # Group by timestamp and calculate cumulative sum of state_of_charge
+        df_cumulative = df.groupby('timestamp').agg(
+        cumulative_soc=('state_of_charge', 'sum'),
+        cumulative_flow_last_min=('flow_last_min', 'sum'),
+        cumulative_invertor_power=('invertor_power', 'sum')
+        ).reset_index()
+        # Round the cumulative sums to 2 decimal places
+        df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
+        df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
+        df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
         df_cumulative.fillna(0, inplace=True)
+        # Convert back to a list of dictionaries
         cumulative_result = df_cumulative.to_dict(orient='records')
-        #cache.set(cache_key, cumulative_result, timeout=60 * 15)  # Cache for 15 minutes   
         return cumulative_result
         
     

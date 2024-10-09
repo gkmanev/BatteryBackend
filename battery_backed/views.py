@@ -82,15 +82,19 @@ class StateViewSet(viewsets.ModelViewSet):
                 serializer = serializer_class(response, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             #return Response(response, status=status.HTTP_200_OK)
+
         elif date_range == 'year':
             if cumulative is not None:                
                 response = BatteryLiveStatus.year.get_cumulative_data_year()
+                return Response(response, status=status.HTTP_200_OK)
+            else:
                 if dev_id:
                     response = BatteryLiveStatus.year.filter(devId=dev_id)     
                 else:       
                     response = BatteryLiveStatus.year.all()
+
                 serializer_class = self.get_serializer_class()
-                serializer = serializer_class(response, many=True)
+                serializer = serializer_class(response, many=True)                
                 return Response(serializer.data, status=status.HTTP_200_OK)
         
 
