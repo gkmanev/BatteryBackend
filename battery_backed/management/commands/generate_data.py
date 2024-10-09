@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
                 # Define the timestamp range
         start_time = Timestamp('2024-10-09 01:00:00+0000', tz='UTC')
-        end_time = Timestamp('2024-10-09 12:23:00+0000', tz='UTC')
+        end_time = Timestamp('2024-10-09 13:00:00+0000', tz='UTC')
 
         sched = BatterySchedule.dam.prepare_consistent_response_dam()
 
