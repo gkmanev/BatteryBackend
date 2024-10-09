@@ -129,7 +129,7 @@ class YearManager(models.Manager):
 
         # Query the dataset, truncate timestamp to day, and aggregate data
         dataset = super().get_queryset().filter(timestamp__gte=start_of_year).annotate(
-            truncated_timestamp=TruncDay('timestamp')  # Truncate timestamp to day
+            truncated_timestamp=TruncHour('timestamp')  # Truncate timestamp to day/hour
         ).values('devId', 'truncated_timestamp').annotate(
             state_of_charge_avg=Round(Avg('state_of_charge'), 2),
             flow_last_min_avg=Round(Avg('flow_last_min'), 2),
