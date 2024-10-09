@@ -2,7 +2,7 @@
 import pandas as pd
 from rest_framework import viewsets
 from .models import BatteryLiveStatus, BatterySchedule
-from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer, BatteryLiveSerializerYear
+from .serializers import BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer, BatteryLiveSerializerYear
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
