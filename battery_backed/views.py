@@ -41,7 +41,7 @@ class StateViewSet(viewsets.ModelViewSet):
             elif date_range == 'month':               
                 queryset = BatteryLiveStatus.month.all()
             elif date_range == 'year':
-                queryset = BatteryLiveStatus.year.all()
+                queryset = BatteryLiveStatus.objects.all()
         # Apply dev_id filter if provided
         if dev_id:
             queryset = queryset.filter(devId=dev_id)
