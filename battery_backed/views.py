@@ -19,7 +19,7 @@ class StateViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         # Determine if you're dealing with raw data or aggregated data
         date_range = self.request.query_params.get('date_range', None)
-        if date_range == 'year' or date_range == 'month':
+        if date_range == 'month':
             return BatteryLiveSerializer  # Use the serializer for yearly aggregation (by day)
         else:
             return BatteryLiveSerializerToday       
