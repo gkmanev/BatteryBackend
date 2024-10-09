@@ -89,7 +89,7 @@ class StateViewSet(viewsets.ModelViewSet):
                 if dev_id:
                     response = BatteryLiveStatus.year.filter(devId=dev_id)     
                 else:       
-                    response = BatteryLiveStatus.year.all()
+                    response = BatteryLiveStatus.objects.all()
                 serializer_class = self.get_serializer_class()
                 serializer = serializer_class(response, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
