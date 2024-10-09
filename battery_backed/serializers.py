@@ -40,6 +40,11 @@ class BatteryLiveSerializerToday(serializers.ModelSerializer):
         fields = ('devId', 'timestamp', 'state_of_charge', 'flow_last_min', 'invertor_power')
 
 
+class BatteryLiveSerializerYear(serializers.ModelSerializer):    
+
+    class Meta:
+        model = BatteryLiveStatus
+        fields = ('devId', 'timestamp', 'state_of_charge', 'flow_last_min', 'invertor_power')
 
 class BatteryScheduleSerializer(serializers.ModelSerializer):    
     

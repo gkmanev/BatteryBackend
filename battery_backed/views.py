@@ -2,7 +2,7 @@
 import pandas as pd
 from rest_framework import viewsets
 from .models import BatteryLiveStatus, BatterySchedule
-from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer
+from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer, BatteryLiveSerializerYear
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -90,7 +90,8 @@ class StateViewSet(viewsets.ModelViewSet):
                     response = BatteryLiveStatus.year.filter(devId=dev_id)     
                 else:       
                     response = BatteryLiveStatus.objects.all()
-                serializer_class = self.get_serializer_class()
+                #serializer_class = self.get_serializer_class()
+                serializer_class = BatteryLiveSerializerYear
                 serializer = serializer_class(response, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
         
