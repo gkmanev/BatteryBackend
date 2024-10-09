@@ -16,13 +16,13 @@ class StateViewSet(viewsets.ModelViewSet):
 
     queryset = BatteryLiveStatus.objects.all()   
     
-    def get_serializer_class(self):
-        # Determine if you're dealing with raw data or aggregated data
-        date_range = self.request.query_params.get('date_range', None)
-        if date_range == 'month':
-            return BatteryLiveSerializer  # Use the serializer for yearly aggregation (by day)
-        else:
-            return BatteryLiveSerializerToday       
+    # def get_serializer_class(self):
+    #     # Determine if you're dealing with raw data or aggregated data
+    #     date_range = self.request.query_params.get('date_range', None)
+    #     if date_range == 'month':
+    #         return BatteryLiveSerializer  # Use the serializer for yearly aggregation (by day)
+    #     else:
+    #         return BatteryLiveSerializerToday       
         
 
     def get_queryset(self):
@@ -55,34 +55,34 @@ class StateViewSet(viewsets.ModelViewSet):
         dev_id = self.request.query_params.get('devId', None) 
 
         # If it's today and cumulative is requested
-        if date_range == 'today':
-            if cumulative:
-                # Fetch cumulative response directly from manager
-                response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
-                return Response(response, status=status.HTTP_200_OK)
-            else:  
-                if dev_id:
-                    response = BatteryLiveStatus.today.prepare_consistent_response(devId=dev_id)                    
-                else:              
-                    response = BatteryLiveStatus.today.prepare_consistent_response()                
-                return Response(response, status=status.HTTP_200_OK)      
+        # if date_range == 'today':
+        #     if cumulative:
+        #         # Fetch cumulative response directly from manager
+        #         response = BatteryLiveStatus.today.prepare_consistent_response(cumulative)
+        #         return Response(response, status=status.HTTP_200_OK)
+        #     else:  
+        #         if dev_id:
+        #             response = BatteryLiveStatus.today.prepare_consistent_response(devId=dev_id)                    
+        #         else:              
+        #             response = BatteryLiveStatus.today.prepare_consistent_response()                
+        #         return Response(response, status=status.HTTP_200_OK)      
      
 
             
-        elif date_range == 'month':
-            if cumulative is not None:
-                pass
-               #response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
-            else:                
-                if dev_id:
-                    response = BatteryLiveStatus.month.filter(devId=dev_id)     
-                else:       
-                    response = BatteryLiveStatus.month.all()
-                serializer_class = self.get_serializer_class()
-                serializer = serializer_class(response, many=True)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            #return Response(response, status=status.HTTP_200_OK)
-        elif date_range == 'year':
+        # elif date_range == 'month':
+        #     if cumulative is not None:
+        #         pass
+        #        #response = BatteryLiveStatus.month.get_cumulative_data_month(cumulative)
+        #     else:                
+        #         if dev_id:
+        #             response = BatteryLiveStatus.month.filter(devId=dev_id)     
+        #         else:       
+        #             response = BatteryLiveStatus.month.all()
+        #         serializer_class = self.get_serializer_class()
+        #         serializer = serializer_class(response, many=True)
+        #         return Response(serializer.data, status=status.HTTP_200_OK)
+        #     #return Response(response, status=status.HTTP_200_OK)
+        if date_range == 'year':
             if cumulative is not None:
                 pass
                 #response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
