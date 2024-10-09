@@ -83,9 +83,8 @@ class StateViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             #return Response(response, status=status.HTTP_200_OK)
         elif date_range == 'year':
-            if cumulative is not None:
-                pass
-                #response = BatteryLiveStatus.year.get_cumulative_data_year(cumulative)
+            if cumulative is not None:                
+                response = BatteryLiveStatus.year.get_cumulative_data_year()
                 if dev_id:
                     response = BatteryLiveStatus.year.filter(devId=dev_id)     
                 else:       
