@@ -1,5 +1,6 @@
 from battery_backed.mail_processing import FileManager, ForecastProcessor
 from battery_backed.forecast_service import PopulateForecast
+from .models import BatteryLiveStatus,YearAgg
 
 def mail_schedule():
     processor = ForecastProcessor()
@@ -13,3 +14,23 @@ def make_forecast():
     forecast.populate_battery_schedule()
 
 
+def agg_for_year_endpoint():
+    year_dataset = BatteryLiveStatus.year.all()
+
+    for item in year_dataset:          
+
+        obj, created = YearAgg.objects.get_or_create(
+                            devId=item.devId,
+                            timestamp=item.timestamp,
+                            defaults={
+                                'invertor_power': item.invertor_power,
+                                'flow_last_min': item.flow_last_min,
+                                'state_of_charge': item.state_of_charge,
+                            }
+                        )                    
+                    # If the entry already exists, update its values
+        if not created:
+            obj.invertor_power = item.invertor_power
+            obj.flow_last_min = item.flow_last_min
+            obj.state_of_charge = item.state_of_charge
+            obj.save()

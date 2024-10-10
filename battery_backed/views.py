@@ -1,8 +1,8 @@
 
 import pandas as pd
 from rest_framework import viewsets
-from .models import BatteryLiveStatus, BatterySchedule
-from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer
+from .models import BatteryLiveStatus, BatterySchedule, YearAgg
+from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer, YearAggSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -178,3 +178,10 @@ class ScheduleCumulativeDataView(APIView):
 
 
 
+class AggregateYearDataView(APIView):
+
+    def get(self, request, *args, **kwargs):        
+
+        year_data = YearAgg.objects.all()            
+        serializer = YearAggSerializer(year_data, many=True)
+        return Response(serializer.data)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BatteryLiveStatus, BatterySchedule
+from .models import BatteryLiveStatus, BatterySchedule, YearAgg
 
 
 
@@ -62,3 +62,9 @@ class ScheduleCumulativeSerializer(serializers.Serializer):
     total_sched_invertor = serializers.FloatField()
     total_sched_flow = serializers.FloatField()
     
+
+class YearAggSerializer(serializers.ModelSerializer):    
+    
+    class Meta:
+        model = YearAgg
+        fields = ('devId', 'timestamp', 'invertor_power','state_of_charge','flow_last_min')
