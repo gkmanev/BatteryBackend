@@ -23,7 +23,7 @@ class Command(BaseCommand):
                     date_range = row['DateRange']  # Extracting using correct key
                     invertor_power = float(row['INVertor Power (MW)'])  # Extracting using correct key
                     soc = float(row['SoC'])
-                    flow = invertor_power*0.95
+                    flow = invertor_power*0.95/60
                 
                     start_time_str = date_range.split(' - ')[1]
                     timestamp = datetime.strptime(start_time_str, '%d.%m.%Y %H:%M')
