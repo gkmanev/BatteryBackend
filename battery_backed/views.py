@@ -182,6 +182,6 @@ class AggregateYearDataView(APIView):
 
     def get(self, request, *args, **kwargs):        
 
-        year_data = YearAgg.objects.all()            
+        year_data = YearAgg.objects.all().order_by('timestamp')      
         serializer = YearAggSerializer(year_data, many=True)
         return Response(serializer.data)
