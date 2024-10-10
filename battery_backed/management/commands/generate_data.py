@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):                      
         
         current_dir = os.path.dirname(os.path.abspath(__file__))  # Get current directory
-        csv_file_path = os.path.join(current_dir, 'csvfile1.csv')  # Replace with your CSV filename
+        csv_file_path = os.path.join(current_dir, 'battery1.csv')  # Replace with your CSV filename
         
         with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=',')
