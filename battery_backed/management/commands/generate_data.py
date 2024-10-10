@@ -33,7 +33,7 @@ class Command(BaseCommand):
                     continue  # Skip this row if the key is not found               
 
                 obj, created = BatteryLiveStatus.objects.get_or_create(
-                        devId='batt-0001',
+                        devId='batt-0002',
                         timestamp=timestamp,
                         defaults={
                             'invertor_power': invertor_power,
