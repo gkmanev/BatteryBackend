@@ -120,8 +120,13 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': crontab(),
         
     # },
-        'periodically_agg_year': {
-        'task': 'battery_backed.tasks.task_year_agg',
+    #     'periodically_agg_year': {
+    #     'task': 'battery_backed.tasks.task_year_agg',
+    #     'schedule': crontab(),#minute='*/5'
+        
+    # },
+        'periodically_sum_year': {
+        'task': 'battery_backed.tasks.task_year_sum',
         'schedule': crontab(),#minute='*/5'
         
     },
