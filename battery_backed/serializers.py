@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BatteryLiveStatus, BatterySchedule, YearAgg
+from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear
 
 
 
@@ -68,3 +68,10 @@ class YearAggSerializer(serializers.ModelSerializer):
     class Meta:
         model = YearAgg
         fields = ('devId', 'timestamp', 'invertor_power','state_of_charge','flow_last_min')
+
+
+class CumulativeYearSerializer(serializers.ModelSerializer):    
+    
+    class Meta:
+        model = CumulativeYear
+        fields = ('devId', 'timestamp', 'cumulative_invertor_power','cumulative_soc','cumulative_flow_last_min')

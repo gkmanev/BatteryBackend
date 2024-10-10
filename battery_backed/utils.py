@@ -1,6 +1,9 @@
 from battery_backed.mail_processing import FileManager, ForecastProcessor
 from battery_backed.forecast_service import PopulateForecast
-from .models import BatteryLiveStatus,YearAgg
+from .models import BatteryLiveStatus,YearAgg, CumulativeYear
+from django.db import transaction
+
+import pandas as pd
 
 def mail_schedule():
     processor = ForecastProcessor()
@@ -34,3 +37,54 @@ def agg_for_year_endpoint():
             obj.flow_last_min = item["flow_last_min_avg"]
             obj.state_of_charge = item["state_of_charge_avg"]
             obj.save()
+
+    get_cumulative_data_year(year_dataset)
+
+def get_cumulative_data_year(dataset):
+    
+     
+    data = list(dataset.values())
+    if not data:
+        return []
+    
+    df = pd.DataFrame(data)
+    # Convert 'timestamp' field to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'])        
+    
+    df = df.sort_values(by='timestamp')
+
+    # Round numerical columns to 2 decimal places
+    numeric_columns = ['invertor_power', 'state_of_charge', 'flow_last_min']  # Adjust based on your data fields
+    df[numeric_columns] = df[numeric_columns].round(2)   
+    df.fillna(0, inplace=True) 
+    
+    
+    # Group by timestamp and calculate cumulative sum of state_of_charge
+    df_cumulative = df.groupby('timestamp').agg(
+    cumulative_soc=('state_of_charge', 'sum'),
+    cumulative_flow_last_min=('flow_last_min', 'sum'),
+    cumulative_invertor_power=('invertor_power', 'sum')
+    ).reset_index()
+    # Round the cumulative sums to 2 decimal places
+    df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
+    df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
+    df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
+    df_cumulative.fillna(0, inplace=True)
+    # Convert back to a list of dictionaries
+    cumulative_result = df_cumulative.to_dict(orient='records')
+    
+    with transaction.atomic():  # Ensure atomicity of database operations
+        for entry in cumulative_result:
+            CumulativeYear.objects.update_or_create(
+                devId=entry['devId'],
+                timestamp=entry['timestamp'],
+                defaults={
+                    'cumulative_soc': entry['cumulative_soc'],
+                    'cumulative_flow_last_min': entry['cumulative_flow_last_min'],
+                    'cumulative_invertor_power': entry['cumulative_invertor_power'],
+                }
+            )
+
+   
+    
+        
