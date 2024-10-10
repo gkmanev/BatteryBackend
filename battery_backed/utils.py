@@ -21,16 +21,16 @@ def agg_for_year_endpoint():
 
         obj, created = YearAgg.objects.get_or_create(
                             devId=item["devId"],
-                            timestamp=item["timestamp"],
+                            timestamp=item["truncated_timestamp"],
                             defaults={
-                                'invertor_power': item["invertor_power"],
-                                'flow_last_min': item["flow_last_min"],
-                                'state_of_charge': item["state_of_charge"],
+                                'invertor_power': item["invertor_power_avg"],
+                                'flow_last_min': item["flow_last_min_avg"],
+                                'state_of_charge': item["state_of_charge_avg"],
                             }
                         )                    
                     # If the entry already exists, update its values
         if not created:
-            obj.invertor_power = item["invertor_power"]
-            obj.flow_last_min = item["flow_last_min"]
-            obj.state_of_charge = item["state_of_charge"]
+            obj.invertor_power = item["invertor_power_avg"]
+            obj.flow_last_min = item["flow_last_min_avg"]
+            obj.state_of_charge = item["state_of_charge_avg"]
             obj.save()
