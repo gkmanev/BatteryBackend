@@ -363,5 +363,4 @@ class CumulativeYear(models.Model):
     cumulative_flow_last_min = models.FloatField(default=0)
     cumulative_invertor_power = models.FloatField(default=0)    
     
-    class Meta:
-        unique_together = ('devId', 'timestamp')
+    
