@@ -38,12 +38,13 @@ def agg_for_year_endpoint():
             obj.state_of_charge = item["state_of_charge_avg"]
             obj.save()
 
-    get_cumulative_data_year(year_dataset)
-
-def get_cumulative_data_year(dataset):
     
+
+def get_cumulative_data_year():
+    
+    year_dataset = YearAgg.objects.all()
      
-    data = list(dataset.values())
+    data = list(year_dataset.values())
     if not data:
         return []
     
