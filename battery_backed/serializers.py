@@ -74,4 +74,4 @@ class CumulativeYearSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CumulativeYear
-        fields = ('devId', 'timestamp', 'cumulative_invertor_power','cumulative_soc','cumulative_flow_last_min')
+        fields = ('timestamp', 'cumulative_invertor_power','cumulative_soc','cumulative_flow_last_min')
