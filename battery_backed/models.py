@@ -357,7 +357,7 @@ class YearAgg(models.Model):
 
     
 class CumulativeYear(models.Model):
-    devId = models.CharField(default='batt-0001', max_length=20)
+   
     timestamp = models.DateTimeField()
     cumulative_soc = models.FloatField(default=0)
     cumulative_flow_last_min = models.FloatField(default=0)

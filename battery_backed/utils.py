@@ -76,8 +76,7 @@ def get_cumulative_data_year():
     
     with transaction.atomic():  # Ensure atomicity of database operations
         for entry in cumulative_result:
-            CumulativeYear.objects.update_or_create(
-                devId=entry['devId'],
+            CumulativeYear.objects.update_or_create(                
                 timestamp=entry['timestamp'],
                 defaults={
                     'cumulative_soc': entry['cumulative_soc'],
