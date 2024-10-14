@@ -182,7 +182,11 @@ class AggregateYearDataView(APIView):
 
     def get(self, request, *args, **kwargs):        
 
-        year_data = YearAgg.objects.all().order_by('timestamp')      
+        devId = self.request.query_params.get('devId', None)
+        if devId:
+            year_data = YearAgg.objects.filter(devId=devId)
+        else:
+            year_data = YearAgg.objects.all().order_by('timestamp')      
         serializer = YearAggSerializer(year_data, many=True)
         return Response(serializer.data)
     
@@ -191,12 +195,7 @@ class AggregateYearDataView(APIView):
 class CumulativeYearDataView(APIView):
 
     def get(self, request, *args, **kwargs):        
-        devId = self.request.query_params.get('devId', None)
-        if devId:
-            year_data = CumulativeYear.objects.filter(devId=devId).order_by('timestamp')
-        else:
-            year_data = CumulativeYear.objects.all().order_by('timestamp')      
-        
+
+        year_data = CumulativeYear.objects.all().order_by('timestamp')      
         serializer = CumulativeYearSerializer(year_data, many=True)
         return Response(serializer.data)
-    
