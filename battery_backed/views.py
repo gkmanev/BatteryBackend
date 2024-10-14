@@ -184,7 +184,7 @@ class AggregateYearDataView(APIView):
 
         devId = self.request.query_params.get('devId', None)
         if devId:
-            year_data = YearAgg.objects.filter(devId=devId)
+            year_data = YearAgg.objects.filter(devId=devId).order_by('timestamp')
         else:
             year_data = YearAgg.objects.all().order_by('timestamp')      
         serializer = YearAggSerializer(year_data, many=True)
