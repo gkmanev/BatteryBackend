@@ -190,12 +190,12 @@ class AggregateYearDataView(APIView):
 
         if devId:
             if date_range == 'month':
-                data = YearAgg.objects.filter(devId=devId, timestamp__gte=start_of_month)
+                data = YearAgg.objects.filter(devId=devId, timestamp__gte=start_of_month).order_by('timestamp')
             else:
                 data = YearAgg.objects.filter(devId=devId).order_by('timestamp')
         else:
             if date_range == 'month':
-                data = YearAgg.objects.filter(timestamp__gte=start_of_month)
+                data = YearAgg.objects.filter(timestamp__gte=start_of_month).order_by('timestamp')
             else:
                 data = YearAgg.objects.all().order_by('timestamp')      
         serializer = YearAggSerializer(data, many=True)
