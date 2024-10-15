@@ -6,6 +6,7 @@ from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, Batte
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from datetime import datetime
 from .tasks import task_forecast_schedule_populate
 
 
@@ -183,11 +184,21 @@ class AggregateYearDataView(APIView):
     def get(self, request, *args, **kwargs):        
 
         devId = self.request.query_params.get('devId', None)
+        date_range = self.request.query_params.get('date_range', None)
+        today = datetime.today()
+        start_of_month = datetime(today.year, today.month, 1)
+
         if devId:
-            year_data = YearAgg.objects.filter(devId=devId).order_by('timestamp')
+            if date_range == 'month':
+                data = YearAgg.objects.filter(devId=devId, timestamp__gte=start_of_month)
+            else:
+                data = YearAgg.objects.filter(devId=devId).order_by('timestamp')
         else:
-            year_data = YearAgg.objects.all().order_by('timestamp')      
-        serializer = YearAggSerializer(year_data, many=True)
+            if date_range == 'month':
+                data = YearAgg.objects.filter(timestamp__gte=start_of_month)
+            else:
+                data = YearAgg.objects.all().order_by('timestamp')      
+        serializer = YearAggSerializer(data, many=True)
         return Response(serializer.data)
     
 

@@ -21,7 +21,7 @@ class PopulateForecast:
             end_time = (now + timedelta(days=2)).replace(hour=1, minute=0, second=0, microsecond=0)
             
             # Initialize values
-            invertor_value = 1
+            invertor_value = 3
 
             for dev in self.devIds:
                 if dev == 'bat-0002':
