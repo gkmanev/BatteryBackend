@@ -206,7 +206,14 @@ class AggregateYearDataView(APIView):
 class CumulativeYearDataView(APIView):
 
     def get(self, request, *args, **kwargs):        
+        date_range = self.request.query_params.get('date_range', None)
+        today = datetime.today()
+        start_of_month = datetime(today.year, today.month, 1)
+        
+        if date_range == 'month':
+            data = CumulativeYear.objects.filter(timestamp__gte=start_of_month).order_by('timestamp')
+        else:
+            data = CumulativeYear.objects.all().order_by('timestamp')  
 
-        year_data = CumulativeYear.objects.all().order_by('timestamp')      
-        serializer = CumulativeYearSerializer(year_data, many=True)
+        serializer = CumulativeYearSerializer(data, many=True)
         return Response(serializer.data)
