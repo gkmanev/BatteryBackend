@@ -37,14 +37,14 @@ class Command(BaseCommand):
                         timestamp=timestamp,
                         defaults={
                             'invertor_power': invertor_power,
-                            'flow_last_min': flow,
+                            'flow_last_min': flow/15,
                             'state_of_charge': soc,
                         }
                     )                    
                 # If the entry already exists, update its values
                 if not created:
                     obj.invertor_power = invertor_power
-                    obj.flow_last_min = flow
+                    obj.flow_last_min = flow/15
                     obj.state_of_charge = soc
                     obj.save()
 
