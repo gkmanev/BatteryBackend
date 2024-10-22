@@ -2,27 +2,28 @@ import requests
 import xml.etree.ElementTree as ET
 import pytz
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
+from battery_backed.models import Price 
 
 
 class GetPricesDam():
 
     def __init__(self) -> None:        
         self.url = 'https://web-api.tp.entsoe.eu/api?securityToken=6276342c-e10c-4d88-8688-cb0a1cf163ca'
+        self.is_dst = None
         self.prepare_get()
 
     def prepare_get(self):
         timezone = pytz.timezone('Europe/Sofia')
-        now = timezone.now()
-        localized_date = timezone.localize(now)
-        # Check if the date is during daylight saving time
-        is_dst = localized_date.dst() != timedelta(0)
 
-        # Print the result
-        if is_dst:
-            print(f"The date {localized_date} is during daylight saving time.")
-        else:
-            print(f"The date {localized_date} is not during daylight saving time.")
+        # Get the current date and time (naive, without timezone)
+        now = datetime.now()
+
+        # Localize the current date and time to the specified time zone using pytz
+        localized_date = timezone.localize(now)
+
+        # Check if the date is during daylight saving time
+        self.is_dst = localized_date.dst() != timedelta(0)       
 
         start_time = (now).replace(hour=0, minute=0, second=0, microsecond=0)
         end_time = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -66,6 +67,16 @@ class GetPricesDam():
             prices.append((position, price_amount))
 
         for position, price in prices:
-            print(f"Position {position}: Price = {price} EUR")
+            if self.is_dst:
+                position = int(position) - 1
+                now = datetime.now(timezone.utc)
+                timestamp = (now).replace(hour=position, minute=0, second=0, microsecond=0)
+                #date_to_str = date_time.strftime("%Y-%m-%dT%H:%M:00Z")
+                
+                price_entry, created = Price.objects.get_or_create(timestamp=timestamp, defaults={'price': price, 'currency':'EUR'})
+                if created:
+                    print(f"Inserted: {timestamp}: Price = {price} EUR")
+                else:
+                    print(f"Already exists: {timestamp}: Price = {price_entry.price} EUR")
 
 

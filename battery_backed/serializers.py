@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear
+from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear, Price
 
 
 
@@ -75,3 +75,10 @@ class CumulativeYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = CumulativeYear
         fields = ('timestamp', 'cumulative_invertor_power','cumulative_soc','cumulative_flow_last_min')
+
+
+class PriceSerializer(serializers.ModelSerializer):    
+    
+    class Meta:
+        model = Price
+        fields = ('timestamp', 'price', 'currency')

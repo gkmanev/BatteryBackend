@@ -362,5 +362,14 @@ class CumulativeYear(models.Model):
     cumulative_soc = models.FloatField(default=0)
     cumulative_flow_last_min = models.FloatField(default=0)
     cumulative_invertor_power = models.FloatField(default=0)    
+
+
+class Price(models.Model):
+    timestamp = models.DateTimeField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='EUR')
+
+    def __str__(self):
+        return f"{self.timestamp}: {self.price} {self.currency}"
     
     
