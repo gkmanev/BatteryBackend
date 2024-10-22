@@ -223,7 +223,8 @@ class PriceView(APIView):
 
     def get(self, request, *args, **kwargs):        
         date_range = self.request.query_params.get('date_range', None)
-        today = datetime.today()
+        now = datetime.today()
+        today = now.replace(hour=0, minute=0)
 
         if date_range == 'today':
             data = Price.objects.filter(timestamp__gte=today).order_by('timestamp')

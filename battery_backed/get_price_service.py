@@ -70,8 +70,8 @@ class GetPricesDam():
             if self.is_dst:
                 position = int(position) - 1
                 now = datetime.now(timezone.utc)
-                timestamp = (now).replace(hour=position, minute=0, second=0, microsecond=0)
-                #date_to_str = date_time.strftime("%Y-%m-%dT%H:%M:00Z")
+                timestamp = (now + timedelta(days=1)).replace(hour=position, minute=0, second=0, microsecond=0)
+                #date_to_str = date_time.strftime("%Y-%m-%dT%H:%M:00Z")                
                 
                 price_entry, created = Price.objects.get_or_create(timestamp=timestamp, defaults={'price': price, 'currency':'EUR'})
                 if created:
