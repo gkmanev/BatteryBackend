@@ -1,5 +1,8 @@
 import requests
 import xml.etree.ElementTree as ET
+import pytz
+from django.utils import timezone
+from datetime import timedelta
 
 
 class GetPricesDam():
@@ -9,8 +12,24 @@ class GetPricesDam():
         self.prepare_get()
 
     def prepare_get(self):
-        start = 202410220000
-        end = 202410230000
+        timezone = pytz.timezone('Europe/Sofia')
+        now = timezone.now()
+        localized_date = timezone.localize(now)
+        # Check if the date is during daylight saving time
+        is_dst = localized_date.dst() != timedelta(0)
+
+        # Print the result
+        if is_dst:
+            print(f"The date {localized_date} is during daylight saving time.")
+        else:
+            print(f"The date {localized_date} is not during daylight saving time.")
+
+        start_time = (now).replace(hour=0, minute=0, second=0, microsecond=0)
+        end_time = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+
+        start = int(start_time.strftime("%Y%m%d%H%M"))
+        end = int(end_time.strftime("%Y%m%d%H%M"))
+
         querystring = {"documentType":"A44","in_Domain":"10YCA-BULGARIA-R","out_Domain":"10YCA-BULGARIA-R","periodStart":start, "periodEnd":end}
         response = requests.get(self.url, params=querystring)
 
