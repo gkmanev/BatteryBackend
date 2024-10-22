@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):                      
         
         current_dir = os.path.dirname(os.path.abspath(__file__))  # Get current directory
-        csv_file_path = os.path.join(current_dir, 'schedule_hist.csv')  # Replace with your CSV filename
+        csv_file_path = os.path.join(current_dir, 'generate_today.csv')  # Replace with your CSV filename
         
         with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=',')
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                     continue  # Skip this row if the key is not found               
 
                 obj, created = BatteryLiveStatus.objects.get_or_create(
-                        devId='batt-0002',
+                        devId='batt-0001',
                         timestamp=timestamp,
                         defaults={
                             'invertor_power': invertor_power,
