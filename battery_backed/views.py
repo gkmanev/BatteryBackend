@@ -6,7 +6,7 @@ from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, Batte
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from datetime import datetime
+from datetime import datetime, timedelta
 from .tasks import task_forecast_schedule_populate
 
 
@@ -227,7 +227,7 @@ class PriceView(APIView):
         today = now.replace(hour=0, minute=0)
 
         if date_range == 'today':
-            data = Price.objects.filter(timestamp__gte=today).order_by('timestamp')
+            data = Price.objects.filter(timestamp__gte=today, timestamp__lte=today+timedelta(days=1)).order_by('timestamp')
         else:
             data = Price.objects.all().order_by('timestamp')  
 

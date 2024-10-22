@@ -31,7 +31,7 @@ class GetPricesDam():
         start = int(start_time.strftime("%Y%m%d%H%M"))
         end = int(end_time.strftime("%Y%m%d%H%M"))
 
-        querystring = {"documentType":"A44","in_Domain":"10YCA-BULGARIA-R","out_Domain":"10YCA-BULGARIA-R","periodStart":start, "periodEnd":end}
+        querystring = {"documentType":"A44","in_Domain":"10YPL-AREA-----S","out_Domain":"10YPL-AREA-----S","periodStart":start, "periodEnd":end}
         response = requests.get(self.url, params=querystring)
 
         if response.status_code == 200:
