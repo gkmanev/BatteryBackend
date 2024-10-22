@@ -130,6 +130,13 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*/40')
         
     },
+
+        'every_day_fetch_prices': {
+        'task': 'battery_backed.tasks.task_fetch_prices',
+        'schedule': crontab(hour= 14, minute=45)        
+    },
+
+    
 }
 
 

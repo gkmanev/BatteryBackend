@@ -1,5 +1,6 @@
 from battery_backed.mail_processing import FileManager, ForecastProcessor
 from battery_backed.forecast_service import PopulateForecast
+from battery_backed.get_price_service import GetPricesDam
 from .models import BatteryLiveStatus,YearAgg, CumulativeYear
 from django.db import transaction
 
@@ -85,6 +86,9 @@ def get_cumulative_data_year():
                 }
             )
 
+
+def fetch_prices_service():
+    fetch = GetPricesDam()
    
     
         
