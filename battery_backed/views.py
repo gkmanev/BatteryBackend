@@ -223,11 +223,15 @@ class PriceView(APIView):
 
     def get(self, request, *args, **kwargs):        
         date_range = self.request.query_params.get('date_range', None)
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
         now = datetime.today()
         today = now.replace(hour=0, minute=0)
 
         if date_range == 'today':
             data = Price.objects.filter(timestamp__gte=today, timestamp__lte=today+timedelta(days=1)).order_by('timestamp')
+        elif start_date and end_date:
+            data = Price.objects.filter(timestamp__gte=start_date, timestamp__lte=end_date).order_by('timestamp')
         else:
             data = Price.objects.all().order_by('timestamp')  
 
