@@ -26,7 +26,7 @@ class GetPricesDam():
         self.is_dst = localized_date.dst() != timedelta(0)      
          
 
-        start_time = (now).replace(year=2015, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_time = (now).replace(year=2024, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
         
         init_time = start_time - timedelta(weeks=4)
         

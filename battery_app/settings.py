@@ -133,7 +133,7 @@ CELERY_BEAT_SCHEDULE = {
 
         'every_day_fetch_prices': {
         'task': 'battery_backed.tasks.task_fetch_prices',
-        'schedule': crontab(hour= 14, minute=45)        
+        'schedule': crontab(hour= 10, minute=56)        
     },
 
     
