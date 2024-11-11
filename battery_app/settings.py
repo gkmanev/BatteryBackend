@@ -115,25 +115,25 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
-    'batt_schedule_update_via_mail': {
-        'task': 'battery_backed.tasks.task_mail_scheduling',
-        'schedule': crontab(),
+    # 'batt_schedule_update_via_mail': {
+    #     'task': 'battery_backed.tasks.task_mail_scheduling',
+    #     'schedule': crontab(),
         
-    },
-        'periodically_agg_year': {
-        'task': 'battery_backed.tasks.task_year_agg',
-        'schedule': crontab(minute='*/45')
+    # },
+    #     'periodically_agg_year': {
+    #     'task': 'battery_backed.tasks.task_year_agg',
+    #     'schedule': crontab(minute='*/45')
         
-    },
-        'periodically_sum_year': {
-        'task': 'battery_backed.tasks.task_year_sum',
-        'schedule': crontab(minute='*/40')
+    # },
+    #     'periodically_sum_year': {
+    #     'task': 'battery_backed.tasks.task_year_sum',
+    #     'schedule': crontab(minute='*/40')
         
-    },
+    # },
 
         'every_day_fetch_prices': {
         'task': 'battery_backed.tasks.task_fetch_prices',
-        'schedule': crontab(hour= 9, minute=59)        
+        'schedule': crontab(hour=12, minute=49)        
     },
 
     
