@@ -3,6 +3,7 @@ import xlrd
 import pytz
 import pandas as pd
 import mimetypes
+import base64
 from base64 import urlsafe_b64decode
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
@@ -138,7 +139,7 @@ class GmailService:
             message.attach(file_attachment)
 
         # Encode and send the email
-        raw_message = {'raw': urlsafe_b64decode(message.as_string().encode('utf-8')).decode('utf-8')}
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
         send_message = self.service.users().messages().send(userId='me', body=raw_message).execute()
         print(f"Email sent successfully to {recipient_email}")
 
