@@ -6,6 +6,7 @@ import mimetypes
 import base64
 from base64 import urlsafe_b64decode
 from email.mime.application import MIMEApplication
+from email import encoders
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -19,7 +20,7 @@ from google.auth.transport.requests import Request
 from datetime import datetime, date, timedelta
 from .models import BatterySchedule
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"]
 
 class GmailService:
     def __init__(self, token_file="token.json", credentials="credentials.json"):        
@@ -118,30 +119,37 @@ class GmailService:
             print("=" * 50)
 
     
-    def send_email_with_attachment(self, recipient_email, subject, body_text, file_path):
-        # Create the email
+    def create_message_with_attachment(self, sender, to, subject, message_text, file_path):
+        # Create the base message
         message = MIMEMultipart()
-        message['to'] = recipient_email
-        message['from'] = 'me'
+        message['to'] = to
+        message['from'] = sender
         message['subject'] = subject
 
-        # Add body text
-        msg_text = MIMEText(body_text)
-        message.attach(msg_text)
+        # Add the message body
+        msg = MIMEText(message_text)
+        message.attach(msg)
 
-        # Attach the file
-        content_type, encoding = mimetypes.guess_type(file_path)
-        main_type, sub_type = content_type.split('/', 1) if content_type else ('application', 'octet-stream')
+        # Add the attachment
+        with open(file_path, 'rb') as f:
+            mime_base = MIMEBase('application', 'octet-stream')
+            mime_base.set_payload(f.read())
+            encoders.encode_base64(mime_base)
+            mime_base.add_header('Content-Disposition', f'attachment; filename="{file_path}"')
+            message.attach(mime_base)
 
-        with open(file_path, 'rb') as file:
-            file_attachment = MIMEApplication(file.read(), _subtype=sub_type)
-            file_attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename(file_path))
-            message.attach(file_attachment)
-
-        # Encode and send the email
-        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
-        send_message = self.service.users().messages().send(userId='me', body=raw_message).execute()
-        print(f"Email sent successfully to {recipient_email}")
+        # Encode the message in base64
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        return {'raw': raw_message}
+    
+    def send_message(self, user_id, message):
+        try:
+            message = self.service.users().messages().send(userId=user_id, body=message).execute()
+            print(f'Message Id: {message["id"]}')
+            return message
+        except Exception as error:
+            print(f'An error occurred: {error}')
+            return None
 
 class FileManager:
     def __init__(self) -> None:

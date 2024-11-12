@@ -18,17 +18,18 @@ def make_forecast():
     forecast.populate_battery_schedule()
 
 
-def make_optimized_schedule():
+def make_optimized_schedule_send_mail():
     gmail_service = GmailService()
     excel_file_path = "sent_optimized_schedules/output.xlsx"
-    gmail_service.send_email_with_attachment(
-    recipient_email="grid.elasticity@entra.energy",
-    subject="Your Subject Here",
-    body_text="Please find the attached Excel file.",
-    file_path=excel_file_path
-)
 
-
+    email_message = gmail_service.create_message_with_attachment(    
+        sender="georgi.manev@entra.energy",
+        to="grid.elasticity@entra.energy",
+        subject="Optimized Schedule",
+        message_text="Please find the attached Excel file.",
+        file_path=excel_file_path
+    )
+    gmail_service.send_message('me', email_message)
 
 
 
