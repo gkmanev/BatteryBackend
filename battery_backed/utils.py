@@ -1,4 +1,4 @@
-from battery_backed.mail_processing import FileManager, ForecastProcessor
+from battery_backed.mail_processing import FileManager, ForecastProcessor, GmailService
 from battery_backed.forecast_service import PopulateForecast
 from battery_backed.get_price_service import GetPricesDam
 from .models import BatteryLiveStatus,YearAgg, CumulativeYear
@@ -16,6 +16,20 @@ def mail_schedule():
 def make_forecast():
     forecast = PopulateForecast(devIds=['batt-0001', 'batt-0002'])
     forecast.populate_battery_schedule()
+
+
+def make_optimized_schedule():
+    gmail_service = GmailService()
+    excel_file_path = "sent_optimized_schedules/output.xlsx"
+    gmail_service.send_email_with_attachment(
+    recipient_email="grid.elasticity@entra.energy",
+    subject="Your Subject Here",
+    body_text="Please find the attached Excel file.",
+    file_path=excel_file_path
+)
+
+
+
 
 
 def agg_for_year_endpoint():

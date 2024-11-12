@@ -2,7 +2,9 @@ import os
 import xlrd
 import pytz
 import pandas as pd
+import mimetypes
 from base64 import urlsafe_b64decode
+from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -113,6 +115,32 @@ class GmailService:
         else:                                  
             self.parse_parts(self.service, parts, folder_name, mail_date, message)
             print("=" * 50)
+
+    
+    def send_email_with_attachment(self, recipient_email, subject, body_text, file_path):
+        # Create the email
+        message = MIMEMultipart()
+        message['to'] = recipient_email
+        message['from'] = 'me'
+        message['subject'] = subject
+
+        # Add body text
+        msg_text = MIMEText(body_text)
+        message.attach(msg_text)
+
+        # Attach the file
+        content_type, encoding = mimetypes.guess_type(file_path)
+        main_type, sub_type = content_type.split('/', 1) if content_type else ('application', 'octet-stream')
+
+        with open(file_path, 'rb') as file:
+            file_attachment = MIMEApplication(file.read(), _subtype=sub_type)
+            file_attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename(file_path))
+            message.attach(file_attachment)
+
+        # Encode and send the email
+        raw_message = {'raw': urlsafe_b64decode(message.as_string().encode('utf-8')).decode('utf-8')}
+        send_message = self.service.users().messages().send(userId='me', body=raw_message).execute()
+        print(f"Email sent successfully to {recipient_email}")
 
 class FileManager:
     def __init__(self) -> None:
