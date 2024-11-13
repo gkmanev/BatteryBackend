@@ -8,6 +8,9 @@ from rest_framework.views import APIView
 from rest_framework import status
 from datetime import datetime, timedelta
 from .tasks import task_forecast_schedule_populate
+from django.utils import timezone
+from pytz import timezone as pytz_timezone
+
 
 
 
@@ -225,9 +228,10 @@ class PriceView(APIView):
         date_range = self.request.query_params.get('date_range', None)
         start_date = self.request.query_params.get('start_date', None)
         end_date = self.request.query_params.get('end_date', None)
-        now = datetime.today()
-        today = now.replace(hour=0, minute=0)
 
+        user_timezone = pytz_timezone("Europe/Warsaw") 
+        today = timezone.now().astimezone(user_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+        
         if date_range == 'today':
             data = Price.objects.filter(timestamp__gte=today, timestamp__lte=today+timedelta(days=1)).order_by('timestamp')
         elif start_date and end_date:
