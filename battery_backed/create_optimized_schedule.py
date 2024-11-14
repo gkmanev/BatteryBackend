@@ -118,7 +118,7 @@ def run_optimizer():
     sell_to_market_amounts = np.array([sell_to_market[h].varValue for h in range(total_hours)])
     soc_values = np.array([soc[h].varValue for h in range(total_hours)])
 
-    power_arr = (charge_to_battery_amounts*2 - discharge_from_battery_amounts*2).tolist()
+    power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
 
     # Create initial DataFrame
     df = pd.DataFrame(power_arr, columns=["values"])
@@ -167,8 +167,9 @@ def run_optimizer():
     invertor = minute_schedule['values'].to_list()
 
     date_today = datetime.today().date()
+    dam = date_today+timedelta(days=1)
     fn = "sent_optimized_schedules"
-    file_name = f"batt1_{date_today}.xlsx"
+    file_name = f"batt1_{dam}.xlsx"
     filepath = os.path.join(fn, file_name)
     # Create a workbook and select the active worksheet
     wb = Workbook()
