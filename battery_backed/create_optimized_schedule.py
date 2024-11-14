@@ -165,7 +165,7 @@ def run_optimizer():
     minute_schedule = minute_schedule.sort_index()
 
     date_today = datetime.today().date()
-    fn = "sent_optimized_schedule"
+    fn = "sent_optimized_schedules"
     file_name = f"batt1_{date_today}.xlsx"
     filepath = os.path.join(fn, file_name)
     # Create a workbook and select the active worksheet
@@ -176,7 +176,7 @@ def run_optimizer():
     for i, value in enumerate(power_arr, start=4):
         ws.cell(row=11, column=i, value=value)
     
-    directories = [d for d in os.listdir() if os.path.isdir(d)]
-    print("Directories:", directories)
-    # # Save to an Excel file
-    # wb.save(filepath)
+    # directories = [d for d in os.listdir() if os.path.isdir(d)]
+    # print("Directories:", directories)
+    # Save to an Excel file
+    wb.save(filepath)
