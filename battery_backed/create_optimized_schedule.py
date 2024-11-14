@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import numpy as np
 import pulp as pl # optimization lib
+from datetime import datetime, timedelta
 
 
 
@@ -117,4 +118,49 @@ def run_optimizer():
     soc_values = np.array([soc[h].varValue for h in range(total_hours)])
 
     power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
-    print(power_arr)
+
+    # Create initial DataFrame
+    df = pd.DataFrame(power_arr, columns=["values"])
+    df.reset_index(drop=True, inplace=True)
+    df.index = df.index + 1  # Make index start from 1
+
+    # Generate a date range starting from today at 1:00 AM, ending at 1:00 AM the next day + 1 hour
+    today_1am = datetime.today().replace(hour=1, minute=15, second=0, microsecond=0)
+    next_day_1am = today_1am + timedelta(days=1)
+
+    # Generate date range from 1 AM today to 1:00 AM the next day (including an extra hour to capture 1 AM on the next day)
+    date_range = pd.date_range(start=today_1am, end=next_day_1am + timedelta(hours=1), freq='H')
+
+    # Ensure the length matches the data
+    df.index = date_range[:len(df)]
+
+    # Resample to 15-minute intervals and forward fill missing values
+    minute_schedule = df.resample('15T').ffill()
+
+    # Manually add rows for 2024-11-14 00:30:00, 2024-11-14 00:45:00, and 2024-11-14 01:00:00
+    last_value = minute_schedule['values'].iloc[-1]  # Get the last value
+
+
+    tomorrow_0_30 = next_day_1am.replace(hour=0, minute=30, second=0, microsecond=0)
+    tomorrow_0_30 = tomorrow_0_30.strftime("%Y-%m-%d %H:%M:%S")
+    tomorrow_0_45 = next_day_1am.replace(hour=0, minute=45, second=0, microsecond=0)
+    tomorrow_0_45 = tomorrow_0_45.strftime("%Y-%m-%d %H:%M:%S")
+    tomorrow_1_00 = next_day_1am.replace(hour=1, minute=0, second=0, microsecond=0)
+    tomorrow_1_00 = tomorrow_1_00.strftime("%Y-%m-%d %H:%M:%S")
+
+
+
+    # Create a new DataFrame for the additional rows
+    additional_times = pd.to_datetime([tomorrow_0_30, tomorrow_0_45, tomorrow_1_00])
+    additional_values = [last_value] * len(additional_times)
+
+    # Create a new DataFrame for the additional rows
+    additional_df = pd.DataFrame({'values': additional_values}, index=additional_times)
+
+    # Concatenate the additional rows with the existing DataFrame
+    minute_schedule = pd.concat([minute_schedule, additional_df])
+
+    # Sort the DataFrame by the index (timestamps)
+    minute_schedule = minute_schedule.sort_index()
+
+    print(minute_schedule)

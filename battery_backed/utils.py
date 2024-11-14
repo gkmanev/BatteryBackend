@@ -35,7 +35,8 @@ def make_optimized_schedule_send_mail():
                         to="grid.elasticity@entra.energy",
                         subject="Optimized Schedule",
                         message_text="Please find the attached Excel file.",
-                        file_path=filepath
+                        file_path=filepath,
+                        file_name=xlsfile
                     )
                     gmail_service.send_message('me', email_message)
 

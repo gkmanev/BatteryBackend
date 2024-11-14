@@ -120,7 +120,7 @@ class GmailService:
             print("=" * 50)
     
     
-    def create_message_with_attachment(self, sender, to, subject, message_text, file_path):
+    def create_message_with_attachment(self, sender, to, subject, message_text, file_path, file_name):
         # Create the base message
         message = MIMEMultipart()
         message['to'] = to
@@ -136,7 +136,7 @@ class GmailService:
             mime_base = MIMEBase('application', 'octet-stream')
             mime_base.set_payload(f.read())
             encoders.encode_base64(mime_base)
-            mime_base.add_header('Content-Disposition', f'attachment; filename="{file_path}"')
+            mime_base.add_header('Content-Disposition', f'attachment; filename="{file_name}"')
             message.attach(mime_base)
 
         # Encode the message in base64
