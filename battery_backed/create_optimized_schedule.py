@@ -118,7 +118,7 @@ def run_optimizer():
     sell_to_market_amounts = np.array([sell_to_market[h].varValue for h in range(total_hours)])
     soc_values = np.array([soc[h].varValue for h in range(total_hours)])
 
-    power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
+    power_arr = (charge_to_battery_amounts*0.5 - discharge_from_battery_amounts*0.5).tolist()
 
     # Create initial DataFrame
     df = pd.DataFrame(power_arr, columns=["values"])
