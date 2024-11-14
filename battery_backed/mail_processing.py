@@ -19,6 +19,7 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from datetime import datetime, date, timedelta
 from .models import BatterySchedule
+import openpyxl
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"]
 
@@ -117,7 +118,7 @@ class GmailService:
         else:                                  
             self.parse_parts(self.service, parts, folder_name, mail_date, message)
             print("=" * 50)
-
+    
     
     def create_message_with_attachment(self, sender, to, subject, message_text, file_path):
         # Create the base message
@@ -165,45 +166,53 @@ class FileManager:
         # print(f"Name Date: {self.file_date} || {d1}")
         # return self.file_date == d1
         today = date.today()
-        today_date = today.strftime("%Y-%m-%d")
-        self.file_date = file.split("_")[1].split(".")[0]
-        batt_number_part = file.split("_")[0].split("batt")[1]
-        self.devId = f"batt-000{batt_number_part}" 
-        if self.file_date >= today_date:            
-            return True
-        else:
-            return False
+        today_date = today.strftime("%Y-%m-%d")       
+        try:
+            self.file_date = file.split("_")[1].split(".")[0]
+            batt_number_part = file.split("_")[0].split("batt")[1]
+            self.devId = f"batt-000{batt_number_part}" 
+            if self.file_date >= today_date:            
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(f"There is a file with not valid name!:{e}")
+
 
     def process_files(self):
-        try:           
-            fn = "schedules"
-            for root, dirs, files in os.walk(fn):               
-                             
-                xlsfiles = [f for f in files if f.endswith('.xls')]                
-                for xlsfile in xlsfiles:                    
-                    my_file = self.get_file_name(xlsfile)                                               
-                    if my_file:                       
-                        filepath = os.path.join(fn, xlsfile)                                            
-                        excel_workbook = xlrd.open_workbook(filepath)
-                        excel_worksheet = excel_workbook.sheet_by_index(0)  
-                        #Day ahead from file date!!!
-                        date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
-                        xl_date = date_obj
-                        xl_date_time = str(xl_date) + "T01:15:00"
-                        period = (24 * 4) 
-                        schedule_list = []
-                        i = 0
-                        timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz="UTC")
-                        while i < period:
-                            i += 1
-                            xl_schedule = excel_worksheet.cell_value(10, 2 + i)  
-                            schedule_list.append(xl_schedule)
-                        df = pd.DataFrame(schedule_list, index=timeIndex)
-                        df.columns = ['schedule']                        
-                        self.save_to_db(df)
+     try:
+         fn = "schedules"
+         for root, dirs, files in os.walk(fn):
+             xlsfiles = [f for f in files if f.endswith(('.xls', '.xlsx'))]  # Include .xlsx files as well
+             for xlsfile in xlsfiles:
+                 my_file = self.get_file_name(xlsfile)
+                 if my_file:
+                     filepath = os.path.join(fn, xlsfile)
+                     if xlsfile.endswith('.xlsx'):
+                         excel_workbook = openpyxl.load_workbook(filepath)
+                         excel_worksheet = excel_workbook.active
+                     else:
+                         excel_workbook = xlrd.open_workbook(filepath)
+                         excel_worksheet = excel_workbook.sheet_by_index(0)
+                     
+                     # Process the worksheet as before...
+                     date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
+                     xl_date = date_obj
+                     xl_date_time = str(xl_date) + "T01:15:00"
+                     period = (24 * 4)  # 4 periods per day (every 15 minutes)
+                     schedule_list = []
+                     i = 0
+                     timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz="UTC")
+                     while i < period:
+                         i += 1
+                         xl_schedule = excel_worksheet.cell(row=11, column=3 + i).value  # For openpyxl
+                         schedule_list.append(xl_schedule)
+                     df = pd.DataFrame(schedule_list, index=timeIndex)
+                     df.columns = ['schedule']
+                     self.save_to_db(df)
 
-        except Exception as e:
-            print(f"Error occurred while preparing the Excel file: {e}")
+     except Exception as e:
+         print(f"Error occurred while preparing the Excel file: {e}")
             
     def save_to_db(self, df):
         try:
@@ -271,7 +280,7 @@ class ForecastProcessor:
 
         after_date = now.strftime("%Y/%m/%d")
         #before_date = temp_date.strftime("%Y/%m/%d")
-        sender_email = "gk.manev@gmail.com"
+        sender_email = "grid.elasticity@entra.energy"
         query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")

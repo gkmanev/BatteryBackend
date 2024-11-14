@@ -3,8 +3,10 @@ from battery_backed.forecast_service import PopulateForecast
 from battery_backed.get_price_service import GetPricesDam
 from .models import BatteryLiveStatus,YearAgg, CumulativeYear
 from django.db import transaction
-
+import os
 import pandas as pd
+import openpyxl
+import xlrd
 
 def mail_schedule():
     processor = ForecastProcessor()
@@ -20,16 +22,22 @@ def make_forecast():
 
 def make_optimized_schedule_send_mail():
     gmail_service = GmailService()
-    excel_file_path = "sent_optimized_schedules/output.xlsx"
-
-    email_message = gmail_service.create_message_with_attachment(    
-        sender="georgi.manev@entra.energy",
-        to="grid.elasticity@entra.energy",
-        subject="Optimized Schedule",
-        message_text="Please find the attached Excel file.",
-        file_path=excel_file_path
-    )
-    gmail_service.send_message('me', email_message)
+    file_manager = FileManager()
+    fn = "sent_optimized_schedules"
+    for root, dirs, files in os.walk(fn):
+        xlsfiles = [f for f in files if f.endswith(('.xls', '.xlsx'))]  # Include .xlsx files as well
+        for xlsfile in xlsfiles:
+                my_file = file_manager.get_file_name(xlsfile)
+                if my_file:
+                    filepath = os.path.join(fn, xlsfile)
+                    email_message = gmail_service.create_message_with_attachment(    
+                        sender="georgi.manev@entra.energy",
+                        to="grid.elasticity@entra.energy",
+                        subject="Optimized Schedule",
+                        message_text="Please find the attached Excel file.",
+                        file_path=filepath
+                    )
+                    gmail_service.send_message('me', email_message)
 
 
 
