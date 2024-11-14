@@ -164,6 +164,8 @@ def run_optimizer():
     # Sort the DataFrame by the index (timestamps)
     minute_schedule = minute_schedule.sort_index()
 
+    invertor = minute_schedule['values'].to_list()
+
     date_today = datetime.today().date()
     fn = "sent_optimized_schedules"
     file_name = f"batt1_{date_today}.xlsx"
@@ -173,7 +175,7 @@ def run_optimizer():
     ws = wb.active
 
     # Write each value into separate cells in row 10, starting from column 2
-    for i, value in enumerate(power_arr, start=4):
+    for i, value in enumerate(invertor, start=4):
         ws.cell(row=11, column=i, value=value)
     
     # directories = [d for d in os.listdir() if os.path.isdir(d)]
