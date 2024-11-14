@@ -175,6 +175,8 @@ def run_optimizer():
     # Write each value into separate cells in row 10, starting from column 2
     for i, value in enumerate(power_arr, start=4):
         ws.cell(row=11, column=i, value=value)
-
-    # Save to an Excel file
-    wb.save(filepath)
+    
+    directories = [d for d in os.listdir() if os.path.isdir(d)]
+    print("Directories:", directories)
+    # # Save to an Excel file
+    # wb.save(filepath)
