@@ -2,8 +2,9 @@ import requests
 import pandas as pd
 import numpy as np
 import pulp as pl # optimization lib
+import os
 from datetime import datetime, timedelta
-
+from openpyxl import Workbook
 
 
 
@@ -163,4 +164,17 @@ def run_optimizer():
     # Sort the DataFrame by the index (timestamps)
     minute_schedule = minute_schedule.sort_index()
 
-    print(minute_schedule)
+    date_today = datetime.today().date()
+    fn = "sent_optimized_schedule"
+    file_name = f"batt1_{date_today}.xlsx"
+    filepath = os.path.join(fn, file_name)
+    # Create a workbook and select the active worksheet
+    wb = Workbook()
+    ws = wb.active
+
+    # Write each value into separate cells in row 10, starting from column 2
+    for i, value in enumerate(power_arr, start=4):
+        ws.cell(row=11, column=i, value=value)
+
+    # Save to an Excel file
+    wb.save(filepath)
