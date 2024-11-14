@@ -180,40 +180,46 @@ class FileManager:
 
 
     def process_files(self):
-     try:
-         fn = "schedules"
-         for root, dirs, files in os.walk(fn):
-             xlsfiles = [f for f in files if f.endswith(('.xls', '.xlsx'))]  # Include .xlsx files as well
-             for xlsfile in xlsfiles:
-                 my_file = self.get_file_name(xlsfile)
-                 if my_file:
-                     filepath = os.path.join(fn, xlsfile)
-                     if xlsfile.endswith('.xlsx'):
-                         excel_workbook = openpyxl.load_workbook(filepath)
-                         excel_worksheet = excel_workbook.active
-                     else:
-                         excel_workbook = xlrd.open_workbook(filepath)
-                         excel_worksheet = excel_workbook.sheet_by_index(0)
-                     
-                     # Process the worksheet as before...
-                     date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
-                     xl_date = date_obj
-                     xl_date_time = str(xl_date) + "T01:15:00"
-                     period = (24 * 4)  # 4 periods per day (every 15 minutes)
-                     schedule_list = []
-                     i = 0
-                     timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz="UTC")
-                     while i < period:
-                         i += 1
-                         xl_schedule = excel_worksheet.cell(row=11, column=3 + i).value  # For openpyxl
-                         schedule_list.append(xl_schedule)
-                     df = pd.DataFrame(schedule_list, index=timeIndex)
-                     df.columns = ['schedule']
-                     self.save_to_db(df)
+        try:
+            fn = "schedules"
+            for root, dirs, files in os.walk(fn):
+                xlsfiles = [f for f in files if f.endswith(('.xls', '.xlsx'))]  # Include .xlsx files as well
+                for xlsfile in xlsfiles:
+                    my_file = self.get_file_name(xlsfile)
+                    if my_file:
+                        filepath = os.path.join(fn, xlsfile)
+                        
+                        # Determine file format and use appropriate library
+                        if xlsfile.endswith('.xlsx'):
+                            excel_workbook = openpyxl.load_workbook(filepath)
+                            excel_worksheet = excel_workbook.active
+                            # Use openpyxl cell access syntax
+                            get_cell_value = lambda row, col: excel_worksheet.cell(row=row, column=col).value
+                        else:
+                            excel_workbook = xlrd.open_workbook(filepath)
+                            excel_worksheet = excel_workbook.sheet_by_index(0)
+                            # Use xlrd cell access syntax
+                            get_cell_value = lambda row, col: excel_worksheet.cell_value(row - 1, col - 1)  # 0-indexed
 
-     except Exception as e:
-         print(f"Error occurred while preparing the Excel file: {e}")
-            
+                        # Process the worksheet as before...
+                        date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
+                        xl_date = date_obj
+                        xl_date_time = str(xl_date) + "T01:15:00"
+                        period = (24 * 4)  # 4 periods per day (every 15 minutes)
+                        schedule_list = []
+                        timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz="UTC")
+                        
+                        for i in range(1, period + 1):
+                            xl_schedule = get_cell_value(11, 3 + i)  # Adjust row/column as needed
+                            schedule_list.append(xl_schedule)
+                        
+                        df = pd.DataFrame(schedule_list, index=timeIndex)
+                        df.columns = ['schedule']
+                        self.save_to_db(df)
+
+        except Exception as e:
+            print(f"Error occurred while preparing the Excel file: {e}")
+                
     def save_to_db(self, df):
         try:
             # first_timestamp = df.index[0] - timedelta(minutes=15) # get the last datapoint before new schedule            
