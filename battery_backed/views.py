@@ -237,7 +237,7 @@ class PriceView(APIView):
         elif start_date and end_date:
             data = Price.objects.filter(timestamp__gte=start_date, timestamp__lte=end_date).order_by('timestamp')
         elif date_range == 'dam':
-            data = Price.objects.filter(timestamp__gte=today+timedelta(days=1)).order_by('timestamp')
+            data = Price.objects.filter(timestamp__gte=today).order_by('timestamp')
 
         else:
             data = Price.objects.all().order_by('timestamp')  
