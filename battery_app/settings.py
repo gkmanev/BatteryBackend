@@ -132,12 +132,24 @@ CELERY_BEAT_SCHEDULE = {
     },
         'every_day_fetch_prices': {
         'task': 'battery_backed.tasks.task_fetch_prices',
-        'schedule': crontab(hour=15, minute=46)        
+        'schedule': crontab(hour=14, minute=46)        
     },
+        
+        'create_schedule_file_xlsx': {
+        'task': 'battery_backed.tasks.task_prepare_optimized_schedule_xlsx',
+        'schedule': crontab(hour=9, minute=50)        
+    },
+        
+        'every_day_fetch_prices': {
+        'task': 'battery_backed.tasks.task_send_schedule_to_email',
+        'schedule': crontab(hour=9, minute=53)        
+    },
+    
 
     
 }
 
+CELERY_TIMEZONE = 'Europe/Sofia'
 
 # celery setting.
 CELERY_CACHE_BACKEND = 'default'

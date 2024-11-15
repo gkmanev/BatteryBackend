@@ -3,6 +3,7 @@ from battery_backed.forecast_service import PopulateForecast
 from battery_backed.get_price_service import GetPricesDam
 from .models import BatteryLiveStatus,YearAgg, CumulativeYear
 from django.db import transaction
+from battery_backed.create_optimized_schedule import run_optimizer
 import os
 import pandas as pd
 import openpyxl
@@ -20,7 +21,7 @@ def make_forecast():
     forecast.populate_battery_schedule()
 
 
-def make_optimized_schedule_send_mail():
+def send_optimized_schedule_to_mail():
     gmail_service = GmailService()
     file_manager = FileManager()
     fn = "sent_optimized_schedules"
@@ -40,6 +41,8 @@ def make_optimized_schedule_send_mail():
                     )
                     gmail_service.send_message('me', email_message)
 
+def prepare_optimized_battery_schedule():
+    run_optimizer()
 
 
 def agg_for_year_endpoint():

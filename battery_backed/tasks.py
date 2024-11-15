@@ -1,6 +1,6 @@
 from celery.utils.log import get_task_logger 
 from celery import shared_task 
-from .utils import mail_schedule, make_forecast, agg_for_year_endpoint, get_cumulative_data_year, fetch_prices_service
+from .utils import mail_schedule, make_forecast, agg_for_year_endpoint, get_cumulative_data_year, fetch_prices_service, prepare_optimized_battery_schedule, send_optimized_schedule_to_mail
 
 
 logger = get_task_logger(__name__)
@@ -34,3 +34,13 @@ def task_year_sum():
 def task_fetch_prices():
     fetch_prices_service()
     logger.info("Starting Task Fetch Prices!")
+
+@shared_task()
+def task_prepare_optimized_schedule_xlsx():
+    prepare_optimized_battery_schedule()
+    logger.info("Prepare Optimized Schedule xlsx file!")
+
+@shared_task()
+def task_send_schedule_to_email():
+    send_optimized_schedule_to_mail()
+    logger.info("Send Schedule to Mail!")
