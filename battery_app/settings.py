@@ -140,9 +140,13 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=9, minute=50)        
     },
         
-        'every_day_fetch_prices': {
+        'send_sched_to_mail': {
         'task': 'battery_backed.tasks.task_send_schedule_to_email',
         'schedule': crontab(hour=9, minute=53)        
+    },
+        'create_price_forecast_dam': {
+        'task': 'battery_backed.tasks.task_create_dam_price',
+        'schedule': crontab(hour=9, minute=30)        
     },
     
 
