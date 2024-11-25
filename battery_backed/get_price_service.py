@@ -31,10 +31,10 @@ class GetPricesDam():
         # Check if the date is during daylight saving time
         self.is_dst = localized_date.dst() != timedelta(0)      
 
-        start = int(now.strftime("%Y%m%d%H%M"))
+        #start = int(now.strftime("%Y%m%d%H%M"))
         querystring = {"documentType":"A44","in_Domain":"10YPL-AREA-----S","out_Domain":"10YPL-AREA-----S","periodStart":start_period, "periodEnd":end_period}
         try:
-            response = requests.get(self.url, params=querystring)
+            response = requests.get(self.url, params=querystring)           
             if response.status_code == 200:
                 self.parse_xml(response.text)
             else:
@@ -94,12 +94,13 @@ class GetPricesDam():
 
                 # Calculate the timestamp by adding the position as hours to the start_time
                 price_timestamp = start_time + timedelta(hours=(position - 1)) 
-                price_entry, created = Price.objects.get_or_create(timestamp=price_timestamp, defaults={'price': price_amount, 'currency':'EUR'})
+                price_entry, created = Price.objects.update_or_create(
+                    timestamp=price_timestamp,
+                    defaults={'price': price_amount, 'currency': 'EUR'}
+                )
                 if created:
                     print(f"Inserted: {price_timestamp}: Price = {price_amount} EUR")
                 else:
-                    print(f"Already exists: {price_timestamp}: Price = {price_entry.price} EUR")
-
-
+                    print(f"Updated: {price_timestamp}: Price = {price_amount} EUR (was {price_entry.price} EUR before update)")
 
 
