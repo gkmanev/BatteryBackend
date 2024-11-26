@@ -18,14 +18,13 @@ class GetPricesDam():
 
         # Get the current date and time (naive, without timezone)
         now = datetime.now()
-        start = now - timedelta(days=10) #1
-        end = now - timedelta(days=1)  #2
+        start = now+timedelta(days=1)
+        end = now+timedelta(days=2)
         start_period = (start).replace(hour=0, minute=0, second=0, microsecond=0)
         start_period = int(start_period.strftime("%Y%m%d%H%M"))
         end_period = (end).replace(hour=0, minute=0, second=0, microsecond=0)
-        end_period = int(end_period.strftime("%Y%m%d%H%M")) 
-
-
+        end_period = int(end_period.strftime("%Y%m%d%H%M"))
+        
         # Localize the current date and time to the specified time zone using pytz
         localized_date = timezone.localize(now)
 
@@ -34,7 +33,6 @@ class GetPricesDam():
 
         #start = int(now.strftime("%Y%m%d%H%M"))
         querystring = {"documentType":"A44","in_Domain":"10YPL-AREA-----S","out_Domain":"10YPL-AREA-----S","periodStart":start_period, "periodEnd":end_period}
-        
         try:
             response = requests.get(self.url, params=querystring)           
             if response.status_code == 200:
