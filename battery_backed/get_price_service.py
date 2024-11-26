@@ -25,6 +25,11 @@ class GetPricesDam():
         end_period = (end).replace(hour=0, minute=0, second=0, microsecond=0)
         end_period = int(end_period.strftime("%Y%m%d%H%M"))
 
+        #set custom periods
+        start_period = 20241113
+        end_period   = 20241126
+
+
         # Localize the current date and time to the specified time zone using pytz
         localized_date = timezone.localize(now)
 
