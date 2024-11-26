@@ -49,7 +49,8 @@ class Command(BaseCommand):
                     timestamp = data_out.get('timestamp', None)
                     print(f"SOC:{soc}, flow: {flow_last_min}, inv: {invertor}")
                     if dev_id is not None and soc is not None and flow_last_min is not None and invertor is not None and timestamp is not None:        
-                                                           
+                        l = BatteryLiveStatus.objects.last()
+                        print(f"TIME: {l.timestamp}")                                   
                         battery = BatteryLiveStatus(  
                             timestamp=timestamp,
                             devId=dev_id,                           
