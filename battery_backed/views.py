@@ -1,8 +1,8 @@
 
 import pandas as pd
 from rest_framework import viewsets
-from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear, Price
-from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer, YearAggSerializer, CumulativeYearSerializer, PriceSerializer
+from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear, Price, ForecastedPrice
+from .serializers import BatteryLiveSerializer,BatteryLiveSerializerToday, BatteryScheduleSerializer, BatteryCumulativeSerializer, ScheduleCumulativeSerializer, YearAggSerializer, CumulativeYearSerializer, PriceSerializer, ForecastedPriceSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -243,4 +243,27 @@ class PriceView(APIView):
             data = Price.objects.all().order_by('timestamp')  
 
         serializer = PriceSerializer(data, many=True)
+        return Response(serializer.data)
+    
+class ForecastedPriceView(APIView):
+
+    def get(self, request, *args, **kwargs):        
+        date_range = self.request.query_params.get('date_range', None)
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+
+        user_timezone = pytz_timezone("Europe/Warsaw") 
+        today = timezone.now().astimezone(user_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        if date_range == 'today':
+            data = ForecastedPrice.objects.filter(timestamp__gte=today, timestamp__lte=today+timedelta(days=1)).order_by('timestamp')
+        elif start_date and end_date:
+            data = ForecastedPrice.objects.filter(timestamp__gte=start_date, timestamp__lte=end_date).order_by('timestamp')
+        elif date_range == 'dam':
+            data = ForecastedPrice.objects.filter(timestamp__gte=today+timedelta(days=1)).order_by('timestamp')
+
+        else:
+            data = ForecastedPrice.objects.all().order_by('timestamp')  
+
+        serializer = ForecastedPriceSerializer(data, many=True)
         return Response(serializer.data)

@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework import routers
-from .views import StateViewSet, ScheduleViewSet, BatteryCumulativeDataView, ScheduleCumulativeDataView, PopulateBatteryScheduleView, AggregateYearDataView, CumulativeYearDataView, PriceView
+from .views import StateViewSet, ScheduleViewSet, BatteryCumulativeDataView, ScheduleCumulativeDataView, PopulateBatteryScheduleView, AggregateYearDataView, CumulativeYearDataView, PriceView, ForecastedPriceView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = routers.DefaultRouter()
@@ -16,6 +16,7 @@ urlpatterns = [
     path('year-agg/', AggregateYearDataView.as_view(), name='agg-year'),
     path('year-sum/', CumulativeYearDataView.as_view(), name='sum-year'),
     path('price/', PriceView.as_view(), name='price'),
+    path('forecasted_price/', ForecastedPriceView.as_view(), name='forecasted_price'),
     
 ]
 

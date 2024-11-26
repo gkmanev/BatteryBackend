@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear, Price
+from .models import BatteryLiveStatus, BatterySchedule, YearAgg, CumulativeYear, Price, ForecastedPrice
 
 
 
@@ -81,4 +81,10 @@ class PriceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Price
+        fields = ('timestamp', 'price', 'currency')
+
+class ForecastedPriceSerializer(serializers.ModelSerializer):    
+    
+    class Meta:
+        model = ForecastedPrice
         fields = ('timestamp', 'price', 'currency')

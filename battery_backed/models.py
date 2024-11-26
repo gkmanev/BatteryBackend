@@ -372,4 +372,12 @@ class Price(models.Model):
     def __str__(self):
         return f"{self.timestamp}: {self.price} {self.currency}"
     
+class ForecastedPrice(models.Model):
+    timestamp = models.DateTimeField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='EUR')
+
+    def __str__(self):
+        return f"{self.timestamp}: {self.price} {self.currency}"
+    
     
