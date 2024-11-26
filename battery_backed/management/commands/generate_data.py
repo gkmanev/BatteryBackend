@@ -22,7 +22,7 @@ class Command(BaseCommand):
                     currency=price.currency
                 )
 
-            print("ForecastedPrice objects populated successfully!")
+            print(f"ForecastedPrice objects populated successfully! {price.timestamp}")
 
 
         

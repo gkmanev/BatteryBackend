@@ -1,7 +1,7 @@
 from battery_backed.mail_processing import FileManager, ForecastProcessor, GmailService
 from battery_backed.forecast_service import PopulateForecast
 from battery_backed.get_price_service import GetPricesDam
-from .models import BatteryLiveStatus,YearAgg, CumulativeYear, Price
+from .models import BatteryLiveStatus,YearAgg, CumulativeYear, Price, ForecastedPrice
 from django.db import transaction
 from battery_backed.create_optimized_schedule import run_optimizer
 from pytz import timezone as pytz_timezone
@@ -126,8 +126,8 @@ def make_price_forecast():
     data = Price.objects.filter(timestamp__gte=today, timestamp__lte=today+timedelta(days=1)).order_by('timestamp')
     for d in data:
         dam = d.timestamp + timedelta(days=1)
-        dam_price = Price(timestamp=dam, price=d.price)
-        exist = Price.objects.filter(timestamp=dam, price=d.price)
+        dam_price = ForecastedPrice(timestamp=dam, price=d.price)
+        exist = ForecastedPrice.objects.filter(timestamp=dam, price=d.price)
         if exist:
             continue
         else:
