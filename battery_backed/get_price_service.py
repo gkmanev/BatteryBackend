@@ -98,7 +98,7 @@ class GetPricesDam():
                 price_amount = point.find('ns:price.amount', ns).text
                 
                 # Calculate the timestamp by adding the position as hours to the start_time
-                price_timestamp = start_time + timedelta(hours=(position)) 
+                price_timestamp = start_time + timedelta(hours=(position + 1)) 
                 price_entry, created = Price.objects.update_or_create(
                     timestamp=price_timestamp,
                     defaults={'price': price_amount, 'currency': 'EUR'}
