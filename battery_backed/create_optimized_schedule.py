@@ -122,8 +122,11 @@ def run_optimizer():
 
     # Create initial DataFrame
     df = pd.DataFrame(power_arr, columns=["values"])
+    print(df)
     df.reset_index(drop=True, inplace=True)
     df.index = df.index + 1  # Make index start from 1
+
+   
 
     # Generate a date range starting from today at 1:00 AM, ending at 1:00 AM the next day + 1 hour
     today_1am = datetime.today().replace(hour=1, minute=15, second=0, microsecond=0)

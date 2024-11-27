@@ -19,12 +19,13 @@ class GetPricesDam():
         # Get the current date and time (naive, without timezone)
         now = datetime.now()
         start = now+timedelta(days=1)
-        end = now+timedelta(days=2)
+        end = now+timedelta(days=2) 
         start_period = (start).replace(hour=0, minute=0, second=0, microsecond=0)
         start_period = int(start_period.strftime("%Y%m%d%H%M"))
         end_period = (end).replace(hour=0, minute=0, second=0, microsecond=0)
         end_period = int(end_period.strftime("%Y%m%d%H%M"))
-        
+        start_period = 202401010000
+        end_period = 202411270000
         # Localize the current date and time to the specified time zone using pytz
         localized_date = timezone.localize(now)
 
@@ -91,9 +92,9 @@ class GetPricesDam():
             for point in period.findall('ns:Point', ns)[::1]:
                 position = int(point.find('ns:position', ns).text)
                 price_amount = point.find('ns:price.amount', ns).text
-
+                
                 # Calculate the timestamp by adding the position as hours to the start_time
-                price_timestamp = start_time + timedelta(hours=(position - 1)) 
+                price_timestamp = start_time + timedelta(hours=(position)) 
                 price_entry, created = Price.objects.update_or_create(
                     timestamp=price_timestamp,
                     defaults={'price': price_amount, 'currency': 'EUR'}
