@@ -112,6 +112,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         if date_range:
             if date_range == "dam":
                 queryset = BatterySchedule.dam.all()
+                print(queryset)
         return queryset             
         
         
