@@ -146,7 +146,7 @@ CELERY_BEAT_SCHEDULE = {
     },
         'create_price_forecast_dam': {
         'task': 'battery_backed.tasks.task_create_dam_price',
-        'schedule': crontab(hour=9, minute=30)        
+        'schedule': crontab(hour=16, minute=29)        
     },
     
 
