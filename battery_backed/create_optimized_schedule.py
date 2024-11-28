@@ -12,10 +12,16 @@ def run_optimizer():
     price_diff_threshold = 60
 
     df_dam = pd.DataFrame()
-    url = "http://85.14.6.37:16543/api/price/?date_range=today"
+    #url = "http://85.14.6.37:16543/api/price/?date_range=today"
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+    end_today = today + timedelta(hours=23)
+    for i in range(30):
+        today = today - timedelta(days=i)
+        end_today = end_today - timedelta(days=i)
+    url = f"http://127.0.0.1:8000/api/price/?start_date={today}&end_date={end_today}"
     response = requests.get(url)
     if response.status_code == 200:
-        data = response.json()
+        data = response.json()        
         df_dam = pd.DataFrame(data)
 
     df_dam = df_dam.rename(columns={"timestamp": "DateRange","price": "Price"})
@@ -42,12 +48,15 @@ def run_optimizer():
     # Convert the prices to float
     df_dam['Price'] = df_dam['Price'].astype(float)
 
+    #df_dam = df_dam.iloc[1:len(df_dam)]
+    
     # Extract the prices and count total hours
     market_prices = df_dam['Price'].tolist()
 
     # Total number of hours based on CSV data
     total_hours = len(market_prices) 
-
+    
+    
     # Ensure there is data for the specified week range
     if total_hours == 0:
         raise ValueError(f"No data available")
@@ -76,7 +85,7 @@ def run_optimizer():
     # Initial SoC
     model += soc[0] == initial_soc
 
-    # Constraints
+    #Constraints
     for h in range(total_hours):
         # Charge or discharge indication
         model += purchase_from_market[h] <= max_charge_rate * is_charging[h]
@@ -118,71 +127,69 @@ def run_optimizer():
     sell_to_market_amounts = np.array([sell_to_market[h].varValue for h in range(total_hours)])
     soc_values = np.array([soc[h].varValue for h in range(total_hours)])
 
-    power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
+    power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()   
+    
 
-    # Create initial DataFrame
-    df = pd.DataFrame(power_arr, columns=["values"])
-    print(df)
+    # # Create initial DataFrame
+    df = pd.DataFrame(power_arr, columns=["schedule"])
+
     df.reset_index(drop=True, inplace=True)
-    df.index = df.index + 1  # Make index start from 1
-
-   
-
+    
     # Generate a date range starting from today at 1:00 AM, ending at 1:00 AM the next day + 1 hour
-    today_1am = datetime.today().replace(hour=1, minute=15, second=0, microsecond=0)
-    next_day_1am = today_1am + timedelta(days=1)
+    
+    next_day = today + timedelta(days=1)
 
     # Generate date range from 1 AM today to 1:00 AM the next day (including an extra hour to capture 1 AM on the next day)
-    date_range = pd.date_range(start=today_1am, end=next_day_1am + timedelta(hours=1), freq='H')
-
-    # Ensure the length matches the data
-    df.index = date_range[:len(df)]
+    date_range = pd.date_range(start=today, end=next_day + timedelta(hours=1), freq='H')
+    df.index = date_range[:len(df)]    
 
     # Resample to 15-minute intervals and forward fill missing values
-    minute_schedule = df.resample('15T').ffill()
+    minute_schedule = df.resample('15T').ffill()  
+    #add 23:15, 23:30, 23:45
+    last_value = minute_schedule['schedule'].iloc[-1]
+    today_23_15 = today.replace(hour=23, minute=15, second=0, microsecond=0)
+    today_23_15 = today_23_15.strftime("%Y-%m-%d %H:%M:%S")
 
-    # Manually add rows for 2024-11-14 00:30:00, 2024-11-14 00:45:00, and 2024-11-14 01:00:00
-    last_value = minute_schedule['values'].iloc[-1]  # Get the last value
+    today_23_30 = today.replace(hour=23, minute=30, second=0, microsecond=0)
+    today_23_30 = today_23_30.strftime("%Y-%m-%d %H:%M:%S")
 
+    today_23_45 = today.replace(hour=23, minute=45, second=0, microsecond=0)
+    today_23_45 = today_23_45.strftime("%Y-%m-%d %H:%M:%S")
 
-    tomorrow_0_30 = next_day_1am.replace(hour=0, minute=30, second=0, microsecond=0)
-    tomorrow_0_30 = tomorrow_0_30.strftime("%Y-%m-%d %H:%M:%S")
-    tomorrow_0_45 = next_day_1am.replace(hour=0, minute=45, second=0, microsecond=0)
-    tomorrow_0_45 = tomorrow_0_45.strftime("%Y-%m-%d %H:%M:%S")
-    tomorrow_1_00 = next_day_1am.replace(hour=1, minute=0, second=0, microsecond=0)
-    tomorrow_1_00 = tomorrow_1_00.strftime("%Y-%m-%d %H:%M:%S")
-
-
-
-    # Create a new DataFrame for the additional rows
-    additional_times = pd.to_datetime([tomorrow_0_30, tomorrow_0_45, tomorrow_1_00])
+    additional_times = pd.to_datetime([today_23_15, today_23_30, today_23_45])
     additional_values = [last_value] * len(additional_times)
 
     # Create a new DataFrame for the additional rows
-    additional_df = pd.DataFrame({'values': additional_values}, index=additional_times)
+    additional_df = pd.DataFrame({'schedule': additional_values}, index=additional_times)
 
     # Concatenate the additional rows with the existing DataFrame
     minute_schedule = pd.concat([minute_schedule, additional_df])
 
+
+    print(len(minute_schedule))
     # Sort the DataFrame by the index (timestamps)
     minute_schedule = minute_schedule.sort_index()
 
-    invertor = minute_schedule['values'].to_list()
+    return minute_schedule
 
-    date_today = datetime.today().date()
-    dam = date_today+timedelta(days=1)
-    fn = "sent_optimized_schedules"
-    file_name = f"batt1_{dam}.xlsx"
-    filepath = os.path.join(fn, file_name)
-    # Create a workbook and select the active worksheet
-    wb = Workbook()
-    ws = wb.active
 
-    # Write each value into separate cells in row 10, starting from column 2
-    for i, value in enumerate(invertor, start=4):
-        ws.cell(row=11, column=i, value=value)
     
-    # directories = [d for d in os.listdir() if os.path.isdir(d)]
-    # print("Directories:", directories)
-    # Save to an Excel file
-    wb.save(filepath)
+
+    # invertor = minute_schedule['values'].to_list()
+
+    # date_today = datetime.today().date()
+    # dam = date_today+timedelta(days=1)
+    # fn = "sent_optimized_schedules"
+    # file_name = f"batt1_{dam}.xlsx"
+    # filepath = os.path.join(fn, file_name)
+    # # Create a workbook and select the active worksheet
+    # wb = Workbook()
+    # ws = wb.active
+    # # Write each value into separate cells in row 10, starting from column 2
+    # for i, value in enumerate(invertor, start=4):
+    #     ws.cell(row=11, column=i, value=value)
+    
+    # # directories = [d for d in os.listdir() if os.path.isdir(d)]
+    # # print("Directories:", directories)
+    # # Save to an Excel file
+    # wb.save(filepath)

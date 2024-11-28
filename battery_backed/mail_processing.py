@@ -21,11 +21,12 @@ from datetime import datetime, date, timedelta
 from .models import BatterySchedule
 import openpyxl
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"]
+#SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"]
 
 class GmailService:
-    def __init__(self, token_file="token.json", credentials="credentials.json"):        
-        
+    def __init__(self, token_file="token.json", credentials="credentials.json"):  
+
+        self.scopes = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"]
         self.credentials_file = os.path.join(os.getcwd(), credentials)        
         self.service = self.authenticate(token_file, self.credentials_file)
         self.files_names_array = []
@@ -33,12 +34,12 @@ class GmailService:
     def authenticate(self, token_file, credentials_file):
         creds = None
         if os.path.exists(token_file):
-            creds = Credentials.from_authorized_user_file(token_file, SCOPES)
+            creds = Credentials.from_authorized_user_file(token_file, self.scopes)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(credentials_file, SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file(credentials_file, self.scopes)
                 creds = flow.run_local_server(port=0)
             with open(token_file, "w") as token:
                 token.write(creds.to_json())
@@ -165,6 +166,7 @@ class FileManager:
         # self.devId = file.split("_")[0]      
         # print(f"Name Date: {self.file_date} || {d1}")
         # return self.file_date == d1
+        print(file)
         today = date.today()
         today_date = today.strftime("%Y-%m-%d")       
         try:
@@ -184,9 +186,12 @@ class FileManager:
             fn = "schedules"
             for root, dirs, files in os.walk(fn):
                 xlsfiles = [f for f in files if f.endswith(('.xls', '.xlsx'))]  # Include .xlsx files as well
-                for xlsfile in xlsfiles:
+                
+                for xlsfile in xlsfiles:                    
                     my_file = self.get_file_name(xlsfile)
+                    
                     if my_file:
+                        
                         filepath = os.path.join(fn, xlsfile)
                         
                         # Determine file format and use appropriate library
@@ -204,7 +209,7 @@ class FileManager:
                         # Process the worksheet as before...
                         date_obj = datetime.strptime(self.file_date, "%Y-%m-%d")
                         xl_date = date_obj
-                        xl_date_time = str(xl_date) + "T01:15:00"
+                        xl_date_time = str(xl_date)# + "T01:15:00"
                         period = (24 * 4)  # 4 periods per day (every 15 minutes)
                         schedule_list = []
                         timeIndex = pd.date_range(start=xl_date_time, periods=period, freq="0h15min", tz="UTC")
@@ -214,7 +219,7 @@ class FileManager:
                             schedule_list.append(xl_schedule)
                         
                         df = pd.DataFrame(schedule_list, index=timeIndex)
-                        df.columns = ['schedule']
+                        df.columns = ['schedule']                        
                         self.save_to_db(df)
 
         except Exception as e:
@@ -286,7 +291,7 @@ class ForecastProcessor:
 
         after_date = now.strftime("%Y/%m/%d")
         #before_date = temp_date.strftime("%Y/%m/%d")
-        sender_email = "grid.elasticity@entra.energy"
+        sender_email = "georgi.manev@entra.energy"
         query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")

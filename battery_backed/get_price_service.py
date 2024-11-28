@@ -31,15 +31,15 @@ class GetPricesDam():
         # Check if the date is during daylight saving time
         self.is_dst = localized_date.dst() != timedelta(0)      
 
-        start_period = 202401010000
-        end_period = 202404300000
+        # start_period = 202411250000
+        # end_period = 202411270000
 
 
 
         #start = int(now.strftime("%Y%m%d%H%M"))
         querystring = {"documentType":"A44","in_Domain":"10YPL-AREA-----S","out_Domain":"10YPL-AREA-----S","periodStart":start_period, "periodEnd":end_period}
         try:
-            response = requests.get(self.url, params=querystring)           
+            response = requests.get(self.url, params=querystring)                  
             if response.status_code == 200:
                 self.parse_xml(response.text)
             else:
@@ -98,7 +98,7 @@ class GetPricesDam():
                 price_amount = point.find('ns:price.amount', ns).text
                 
                 # Calculate the timestamp by adding the position as hours to the start_time
-                price_timestamp = start_time + timedelta(hours=(position + 1)) 
+                price_timestamp = start_time + timedelta(hours=(position)) 
                 price_entry, created = Price.objects.update_or_create(
                     timestamp=price_timestamp,
                     defaults={'price': price_amount, 'currency': 'EUR'}
