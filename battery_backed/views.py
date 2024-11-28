@@ -116,26 +116,26 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         return queryset             
         
         
-    # def list(self, request, *args, **kwargs):
-    #     date_range = self.request.query_params.get('date_range', None)
-    #     cumulative = self.request.query_params.get('cumulative', None)
-    #     dev_id = self.request.query_params.get('devId', None) 
+    def list(self, request, *args, **kwargs):
+        date_range = self.request.query_params.get('date_range', None)
+        cumulative = self.request.query_params.get('cumulative', None)
+        dev_id = self.request.query_params.get('devId', None) 
 
-    #     if date_range == "dam":           
-    #         if cumulative is not None:
-    #             response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative)            
-    #             return Response(response, status=status.HTTP_200_OK)
-    #         else:
-    #             if dev_id is not None:
-    #                 response = BatterySchedule.dam.prepare_consistent_response_dam(devId=dev_id)
-    #             else:
-    #                 response = BatterySchedule.dam.prepare_consistent_response_dam() 
-    #             return Response(response, status=status.HTTP_200_OK)   
-    #     else:
-    #         response = BatterySchedule.objects.all().order_by('timestamp')
-    #         serializer_class = self.get_serializer_class()
-    #         serializer = serializer_class(response, many=True)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
+        if date_range == "dam":           
+            if cumulative is not None:
+                response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative)            
+                return Response(response, status=status.HTTP_200_OK)
+            else:
+                if dev_id is not None:
+                    response = BatterySchedule.dam.prepare_consistent_response_dam(devId=dev_id)
+                else:
+                    response = BatterySchedule.dam.prepare_consistent_response_dam() 
+                return Response(response, status=status.HTTP_200_OK)   
+        else:
+            response = BatterySchedule.objects.all().order_by('timestamp')
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(response, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
