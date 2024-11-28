@@ -35,7 +35,7 @@ def send_optimized_schedule_to_mail():
                 if my_file:
                     filepath = os.path.join(fn, xlsfile)
                     email_message = gmail_service.create_message_with_attachment(    
-                        sender="georgi.manev@entra.energy",
+                        sender="grid.elasticity@entra.energy",
                         to="grid.elasticity@entra.energy",
                         subject="Optimized Schedule",
                         message_text="Please find the attached Excel file.",

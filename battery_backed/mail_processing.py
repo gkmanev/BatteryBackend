@@ -291,7 +291,7 @@ class ForecastProcessor:
 
         after_date = now.strftime("%Y/%m/%d")
         #before_date = temp_date.strftime("%Y/%m/%d")
-        sender_email = "georgi.manev@entra.energy"
+        sender_email = "grid.elasticity@entra.energy"
         query_str = f"from:{sender_email} after:{after_date}"        
         results = self.gmail_service.search_messages(query_str)
         print(f"Found {len(results)} results.")
