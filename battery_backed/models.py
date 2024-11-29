@@ -268,9 +268,10 @@ class DayAheadManager(models.Manager):
 
             # df_no_id = df_device.drop(columns=['id'])            
            
-            df_resampled = df_device.resample('1T').ffill()
+            df_resampled = df_device.resample('1T').asfreq()
+            
              # Interpolate 'soc' and 'flow' columns
-            #df_resampled['soc'] = df_resampled['soc'].interpolate()
+            df_resampled['soc'] = df_resampled['soc'].interpolate(method='linear')
             df_resampled['flow'] = df_resampled['flow'].bfill()
 
             # Divide the flow by 15 to have it per min
