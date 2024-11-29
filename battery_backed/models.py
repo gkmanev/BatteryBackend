@@ -268,7 +268,7 @@ class DayAheadManager(models.Manager):
 
             # df_no_id = df_device.drop(columns=['id'])            
            
-            df_resampled = df_device.resample('1T').asfreq()
+            df_resampled = df_device.resample('1T').ffill()
              # Interpolate 'soc' and 'flow' columns
             df_resampled['soc'] = df_resampled['soc'].interpolate()
             df_resampled['flow'] = df_resampled['flow'].bfill()

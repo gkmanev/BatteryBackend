@@ -144,8 +144,13 @@ def run_optimizer():
     date_range = pd.date_range(start=today, end=next_day + timedelta(hours=1), freq='H')
     df.index = date_range[:len(df)]    
 
+       
     # Resample to 15-minute intervals and forward fill missing values
     minute_schedule = df.resample('15T').ffill()  
+    today = datetime.today()
+    test = minute_schedule[minute_schedule.index < today]
+    print(test)
+    
     #add 23:15, 23:30, 23:45
     last_value = minute_schedule['schedule'].iloc[-1]
     today_23_15 = today.replace(hour=23, minute=15, second=0, microsecond=0)
