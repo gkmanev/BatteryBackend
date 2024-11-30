@@ -146,9 +146,9 @@ def run_optimizer():
 
        
     # Resample to 15-minute intervals and forward fill missing values
-    minute_schedule = df.resample('15T').ffill()  
+    minute_schedule = df.resample('1T').ffill()  
     today = datetime.today()
-    test = minute_schedule[minute_schedule.index < today]
+    test = minute_schedule[minute_schedule.index < today-timedelta(hours=6)]
     print(test)
     
     #add 23:15, 23:30, 23:45
