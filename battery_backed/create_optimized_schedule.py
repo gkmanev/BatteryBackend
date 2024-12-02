@@ -146,10 +146,8 @@ def run_optimizer():
 
        
     # Resample to 15-minute intervals and forward fill missing values
-    minute_schedule = df.resample('1T').ffill()  
+    minute_schedule = df.resample('15T').ffill()  
     today = datetime.today()
-    test = minute_schedule[minute_schedule.index < today-timedelta(hours=6)]
-    print(test)
     
     #add 23:15, 23:30, 23:45
     last_value = minute_schedule['schedule'].iloc[-1]
@@ -181,7 +179,7 @@ def run_optimizer():
     invertor = minute_schedule['schedule'].to_list()
 
     date_today = datetime.today().date()
-    dam = date_today+timedelta(days=1)
+    dam = date_today + timedelta(days=1)
     fn = "sent_optimized_schedules"
     file_name = f"batt1_{dam}.xlsx"
     filepath = os.path.join(fn, file_name)
