@@ -57,6 +57,9 @@ def revenue_calculations():
     # Create a new column that is the product of 'total_flow' and 'price'
     merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
 
+    merged_df['accumulated_flow_price'] = merged_df['flow_price'].cumsum()
+
+
     # Optionally reset index if needed
     merged_df.reset_index(drop=True, inplace=True)
 
