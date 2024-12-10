@@ -41,7 +41,7 @@ def revenue_calculations():
         battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
         .resample('1T')  # Resample to 1-minute intervals
         .sum()  # Perform resampling aggregation
-        .fillna(method='bfill')  # Fill NaN values by backward filling
+        .fillna(method='ffill')  # Fill NaN values by forward filling
         .reset_index()  # Reset index to return a flat DataFrame
     )
 
