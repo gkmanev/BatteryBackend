@@ -134,5 +134,7 @@ def make_price_forecast():
             dam_price.save()
 
 
+
+
     
         
