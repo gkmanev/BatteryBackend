@@ -48,8 +48,21 @@ def revenue_calculations():
     # Print the first 200 rows for inspection
     pd.set_option('display.max_rows', None)
 
-    print(aggregated_flow.iloc[:200])
-    
+        
     price_resampled = price_df.resample('1T').mean().reset_index()
+
+    # Merge aggregated_flow and price_resampled on 'timestamp'
+    merged_df = pd.merge(aggregated_flow, price_resampled, on='timestamp', how='inner')
+
+    # Create a new column that is the product of 'total_flow' and 'price'
+    merged_df['flow_price'] = merged_df['total_flow'] * merged_df['price']
+
+    # Optionally reset index if needed
+    merged_df.reset_index(drop=True, inplace=True)
+
+    # Now print or inspect the merged DataFrame
+    print(merged_df.iloc[:200])
+
+
     forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
 

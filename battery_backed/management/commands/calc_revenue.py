@@ -8,5 +8,5 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         revenue_calculations()
-        
-        self.stdout.write(self.style.SUCCESS('Database successfully empted'))
+
+        self.stdout.write(self.style.SUCCESS('Executed!'))
