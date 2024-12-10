@@ -2,7 +2,7 @@ from battery_backed.models import BatterySchedule, Price, ForecastedPrice
 from datetime import datetime
 from django.utils.timezone import now
 import pandas as pd
-
+from django.core.cache import cache
 
 
 def revenue_calculations():
@@ -63,9 +63,7 @@ def revenue_calculations():
     # Optionally reset index if needed
     merged_df.reset_index(drop=True, inplace=True)
 
-    # Now print or inspect the merged DataFrame
-    print(merged_df.iloc[:200])
-
-
     forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
+
+    cache.set('accumulated_flow_price_data', merged_df.to_dict(), timeout=3600)
 

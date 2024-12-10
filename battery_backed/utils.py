@@ -4,6 +4,7 @@ from battery_backed.get_price_service import GetPricesDam
 from .models import BatteryLiveStatus,YearAgg, CumulativeYear, Price, ForecastedPrice
 from django.db import transaction
 from battery_backed.create_optimized_schedule import run_optimizer
+from battery_backed.calculate_revenue import revenue_calculations
 from pytz import timezone as pytz_timezone
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -134,7 +135,8 @@ def make_price_forecast():
             dam_price.save()
 
 
+def calculate_cumulative_revenue():
+    revenue_calculations()
 
 
-    
         

@@ -7,9 +7,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from datetime import datetime, timedelta
-from .tasks import task_forecast_schedule_populate
+from .tasks import task_forecast_schedule_populate, task_cumulaticve_revenue
 from django.utils import timezone
 from pytz import timezone as pytz_timezone
+from django.core.cache import cache
+
 
 
 
@@ -265,3 +267,15 @@ class ForecastedPriceView(APIView):
 
         serializer = ForecastedPriceSerializer(data, many=True)
         return Response(serializer.data)
+    
+
+class AccumulatedFlowPriceView(APIView):
+    def get(self, request, format=None):
+        # Fetch the processed data from Redis (or your database)
+        accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
+        
+        if accumulated_flow_price_data:
+            return Response(accumulated_flow_price_data, status=status.HTTP_200_OK)
+        else:
+            task_cumulaticve_revenue.delay()
+            return Response({"detail": "Data not available or expired."}, status=status.HTTP_404_NOT_FOUND)

@@ -1,6 +1,6 @@
 from celery.utils.log import get_task_logger 
 from celery import shared_task 
-from .utils import mail_schedule, make_forecast, agg_for_year_endpoint, get_cumulative_data_year, fetch_prices_service, prepare_optimized_battery_schedule, send_optimized_schedule_to_mail, make_price_forecast
+from .utils import mail_schedule, make_forecast, agg_for_year_endpoint, get_cumulative_data_year, fetch_prices_service, prepare_optimized_battery_schedule, send_optimized_schedule_to_mail, make_price_forecast, calculate_cumulative_revenue
 
 
 logger = get_task_logger(__name__)
@@ -49,3 +49,8 @@ def task_send_schedule_to_email():
 def task_create_dam_price():
     make_price_forecast()
     logger.info("Create Price Forecast!")
+
+@shared_task()
+def task_cumulaticve_revenue():
+    calculate_cumulative_revenue()
+    logger.info("revenue cache set!")
