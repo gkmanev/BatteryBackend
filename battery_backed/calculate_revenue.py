@@ -65,5 +65,7 @@ def revenue_calculations():
 
     forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
 
+    print(merged_df.iloc[:200])
+
     cache.set('accumulated_flow_price_data', merged_df.to_dict(), timeout=3600)
 
