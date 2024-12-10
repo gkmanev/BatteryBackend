@@ -40,14 +40,14 @@ def revenue_calculations():
     battery_resampled = (
         battery_df.groupby('devId')  # Group by devId first
         .resample('1T')  # Resample for 1-minute intervals
-        .mean()  # Calculate the mean for numerical fields
+        .sum()  # Calculate the mean for numerical fields
         .reset_index()
     )
     # Calculate accumulated flow for each devId
-    battery_resampled['accumulated_flow'] = (
-        battery_resampled.groupby('devId')['flow'].cumsum()
-    )
-    print(battery_resampled)    
+    # battery_resampled['accumulated_flow'] = (
+    #     battery_resampled.groupby('devId')['flow'].cumsum()
+    # )
+    print(battery_resampled.iloc[:200])    
     
     price_resampled = price_df.resample('1T').mean().reset_index()
     forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
