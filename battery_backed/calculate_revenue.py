@@ -37,17 +37,16 @@ def revenue_calculations():
     forecasted_price_df.set_index('timestamp', inplace=True)
 
     # Resample data at 1-minute intervals
-    battery_resampled = (
-        battery_df.groupby('devId')  # Group by devId first
-        .resample('1T')  # Resample for 1-minute intervals
-        .sum()  # Calculate the mean for numerical fields
-        .reset_index()
+    aggregated_flow = (
+        battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
+        .resample('1T')  # Resample to 1-minute intervals
+        .sum()  # Perform resampling aggregation
+        .fillna(method='bfill')  # Fill NaN values by backward filling
+        .reset_index()  # Reset index to return a flat DataFrame
     )
-    # Calculate accumulated flow for each devId
-    # battery_resampled['accumulated_flow'] = (
-    #     battery_resampled.groupby('devId')['flow'].cumsum()
-    # )
-    print(battery_resampled.iloc[:200])    
+
+    # Print the first 200 rows for inspection
+    print(aggregated_flow.iloc[:200])
     
     price_resampled = price_df.resample('1T').mean().reset_index()
     forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
