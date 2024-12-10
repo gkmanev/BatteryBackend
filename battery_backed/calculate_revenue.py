@@ -49,7 +49,7 @@ def revenue_calculations():
     pd.set_option('display.max_rows', None)
 
         
-    price_resampled = price_df.resample('1T').mean().reset_index()
+    price_resampled = price_df.resample('1T').mean().fillna(method='ffill').reset_index()
 
     # Merge aggregated_flow and price_resampled on 'timestamp'
     merged_df = pd.merge(aggregated_flow, price_resampled, on='timestamp', how='inner')
