@@ -36,19 +36,12 @@ def revenue_calculations():
     price_df.set_index('timestamp', inplace=True)
     forecasted_price_df.set_index('timestamp', inplace=True)
 
-    # Resample data at 1-minute intervals
-    aggregated_flow = (
-        battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
-        .resample('1T')  # Resample to 1-minute intervals
-        .sum()  # Perform resampling aggregation
-        .fillna(method='ffill')  # Fill NaN values by forward filling
-        .reset_index()  # Reset index to return a flat DataFrame
-    )
+
 
     # Print the first 200 rows for inspection
     pd.set_option('display.max_rows', None)
 
-    print(aggregated_flow.iloc[:200])
+    print(battery_df.iloc[:200])
     
     price_resampled = price_df.resample('1T').mean().reset_index()
     forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
