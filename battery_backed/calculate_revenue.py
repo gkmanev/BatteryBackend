@@ -46,6 +46,8 @@ def revenue_calculations():
     )
 
     # Print the first 200 rows for inspection
+    pd.set_option('display.max_rows', None)
+
     print(aggregated_flow.iloc[:200])
     
     price_resampled = price_df.resample('1T').mean().reset_index()
