@@ -55,7 +55,7 @@ def revenue_calculations():
     merged_df = pd.merge(aggregated_flow, price_resampled, on='timestamp', how='inner')
 
     # Create a new column that is the product of 'total_flow' and 'price'
-    merged_df['flow_price'] = merged_df['total_flow'] * merged_df['price']
+    merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
 
     # Optionally reset index if needed
     merged_df.reset_index(drop=True, inplace=True)
