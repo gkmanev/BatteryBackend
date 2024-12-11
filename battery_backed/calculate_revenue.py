@@ -38,7 +38,7 @@ def revenue_calculations():
 
     # Group by devId and resample to 1-minute frequency with forward fill
     resampled_flow = (
-        battery_df.groupby('devId')
+        battery_df.groupby('devId', group_keys=False) 
         .resample('1T')
         .ffill()  # Forward fill missing values
         .reset_index()
