@@ -382,7 +382,7 @@ class CalculateRevenue(models.Manager):
 
         merged_df.dropna(axis=0, inplace=True)
         pd.set_option('display.max_rows', None)
-
+        print(merged_df.iloc[:100])
         if not devId:
             merged_df = merged_df.groupby('timestamp').agg(
             cumulative_price_flow=('price_flow', 'sum'),
