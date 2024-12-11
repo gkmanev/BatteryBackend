@@ -334,8 +334,8 @@ class CalculateRevenue(models.Manager):
         dam_schedule = self.get_queryset()  
         # Filter prices and forecasted prices from today onward
         price_dam = Price.objects.filter(timestamp__gte=today)
-        print(price_dam.iloc[:200])
-        
+        print(price_dam)
+
         forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
          # Convert QuerySet to DataFrame
         battery_df = pd.DataFrame.from_records(
