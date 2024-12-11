@@ -35,7 +35,15 @@ def revenue_calculations():
     battery_df.set_index('timestamp', inplace=True)
     price_df.set_index('timestamp', inplace=True)
     forecasted_price_df.set_index('timestamp', inplace=True)
-    print(battery_df.iloc[:200])
+
+    # Group by devId and resample to 1-minute frequency with forward fill
+    resampled_flow = (
+        df.groupby('devId')
+        .resample('1T')
+        .ffill()  # Forward fill missing values
+        .reset_index()
+    )
+
     # Resample data at 1-minute intervals
     # aggregated_flow = (
     #     battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
@@ -44,15 +52,14 @@ def revenue_calculations():
     #     .fillna(method='ffill')  # Fill NaN values by forward filling
     #     .reset_index()  # Reset index to return a flat DataFrame
     # )
-    # not_aggregated_flow = battery_df.resample('1T').mean().fillna(method='ffill').reset_index()
-
-    # # Print the first 200 rows for inspection
-    # pd.set_option('display.max_rows', None)
-
+    
+    # Print the first 200 rows for inspection
+    pd.set_option('display.max_rows', None)
         
-    # price_resampled = price_df.resample('1T').mean().fillna(method='ffill').reset_index()
-    # merged_df = pd.merge(not_aggregated_flow, price_resampled, on='timestamp', how='inner')
-    # merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
+    price_resampled = price_df.resample('1T').mean().fillna(method='ffill').reset_index()
+    merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='inner')
+
+    merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
     # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
 
     # # Merge aggregated_flow and price_resampled on 'timestamp'
