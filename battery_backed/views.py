@@ -276,6 +276,5 @@ class AccumulatedFlowPriceView(APIView):
         
         if accumulated_flow_price_data:
             return Response(accumulated_flow_price_data, status=status.HTTP_200_OK)
-        else:
-            task_cumulaticve_revenue.delay()
+        else:            
             return Response({"detail": "Data not available or expired."}, status=status.HTTP_404_NOT_FOUND)

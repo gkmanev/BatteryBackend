@@ -1,5 +1,5 @@
 from battery_backed.models import BatterySchedule, Price, ForecastedPrice
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils.timezone import now
 import pandas as pd
 from django.core.cache import cache
@@ -61,9 +61,24 @@ def revenue_calculations():
 
 
     # Optionally reset index if needed
-    merged_df.reset_index(drop=True, inplace=True)
+    merged_df.reset_index(drop=True, inplace=True) 
 
-    forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
+    # divide merged_df to 2 data frames - before and after now!
+    today_end = today + timedelta(days=1) - timedelta(seconds=1) 
+    now = datetime.now()
+    # Filter for data from today at 00:00 to now
+    df_today_to_now = merged_df[(merged_df['timestamp'] >= today) & (merged_df['timestamp'] <= now)]
+    df_today_to_now = {
+        'to_now':df_today_to_now
+    }
+
+    # Filter for data from now to the end of today
+    df_now_to_end = merged_df[(merged_df['timestamp'] > now) & (merged_df['timestamp'] <= today_end)]
+    df_now_to_end = {
+        'from_now':df_now_to_end
+    }
     
-    cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
+    cache.set('today_to_now', df_today_to_now[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
+    cache.set('now_to_tomorrow', df_now_to_end[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
 
+    #forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
