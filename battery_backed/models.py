@@ -335,7 +335,7 @@ class CalculateRevenue(models.Manager):
         dam_schedule = self.get_queryset()  
         # Filter prices and forecasted prices from today onward
         price_dam = Price.objects.filter(timestamp__gte=today_start)
-        print(price_dam)
+        
 
         forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
          # Convert QuerySet to DataFrame
@@ -366,20 +366,24 @@ class CalculateRevenue(models.Manager):
             .ffill()  # Forward fill missing values
             .reset_index()
         )
-        # price_resampled = (
-        #     price_df.resample('1T')
-        #     .ffill()
-        #     .reset_index()
-        # )
-        # resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+        price_resampled = (
+            price_df.resample('1T')
+            .ffill()
+            .reset_index()
+        )
+        print(f"Price Length:{len(price_resampled)} || Flow Resample: {len(resampled_flow)}")
 
-        # merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
+        resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+
+        merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
         
-        # merged_df['price'] = merged_df['price'].astype(float)
+        merged_df['price'] = merged_df['price'].astype(float)
 
-        # merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
+        merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
-        # pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_rows', None)
+
+        print(merged_df.iloc[:200])
 
         
 
