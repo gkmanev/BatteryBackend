@@ -384,15 +384,16 @@ class CalculateRevenue(models.Manager):
         pd.set_option('display.max_rows', None)
 
         if not devId:
+            print(merged_df.iloc[:200])
 
-            aggregated_flow = (
-                battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
-                .resample('1T')  # Resample to 1-minute intervals
-                .sum()  # Perform resampling aggregation
-                .fillna(method='ffill')  # Fill NaN values by forward filling
-                .reset_index()  # Reset index to return a flat DataFrame
-            )
-            print(aggregated_flow.iloc[:200])
+            # aggregated_flow = (
+            #     battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
+            #     .resample('1T')  # Resample to 1-minute intervals
+            #     .sum()  # Perform resampling aggregation
+            #     .fillna(method='ffill')  # Fill NaN values by forward filling
+            #     .reset_index()  # Reset index to return a flat DataFrame
+            # )
+            # print(aggregated_flow.iloc[:200])
 
 
         
