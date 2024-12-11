@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.db.models import Avg, Sum, Case, When, Value, F, FloatField
 from django.db.models.functions import TruncDay, TruncHour, Round
 from django.utils.timezone import now
+from django.utils import timezone
+
 from pytz import timezone
 import pandas as pd
 import pytz
