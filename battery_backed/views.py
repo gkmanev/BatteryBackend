@@ -273,7 +273,9 @@ class AccumulatedFlowPriceView(APIView):
     def get(self, request, format=None):
         # Fetch the processed data from Redis (or your database)
         accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
-        
+        if not accumulated_flow_price_data:
+            accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)
+            
         if accumulated_flow_price_data:
             return Response(accumulated_flow_price_data, status=status.HTTP_200_OK)
         else:            

@@ -385,16 +385,11 @@ class CalculateRevenue(models.Manager):
 
         if not devId:
             merged_df['accumulated_flow_price'] = merged_df['price_flow'].cumsum()
-            print(merged_df.iloc[:200])
+            merged_df = merged_df['timestamp', 'accumulated_flow_price']
+            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
+            return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
 
-            # aggregated_flow = (
-            #     battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
-            #     .resample('1T')  # Resample to 1-minute intervals
-            #     .sum()  # Perform resampling aggregation
-            #     .fillna(method='ffill')  # Fill NaN values by forward filling
-            #     .reset_index()  # Reset index to return a flat DataFrame
-            # )
-            # print(aggregated_flow.iloc[:200])
+
 
 
         
