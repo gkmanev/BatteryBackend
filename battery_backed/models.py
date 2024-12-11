@@ -384,11 +384,24 @@ class CalculateRevenue(models.Manager):
         pd.set_option('display.max_rows', None)
         print(merged_df.iloc[:100])
         if not devId:
-            merged_df = merged_df.groupby('timestamp').agg(
-            cumulative_price_flow=('price_flow', 'sum'),
-            ).reset_index()
-            # Round the cumulative sums to 2 decimal places
-            print(merged_df.iloc[:200])
+           
+            cumulative_price_flow = merged_df.groupby('timestamp', as_index=False).agg({
+                'price_flow': 'sum'
+            })
+
+            # Merge the cumulative data back if you need the full DataFrame
+            final_df = merged_df.drop_duplicates(subset='timestamp').merge(
+                cumulative_price_flow, on='timestamp', suffixes=('', '_cumulative')
+            )
+
+            # Rename the cumulative column for clarity
+            final_df.rename(columns={'price_flow_cumulative': 'cumulative_price_flow'}, inplace=True)
+
+            # Keep only relevant columns
+            final_df = final_df[['timestamp', 'cumulative_price_flow']]
+
+            # Print the result
+            print(final_df)
             
             # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
             # return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
