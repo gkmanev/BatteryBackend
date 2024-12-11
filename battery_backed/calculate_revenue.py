@@ -37,33 +37,37 @@ def revenue_calculations():
     forecasted_price_df.set_index('timestamp', inplace=True)
 
     # Resample data at 1-minute intervals
-    aggregated_flow = (
-        battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
-        .resample('1T')  # Resample to 1-minute intervals
-        .sum()  # Perform resampling aggregation
-        .fillna(method='ffill')  # Fill NaN values by forward filling
-        .reset_index()  # Reset index to return a flat DataFrame
-    )
+    # aggregated_flow = (
+    #     battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
+    #     .resample('1T')  # Resample to 1-minute intervals
+    #     .sum()  # Perform resampling aggregation
+    #     .fillna(method='ffill')  # Fill NaN values by forward filling
+    #     .reset_index()  # Reset index to return a flat DataFrame
+    # )
+    not_aggregated_flow = battery_df.resample('1T').mean().fillna(method='ffill').reset_index()
 
     # Print the first 200 rows for inspection
     pd.set_option('display.max_rows', None)
 
         
     price_resampled = price_df.resample('1T').mean().fillna(method='ffill').reset_index()
-
-    # Merge aggregated_flow and price_resampled on 'timestamp'
-    merged_df = pd.merge(aggregated_flow, price_resampled, on='timestamp', how='inner')
-
-    # Create a new column that is the product of 'total_flow' and 'price'
+    merged_df = pd.merge(not_aggregated_flow, price_resampled, on='timestamp', how='inner')
     merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
-
-    merged_df['accumulated_flow_price'] = merged_df['flow_price'].cumsum()
-
-
-    # Optionally reset index if needed
-    merged_df.reset_index(drop=True, inplace=True)    
-    
-    
     cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
+
+    # # Merge aggregated_flow and price_resampled on 'timestamp'
+    # merged_df = pd.merge(aggregated_flow, price_resampled, on='timestamp', how='inner')
+
+    # # Create a new column that is the product of 'total_flow' and 'price'
+    # merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
+
+    # merged_df['accumulated_flow_price'] = merged_df['flow_price'].cumsum()
+
+
+    # # Optionally reset index if needed
+    # merged_df.reset_index(drop=True, inplace=True)    
+    
+    
+    # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
 
     #forecasted_price_resampled = forecasted_price_df.resample('1T').mean().reset_index()
