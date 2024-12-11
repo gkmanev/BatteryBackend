@@ -43,6 +43,7 @@ def revenue_calculations():
         .ffill()  # Forward fill missing values
         .reset_index()
     )
+    print(resampled_flow)
 
     # Resample data at 1-minute intervals
     # aggregated_flow = (
@@ -53,15 +54,7 @@ def revenue_calculations():
     #     .reset_index()  # Reset index to return a flat DataFrame
     # )
     
-    # Print the first 200 rows for inspection
-    pd.set_option('display.max_rows', None)
-        
-    price_resampled = price_df.resample('1T').mean().fillna(method='ffill').reset_index()
-    merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='inner')
-
-    merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
-
-    print(merged_df)
+    
     # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
 
     # # Merge aggregated_flow and price_resampled on 'timestamp'
