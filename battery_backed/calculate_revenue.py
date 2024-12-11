@@ -49,9 +49,14 @@ def revenue_calculations():
         .reset_index()
     )
     resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+
+    merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
+    
+    merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
+
     pd.set_option('display.max_rows', None)
 
-    print(price_resampled.iloc[:200])
+    print(merged_df.iloc[:200])
 
     # Resample data at 1-minute intervals
     # aggregated_flow = (
