@@ -330,7 +330,7 @@ class CalculateRevenue(models.Manager):
     
     def revenue_calc(self, devId):
         # Get the current timestamp with timezone support
-        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)  # Midnight of today
+        today = datetime.today()
         dam_schedule = self.get_queryset()  
         # Filter prices and forecasted prices from today onward
         price_dam = Price.objects.filter(timestamp__gte=today)
