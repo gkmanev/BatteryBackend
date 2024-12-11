@@ -38,7 +38,7 @@ def revenue_calculations():
 
     # Group by devId and resample to 1-minute frequency with forward fill
     resampled_flow = (
-        df.groupby('devId')
+        battery_df.groupby('devId')
         .resample('1T')
         .ffill()  # Forward fill missing values
         .reset_index()
@@ -60,6 +60,8 @@ def revenue_calculations():
     merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='inner')
 
     merged_df['flow_price'] = merged_df['flow'] * merged_df['price']
+
+    print(merged_df)
     # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
 
     # # Merge aggregated_flow and price_resampled on 'timestamp'
