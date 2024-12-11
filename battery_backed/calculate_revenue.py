@@ -6,7 +6,7 @@ from django.core.cache import cache
 
 
 def revenue_calculations():
-    BatterySchedule.revenue.revenue_calc(devId='batt-0001')
+    BatterySchedule.revenue.revenue_calc(devId=None)
 
 
     
