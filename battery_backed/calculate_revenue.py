@@ -43,7 +43,10 @@ def revenue_calculations():
         .ffill()  # Forward fill missing values
         .reset_index()
     )
-    print(resampled_flow)
+    resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+    pd.set_option('display.max_rows', None)
+
+    print(resampled_flow.iloc[:200])
 
     # Resample data at 1-minute intervals
     # aggregated_flow = (
