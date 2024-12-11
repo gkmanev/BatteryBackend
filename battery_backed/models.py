@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime, timedelta
 from django.db.models import Avg, Sum, Case, When, Value, F, FloatField
 from django.db.models.functions import TruncDay, TruncHour, Round
+from django.utils.timezone import now
 from pytz import timezone
 import pandas as pd
 import pytz
@@ -318,6 +319,67 @@ class DayAheadManager(models.Manager):
         resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')   
         
         return resampled_result
+
+class CalculateRevenue(models.Manager):
+
+    def get_queryset(self) -> models.QuerySet:
+        today = datetime.now(tz=pytz.UTC).date()   
+        print(f"today start with UTC: {today}")
+        today_start = str(today)+'T'+'00:00:00Z'        
+        return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
+    
+    def revenue_calc(self, devId):
+        # Get the current timestamp with timezone support
+        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)  # Midnight of today
+        dam_schedule = self.get_queryset()  
+        # Filter prices and forecasted prices from today onward
+        price_dam = Price.objects.filter(timestamp__gte=today)
+        forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
+         # Convert QuerySet to DataFrame
+        battery_df = pd.DataFrame.from_records(
+            dam_schedule.values('timestamp', 'devId', 'flow')
+        )
+        price_df = pd.DataFrame.from_records(
+            price_dam.values('timestamp', 'price')
+        )
+        forecasted_price_df = pd.DataFrame.from_records(
+            forecasted_price_dam.values('timestamp', 'price')
+        )
+        
+        # Ensure the timestamp column is a datetime object
+        for df in [battery_df, price_df, forecasted_price_df]:
+            if not df.empty:
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+        # Set the timestamp as the index for resampling
+        battery_df.set_index('timestamp', inplace=True)
+        price_df.set_index('timestamp', inplace=True)
+        forecasted_price_df.set_index('timestamp', inplace=True)
+
+        # Group by devId and resample to 1-minute frequency with forward fill
+        resampled_flow = (
+            battery_df.groupby('devId', group_keys=False) 
+            .resample('1T')
+            .ffill()  # Forward fill missing values
+            .reset_index()
+        )
+        price_resampled = (
+            price_df.resample('1T')
+            .ffill()
+            .reset_index()
+        )
+        resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+
+        merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
+        
+        merged_df['price'] = merged_df['price'].astype(float)
+
+        merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
+
+        pd.set_option('display.max_rows', None)
+
+        print(merged_df.iloc[:200])
+
    
 
 class BatteryLiveStatus(models.Model):
@@ -336,7 +398,8 @@ class BatterySchedule(models.Model):
     devId = models.CharField(default='batt1', max_length=20)
     timestamp = models.DateTimeField()
     dam = DayAheadManager()
-    objects = models.Manager()    
+    objects = models.Manager()   
+    revenue = CalculateRevenue() 
     invertor = models.FloatField(default=0)
     soc = models.FloatField(default=0)
     flow = models.FloatField(default=0)
