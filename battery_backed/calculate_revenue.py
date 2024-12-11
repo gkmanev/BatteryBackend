@@ -52,6 +52,8 @@ def revenue_calculations():
 
     merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
     
+    merged_df['price'] = merged_df['price'].astype(float)
+
     merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
     pd.set_option('display.max_rows', None)
