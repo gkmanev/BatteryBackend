@@ -383,7 +383,7 @@ class CalculateRevenue(models.Manager):
 
         pd.set_option('display.max_rows', None)
 
-        print(merged_df.iloc[:200])
+        print(merged_df)
 
         
 
