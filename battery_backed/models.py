@@ -371,8 +371,7 @@ class CalculateRevenue(models.Manager):
             .ffill()
             .reset_index()
         )
-        print(f"Price Length:{len(price_resampled)} || Flow Resample: {len(resampled_flow)}")
-
+        
         resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
 
         merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
@@ -381,9 +380,20 @@ class CalculateRevenue(models.Manager):
 
         merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
+        merged_df.dropna(axis=0)
         pd.set_option('display.max_rows', None)
 
-        print(merged_df)
+        if not devId:
+
+            aggregated_flow = (
+                battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
+                .resample('1T')  # Resample to 1-minute intervals
+                .sum()  # Perform resampling aggregation
+                .fillna(method='ffill')  # Fill NaN values by forward filling
+                .reset_index()  # Reset index to return a flat DataFrame
+            )
+            print(aggregated_flow.iloc[:200])
+
 
         
 
