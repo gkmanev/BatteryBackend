@@ -380,14 +380,14 @@ class CalculateRevenue(models.Manager):
 
         merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
-        merged_df.dropna(axis=0)
+        merged_df.dropna(axis=0, inplace=True)
         pd.set_option('display.max_rows', None)
 
         if not devId:
             merged_df['accumulated_flow_price'] = merged_df['price_flow'].cumsum()            
             merged_df.dropna(axis=0, inplace=True)
             has_nan = merged_df.isna().any().any()
-            print(has_nan)  # True if any NaN exists in the DataFrame
+            print(merged_df.iloc[:200])  # True if any NaN exists in the DataFrame
             cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
             return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
 
