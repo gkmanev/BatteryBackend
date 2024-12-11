@@ -384,6 +384,7 @@ class CalculateRevenue(models.Manager):
         pd.set_option('display.max_rows', None)
 
         if not devId:
+            merged_df['accumulated_flow_price'] = merged_df['price_flow'].cumsum()
             print(merged_df.iloc[:200])
 
             # aggregated_flow = (
