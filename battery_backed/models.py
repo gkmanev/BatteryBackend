@@ -389,7 +389,7 @@ class CalculateRevenue(models.Manager):
         merged_df.dropna(axis=0, inplace=True)
         
         pd.set_option('display.max_rows', None)
-        print(merged_df)
+        print(merged_df.iloc[:200])
         if not devId: 
             cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
             return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
