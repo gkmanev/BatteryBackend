@@ -356,6 +356,7 @@ class CalculateRevenue(models.Manager):
 
         # Set the timestamp as the index for resampling
         battery_df.set_index('timestamp', inplace=True)
+        
         price_df.set_index('timestamp', inplace=True)
         forecasted_price_df.set_index('timestamp', inplace=True)
 
@@ -386,20 +387,13 @@ class CalculateRevenue(models.Manager):
         # merged_df.dropna(axis=0, inplace=True)
         pd.set_option('display.max_rows', None)
         
-        if not devId:   
-            
-            print(merged_df.iloc[:100])
-
-                    
-            
-            
-            # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
-            # return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
+        if not devId: 
+            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
+            return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
 
 
 
-
-        
+       
 
    
 
