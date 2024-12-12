@@ -374,33 +374,19 @@ class CalculateRevenue(models.Manager):
         
         resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
 
-        merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
+        # merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
         
-        merged_df['price'] = merged_df['price'].astype(float)
+        # merged_df['price'] = merged_df['price'].astype(float)
 
-        merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
+        # merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
-        merged_df.dropna(axis=0, inplace=True)
+        # merged_df.dropna(axis=0, inplace=True)
         pd.set_option('display.max_rows', None)
-        print(merged_df.iloc[:100])
-        if not devId:           
-            cumulative_price_flow = merged_df.groupby('timestamp', as_index=False).agg({
-                'price_flow': 'sum'
-            })
-
-            # Merge the cumulative data back if you need the full DataFrame
-            final_df = merged_df.drop_duplicates(subset='timestamp').merge(
-                cumulative_price_flow, on='timestamp', suffixes=('', '_cumulative')
-            )
-
-            # Rename the cumulative column for clarity
-            final_df.rename(columns={'price_flow_cumulative': 'cumulative_price_flow'}, inplace=True)
-
-            # Keep only relevant columns
-            final_df = final_df[['timestamp', 'cumulative_price_flow']]
-
-            # Print the result
-            print(final_df.iloc[:200])
+        
+        if not devId:   
+            print(resampled_flow.iloc[:100])
+                    
+            
             
             # cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
             # return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
