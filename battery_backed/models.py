@@ -381,6 +381,8 @@ class CalculateRevenue(models.Manager):
 
         merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
+        merged_df['revenue'] = merged_df['price_flow'].cumsum()
+
         # merged_df.dropna(axis=0, inplace=True)
         pd.set_option('display.max_rows', None)
         
