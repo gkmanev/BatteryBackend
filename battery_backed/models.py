@@ -374,25 +374,25 @@ class CalculateRevenue(models.Manager):
         )
         
         resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
-        aggregated_flow_df = resampled_flow.groupby(["timestamp", "devId"], as_index=False)["flow"].cumsum()
+        aggregated_flow_df = resampled_flow.groupby("timestamp", as_index=False)["flow"].sum()
+
+        merged_df = pd.merge(aggregated_flow_df, price_resampled, on='timestamp', how='left')
         
-        # merged_df = pd.merge(aggregated_flow_df, price_resampled, on='timestamp', how='left')
-        
-        # merged_df['price'] = merged_df['price'].astype(float)
+        merged_df['price'] = merged_df['price'].astype(float)
 
-        # merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
+        merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
-        # merged_df['revenue'] = merged_df['price_flow'].cumsum()
+        merged_df['revenue'] = merged_df['price_flow'].cumsum()
 
-        # merged_df['revenue'] = merged_df['revenue'].round(2)
+        merged_df['revenue'] = merged_df['revenue'].round(2)
 
-        # merged_df.dropna(axis=0, inplace=True)
+        merged_df.dropna(axis=0, inplace=True)
         
         pd.set_option('display.max_rows', None)
-        print(aggregated_flow_df.iloc[:200])
-        # if not devId: 
-        #     cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
-        #     return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
+        
+        if not devId: 
+            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
+            return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
 
 
 
