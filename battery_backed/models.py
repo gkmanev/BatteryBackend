@@ -388,8 +388,8 @@ class CalculateRevenue(models.Manager):
         pd.set_option('display.max_rows', None)
         
         if not devId: 
-            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records'), timeout=3600)
-            return merged_df[['timestamp', 'accumulated_flow_price']].to_dict(orient='records')
+            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
+            return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
 
 
 
