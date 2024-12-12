@@ -373,6 +373,7 @@ class CalculateRevenue(models.Manager):
         )
         
         resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+        aggregated_flow_df = df.groupby("timestamp", as_index=False)["flow"].sum()
 
         # merged_df = pd.merge(resampled_flow, price_resampled, on='timestamp', how='left')
         
@@ -385,6 +386,8 @@ class CalculateRevenue(models.Manager):
         
         if not devId:   
             print(resampled_flow.iloc[:100])
+            print(aggregated_flow_df.iloc[:100])
+
                     
             
             
