@@ -326,7 +326,7 @@ class CalculateRevenue(models.Manager):
         today = datetime.now(tz=pytz.UTC).date()   
         print(f"today start with UTC: {today}")
         today_start = str(today)+'T'+'00:00:00Z'        
-        return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
+        return super().get_queryset().filter(timestamp__gte=today_start, devId='batt-0001').order_by('timestamp')
     
     def revenue_calc(self, devId):
         # Get the current timestamp with timezone support
@@ -389,7 +389,7 @@ class CalculateRevenue(models.Manager):
         merged_df.dropna(axis=0, inplace=True)
         
         pd.set_option('display.max_rows', None)
-        
+        print(merged_df)
         if not devId: 
             cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
             return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
