@@ -385,7 +385,7 @@ class CalculateRevenue(models.Manager):
         pd.set_option('display.max_rows', None)
         
         if not devId:   
-            print(resampled_flow.iloc[:100])
+            print(resampled_flow.iloc[:200])
             print(aggregated_flow_df.iloc[:100])
 
                     
