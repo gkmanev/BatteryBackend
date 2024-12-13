@@ -333,10 +333,11 @@ class CalculateRevenue(models.Manager):
         today = datetime.now(tz=pytz.UTC).date()
         today_start = str(today)+'T'+'00:00:00Z'
         dam_schedule = self.get_queryset()  
-        if devId:
-            dam_schedule = dam_schedule.filter(devId=devId)
-            for d in dam_schedule:
+        dam_schedule = dam_schedule.filter(devId='batt-0001')
+        for d in dam_schedule:
                 print(f"{d}")
+        if devId:
+            dam_schedule = dam_schedule.filter(devId=devId)           
         # Filter prices and forecasted prices from today onward
         # price_dam = Price.objects.filter(timestamp__gte=today_start)
         
