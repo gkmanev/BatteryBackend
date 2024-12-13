@@ -179,7 +179,7 @@ def run_optimizer():
     invertor = minute_schedule['schedule'].to_list()
 
     date_today = datetime.today().date()
-    dam = date_today + timedelta(days=1)
+    dam = date_today# + timedelta(days=1)
     fn = "sent_optimized_schedules"
     file_name = f"batt1_{dam}.xlsx"
     filepath = os.path.join(fn, file_name)
