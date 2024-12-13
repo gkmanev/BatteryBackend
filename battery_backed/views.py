@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from datetime import datetime, timedelta
-from .tasks import task_forecast_schedule_populate, task_cumulaticve_revenue
+from .tasks import task_forecast_schedule_populate
 from django.utils import timezone
 from pytz import timezone as pytz_timezone
 from django.core.cache import cache
