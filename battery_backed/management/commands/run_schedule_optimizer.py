@@ -13,15 +13,15 @@ class Command(BaseCommand):
         for row in optimized_schedule.itertuples():            
             
             invertor = row.schedule          
-            flow = invertor/60*15
-            soc += flow             
-            print(f"Inv:{invertor}||Flow:{flow}")
-            # BatteryLiveStatus.objects.get_or_create(
-            #         devId='batt-0001', 
-            #         timestamp=row.Index,
-            #         invertor_power=invertor,
-            #         flow_last_min=flow,
-            #         state_of_charge=soc
-            #     )                    
+            flow = invertor/60
+            soc += flow
+                        
+            BatteryLiveStatus.objects.get_or_create(
+                    devId='batt-0001', 
+                    timestamp=row.Index,
+                    invertor_power=invertor,
+                    flow_last_min=flow,
+                    state_of_charge=soc
+                )                    
 
         self.stdout.write(self.style.SUCCESS('Run Schedule Optimizer'))
