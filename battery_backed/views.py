@@ -273,14 +273,22 @@ class AccumulatedFlowPriceView(APIView):
     def get(self, request, format=None):
         date_range = self.request.query_params.get('date_range', None)
         devId = self.request.query_params.get('devId', None)
-
+        forecasted = self.request.query_params.get('forecasted_price', None)
+        
         if date_range == 'today' or date_range == 'dam':
             if not devId:
-                accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
-                if not accumulated_flow_price_data:
-                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)                
+                if not forecasted:
+                    accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
+                    if not accumulated_flow_price_data:
+                        accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)
+                else:
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(price_forecast=True)
+                                    
             else:
-                accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=devId)
+                if not forecasted:
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=devId)
+                else:
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=devId, forecasted=True)
             return Response(accumulated_flow_price_data, status=status.HTTP_200_OK)
 
 

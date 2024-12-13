@@ -328,7 +328,7 @@ class CalculateRevenue(models.Manager):
         today_start = str(today)+'T'+'00:00:00Z'        
         return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
     
-    def revenue_calc(self, devId):
+    def revenue_calc(self, devId, price_forecast=False):
         # Get the current timestamp with timezone support
         today = datetime.now(tz=pytz.UTC).date()
         today_start = str(today)+'T'+'00:00:00Z'
@@ -337,8 +337,10 @@ class CalculateRevenue(models.Manager):
         if devId:
             dam_schedule = dam_schedule.filter(devId=devId)    
             
-        # Filter prices and forecasted prices from today onward
+        # Filter prices and forecasted prices from today onward        
         price_dam = Price.objects.filter(timestamp__gte=today_start)
+        if price_forecast:
+            price_dam = ForecastedPrice.objects.filter(timestamp__gte=today_start)
         
         forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
          # Convert QuerySet to DataFrame
