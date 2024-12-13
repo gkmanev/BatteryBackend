@@ -3,6 +3,7 @@ from battery_backed.create_optimized_schedule import run_optimizer
 from battery_backed.models import BatteryLiveStatus
 from datetime import datetime
 import pandas as pd
+
 class Command(BaseCommand):
     help = 'Run Schedule Optimizer'
 
@@ -16,7 +17,7 @@ class Command(BaseCommand):
             soc += flow             
                        
             BatteryLiveStatus.objects.get_or_create(
-                    devId='bat-0001', 
+                    devId='batt-0001', 
                     timestamp=row.Index,
                     invertor_power=invertor,
                     flow_last_min=flow,
