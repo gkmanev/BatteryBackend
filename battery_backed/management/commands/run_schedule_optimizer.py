@@ -13,12 +13,9 @@ class Command(BaseCommand):
             
             invertor = row.schedule          
             flow = invertor/60*15
-            soc += flow 
-            
-            today = datetime.today()
-            now = today.replace(hour=10, minute=0, second=0, microsecond=0)
-            if row.index <= now:
-                BatteryLiveStatus.objects.get_or_create(
+            soc += flow             
+                       
+            BatteryLiveStatus.objects.get_or_create(
                     devId='bat-0001', 
                     timestamp=row.Index,
                     invertor_power=invertor,
