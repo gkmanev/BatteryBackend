@@ -334,70 +334,69 @@ class CalculateRevenue(models.Manager):
         today_start = str(today)+'T'+'00:00:00Z'
         dam_schedule = self.get_queryset()  
         dam_schedule = dam_schedule.filter(devId='batt-0001')
-        for d in dam_schedule:
-                print(f"{d.timestamp} || {d.devId}")
+        
         if devId:
             dam_schedule = dam_schedule.filter(devId=devId)           
         # Filter prices and forecasted prices from today onward
-        # price_dam = Price.objects.filter(timestamp__gte=today_start)
+        price_dam = Price.objects.filter(timestamp__gte=today_start)
         
 
-        # forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
-        #  # Convert QuerySet to DataFrame
-        # battery_df = pd.DataFrame.from_records(
-        #     dam_schedule.values('timestamp', 'devId', 'flow')
-        # )
-        # price_df = pd.DataFrame.from_records(
-        #     price_dam.values('timestamp', 'price')
-        # )
-        # forecasted_price_df = pd.DataFrame.from_records(
-        #     forecasted_price_dam.values('timestamp', 'price')
-        # )
+        forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
+         # Convert QuerySet to DataFrame
+        battery_df = pd.DataFrame.from_records(
+            dam_schedule.values('timestamp', 'devId', 'flow')
+        )
+        price_df = pd.DataFrame.from_records(
+            price_dam.values('timestamp', 'price')
+        )
+        forecasted_price_df = pd.DataFrame.from_records(
+            forecasted_price_dam.values('timestamp', 'price')
+        )
         
-        # # Ensure the timestamp column is a datetime object
-        # for df in [battery_df, price_df, forecasted_price_df]:
-        #     if not df.empty:
-        #         df['timestamp'] = pd.to_datetime(df['timestamp'])
+        # Ensure the timestamp column is a datetime object
+        for df in [battery_df, price_df, forecasted_price_df]:
+            if not df.empty:
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-        # # Set the timestamp as the index for resampling
-        # battery_df.set_index('timestamp', inplace=True)
+        # Set the timestamp as the index for resampling
+        battery_df.set_index('timestamp', inplace=True)
         
-        # price_df.set_index('timestamp', inplace=True)
-        # forecasted_price_df.set_index('timestamp', inplace=True)
+        price_df.set_index('timestamp', inplace=True)
+        forecasted_price_df.set_index('timestamp', inplace=True)
 
-        # # Group by devId and resample to 1-minute frequency with forward fill
-        # resampled_flow = (
-        #     battery_df.groupby('devId', group_keys=False) 
-        #     .resample('1T')
-        #     .ffill()  # Forward fill missing values
-        #     .reset_index()
-        # )
-        # price_resampled = (
-        #     price_df.resample('1T')
-        #     .ffill()
-        #     .reset_index()
-        # )
+        # Group by devId and resample to 1-minute frequency with forward fill
+        resampled_flow = (
+            battery_df.groupby('devId', group_keys=False) 
+            .resample('1T')
+            .ffill()  # Forward fill missing values
+            .reset_index()
+        )
+        price_resampled = (
+            price_df.resample('1T')
+            .ffill()
+            .reset_index()
+        )
         
-        # resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
-        # aggregated_flow_df = resampled_flow.groupby("timestamp", as_index=False)["flow"].sum()
+        resampled_flow = resampled_flow.sort_values(by=['timestamp', 'devId']).reset_index(drop=True)
+        aggregated_flow_df = resampled_flow.groupby("timestamp", as_index=False)["flow"].sum()
 
-        # merged_df = pd.merge(aggregated_flow_df, price_resampled, on='timestamp', how='left')
+        merged_df = pd.merge(aggregated_flow_df, price_resampled, on='timestamp', how='left')
         
-        # merged_df['price'] = merged_df['price'].astype(float)
+        merged_df['price'] = merged_df['price'].astype(float)
 
-        # merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
+        merged_df['price_flow'] = merged_df['flow'] * merged_df['price']
 
-        # merged_df['revenue'] = merged_df['price_flow'].cumsum()
+        merged_df['revenue'] = merged_df['price_flow'].cumsum()
 
-        # merged_df['revenue'] = merged_df['revenue'].round(2)
+        merged_df['revenue'] = merged_df['revenue'].round(2)
 
-        # merged_df.dropna(axis=0, inplace=True)
+        merged_df.dropna(axis=0, inplace=True)
         
-        # pd.set_option('display.max_rows', None)
-        # print(merged_df.iloc[:200])
-        # if not devId: 
-        #     cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
-        #     return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
+        pd.set_option('display.max_rows', None)
+        print(merged_df.iloc[:200])
+        if not devId: 
+            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
+            return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
 
 
 
