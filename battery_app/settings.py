@@ -148,10 +148,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'battery_backed.tasks.task_create_dam_price',
         'schedule': crontab(hour=9, minute=30)        
     },
-    'cumulatice_revenue': {
-        'task': 'battery_backed.tasks.task_cumulaticve_revenue',
-        'schedule': crontab()        
-    },
+    # 'cumulatice_revenue': {
+    #     'task': 'battery_backed.tasks.task_cumulaticve_revenue',
+    #     'schedule': crontab()        
+    # },
     
 
     

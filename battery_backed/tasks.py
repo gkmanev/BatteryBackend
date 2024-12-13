@@ -50,7 +50,7 @@ def task_create_dam_price():
     make_price_forecast()
     logger.info("Create Price Forecast!")
 
-@shared_task()
-def task_cumulaticve_revenue():
-    calculate_cumulative_revenue()
-    logger.info("revenue cache set!")
+# @shared_task()
+# def task_cumulaticve_revenue():
+#     calculate_cumulative_revenue()
+#     logger.info("revenue cache set!")

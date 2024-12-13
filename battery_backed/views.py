@@ -277,12 +277,10 @@ class AccumulatedFlowPriceView(APIView):
         
         if date_range == 'today' or date_range == 'dam':
             if not devId:
-                if not forecasted:
-                    accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
-                    if not accumulated_flow_price_data:
-                        accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)
+                if not forecasted:                   
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc()
                 else:
-                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None, price_forecast=True)
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(price_forecast=True)
                                     
             else:
                 if not forecasted:

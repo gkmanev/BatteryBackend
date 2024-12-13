@@ -135,8 +135,8 @@ def make_price_forecast():
             dam_price.save()
 
 
-def calculate_cumulative_revenue():
-    revenue_calculations()
+# def calculate_cumulative_revenue():
+#     revenue_calculations()
 
 
         
