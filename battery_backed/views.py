@@ -282,7 +282,7 @@ class AccumulatedFlowPriceView(APIView):
                     if not accumulated_flow_price_data:
                         accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)
                 else:
-                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(price_forecast=True)
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None, price_forecast=True)
                                     
             else:
                 if not forecasted:
