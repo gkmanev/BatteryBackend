@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from battery_backed.create_optimized_schedule import run_optimizer
 from battery_backed.models import BatteryLiveStatus
+from datetime import datetime
 import pandas as pd
 class Command(BaseCommand):
     help = 'Run Schedule Optimizer'
@@ -13,14 +14,16 @@ class Command(BaseCommand):
             invertor = row.schedule          
             flow = invertor/60*15
             soc += flow 
-            print(f"Timestamp:{row.Index}")
-
-            # BatteryLiveStatus.objects.get_or_create(
-            #     devId='bat-0001', 
-            #     timestamp=row.Index,
-            #     invertor_power=invertor,
-            #     flow_last_min=flow,
-            #     state_of_charge=soc
-            # )                    
+            
+            today = datetime.today()
+            now = today.replace(hour=10, minute=0, second=0, microsecond=0)
+            if row.index <= now:
+                BatteryLiveStatus.objects.get_or_create(
+                    devId='bat-0001', 
+                    timestamp=row.Index,
+                    invertor_power=invertor,
+                    flow_last_min=flow,
+                    state_of_charge=soc
+                )                    
 
         self.stdout.write(self.style.SUCCESS('Run Schedule Optimizer'))
