@@ -332,16 +332,14 @@ class CalculateRevenue(models.Manager):
         # Get the current timestamp with timezone support
         today = datetime.now(tz=pytz.UTC).date()
         today_start = str(today)+'T'+'00:00:00Z'
-        dam_schedule = self.get_queryset()  
-        dam_schedule = dam_schedule.filter(devId='batt-0001')
+        dam_schedule = self.get_queryset()      
         
         if devId:
-            dam_schedule = dam_schedule.filter(devId=devId)          
-            print("HERE!!!") 
+            dam_schedule = dam_schedule.filter(devId=devId)    
+            
         # Filter prices and forecasted prices from today onward
         price_dam = Price.objects.filter(timestamp__gte=today_start)
-        print(dam_schedule)
-
+        
         forecasted_price_dam = ForecastedPrice.objects.filter(timestamp__gte=today)
          # Convert QuerySet to DataFrame
         battery_df = pd.DataFrame.from_records(
@@ -393,11 +391,10 @@ class CalculateRevenue(models.Manager):
 
         merged_df.dropna(axis=0, inplace=True)
         
-        pd.set_option('display.max_rows', None)
-        print(merged_df.iloc[:200])
-        if not devId: 
-            cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
-            return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
+        pd.set_option('display.max_rows', None)        
+        
+        cache.set('accumulated_flow_price_data', merged_df[['timestamp', 'revenue']].to_dict(orient='records'), timeout=3600)
+        return merged_df[['timestamp', 'revenue']].to_dict(orient='records')
 
 
 
