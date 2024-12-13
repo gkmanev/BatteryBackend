@@ -326,7 +326,7 @@ class CalculateRevenue(models.Manager):
         today = datetime.now(tz=pytz.UTC).date()   
         print(f"today start with UTC: {today}")
         today_start = str(today)+'T'+'00:00:00Z'        
-        return super().get_queryset().filter(timestamp__gte=today_start, devId='batt-0001').order_by('timestamp')
+        return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
     
     def revenue_calc(self, devId):
         # Get the current timestamp with timezone support
