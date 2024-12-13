@@ -271,12 +271,17 @@ class ForecastedPriceView(APIView):
 
 class AccumulatedFlowPriceView(APIView):
     def get(self, request, format=None):
-        # Fetch the processed data from Redis (or your database)
-        accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
-        if not accumulated_flow_price_data:
-            accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)
-            
-        if accumulated_flow_price_data:
+        date_range = self.request.query_params.get('date_range', None)
+        devId = self.request.query_params.get('devId', None)
+
+        if date_range == 'today' or date_range == 'dam':
+            if not devId:
+                accumulated_flow_price_data = cache.get('accumulated_flow_price_data')
+                if not accumulated_flow_price_data:
+                    accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=None)                
+            else:
+                accumulated_flow_price_data = BatterySchedule.revenue.revenue_calc(devId=devId)
             return Response(accumulated_flow_price_data, status=status.HTTP_200_OK)
-        else:            
-            return Response({"detail": "Data not available or expired."}, status=status.HTTP_404_NOT_FOUND)
+
+
+        return Response({"detail": "Data not available or expired."}, status=status.HTTP_404_NOT_FOUND)
