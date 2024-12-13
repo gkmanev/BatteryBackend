@@ -8,8 +8,7 @@ from django.core.cache import cache
 def revenue_calculations():
     BatterySchedule.revenue.revenue_calc(devId=None)
 
-
-    
+   
     # Resample data at 1-minute intervals
     # aggregated_flow = (
     #     battery_df.groupby('timestamp')['flow'].sum()  # Sum flow values at each timestamp
