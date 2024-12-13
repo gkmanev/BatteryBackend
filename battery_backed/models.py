@@ -335,7 +335,7 @@ class CalculateRevenue(models.Manager):
         dam_schedule = self.get_queryset()  
         dam_schedule = dam_schedule.filter(devId='batt-0001')
         for d in dam_schedule:
-                print(f"{d}")
+                print(f"{d.timestamp} || {d.devId}")
         if devId:
             dam_schedule = dam_schedule.filter(devId=devId)           
         # Filter prices and forecasted prices from today onward
