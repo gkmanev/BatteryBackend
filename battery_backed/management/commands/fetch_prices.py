@@ -7,4 +7,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         test = GetPricesDam()
-        
+        #test.order_df()

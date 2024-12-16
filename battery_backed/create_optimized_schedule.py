@@ -174,23 +174,23 @@ def run_optimizer():
     # Sort the DataFrame by the index (timestamps)
     minute_schedule = minute_schedule.sort_index()
 
-    return minute_schedule    
+    #return minute_schedule    
 
-    # invertor = minute_schedule['schedule'].to_list()
+    invertor = minute_schedule['schedule'].to_list()
 
-    # date_today = datetime.today().date()
-    # dam = date_today + timedelta(days=1)
-    # fn = "sent_optimized_schedules"
-    # file_name = f"batt1_{dam}.xlsx"
-    # filepath = os.path.join(fn, file_name)
-    # # Create a workbook and select the active worksheet
-    # wb = Workbook()
-    # ws = wb.active
-    # # Write each value into separate cells in row 10, starting from column 2
-    # for i, value in enumerate(invertor, start=4):
-    #     ws.cell(row=11, column=i, value=value)
+    date_today = datetime.today().date()
+    dam = date_today + timedelta(days=1)
+    fn = "sent_optimized_schedules"
+    file_name = f"batt1_{dam}.xlsx"
+    filepath = os.path.join(fn, file_name)
+    # Create a workbook and select the active worksheet
+    wb = Workbook()
+    ws = wb.active
+    # Write each value into separate cells in row 10, starting from column 2
+    for i, value in enumerate(invertor, start=4):
+        ws.cell(row=11, column=i, value=value)
     
-    # # directories = [d for d in os.listdir() if os.path.isdir(d)]
-    # # print("Directories:", directories)
-    # # Save to an Excel file
-    # wb.save(filepath)
+    # directories = [d for d in os.listdir() if os.path.isdir(d)]
+    # print("Directories:", directories)
+    # Save to an Excel file
+    wb.save(filepath)
