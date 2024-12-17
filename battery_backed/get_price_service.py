@@ -31,15 +31,16 @@ class GetPricesDam():
         # Check if the date is during daylight saving time
         self.is_dst = localized_date.dst() != timedelta(0)      
 
-        # start_period = 202411250000
-        # end_period = 202411280000
+        start_period = 202412170000
+        end_period = 202412180000
 
 
 
         #start = int(now.strftime("%Y%m%d%H%M"))
         querystring = {"documentType":"A44","in_Domain":"10YPL-AREA-----S","out_Domain":"10YPL-AREA-----S","periodStart":start_period, "periodEnd":end_period}
         try:
-            response = requests.get(self.url, params=querystring)                  
+            response = requests.get(self.url, params=querystring)   
+            print(response.text)               
             if response.status_code == 200:
                 self.parse_xml(response.text)
             else:

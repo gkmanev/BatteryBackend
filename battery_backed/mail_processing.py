@@ -216,8 +216,7 @@ class FileManager:
                         
                         for i in range(1, period + 1):
                             xl_schedule = get_cell_value(11, 3 + i)  # Adjust row/column as needed
-                            schedule_list.append(xl_schedule)
-                        
+                            schedule_list.append(xl_schedule)                        
                         df = pd.DataFrame(schedule_list, index=timeIndex)
                         df.columns = ['schedule']                        
                         self.save_to_db(df)

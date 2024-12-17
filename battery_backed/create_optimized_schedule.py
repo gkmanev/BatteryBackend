@@ -26,8 +26,7 @@ def run_optimizer():
         df_dam = pd.DataFrame(data)        
 
     df_dam = df_dam.rename(columns={"timestamp": "DateRange","price": "Price"})
-        
-
+    
     # Parameters - can be modified as needed
     max_capacity = 100  # MWh
     capacity_hours =4
@@ -165,12 +164,12 @@ def run_optimizer():
 
     # Create a new DataFrame for the additional rows
     additional_df = pd.DataFrame({'schedule': additional_values}, index=additional_times)
-
+    
     # Concatenate the additional rows with the existing DataFrame
     minute_schedule = pd.concat([minute_schedule, additional_df])
 
 
-    print(len(minute_schedule))
+    
     # Sort the DataFrame by the index (timestamps)
     minute_schedule = minute_schedule.sort_index()
 
