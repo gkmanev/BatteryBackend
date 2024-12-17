@@ -19,7 +19,7 @@ def run_optimizer():
     #     today = today - timedelta(days=i)
     #     end_today = end_today - timedelta(days=i)
     url = f"http://85.14.6.37:16543/api/price/?start_date={today}&end_date={end_today}"
-    
+    print(url)
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()        
@@ -55,7 +55,7 @@ def run_optimizer():
 
     # Total number of hours based on CSV data
     total_hours = len(market_prices) 
-    
+    print(total_hours)
     
     # Ensure there is data for the specified week range
     if total_hours == 0:

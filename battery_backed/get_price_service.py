@@ -31,11 +31,9 @@ class GetPricesDam():
         # Check if the date is during daylight saving time
         self.is_dst = localized_date.dst() != timedelta(0)      
 
-        start_period = 202412160000
-        end_period = 202412180000
-
-
-
+        # start_period = 202412160000
+        # end_period = 202412180000
+        
         #start = int(now.strftime("%Y%m%d%H%M"))
         querystring = {"documentType":"A44","in_Domain":"10YPL-AREA-----S","out_Domain":"10YPL-AREA-----S","periodStart":start_period, "periodEnd":end_period}
         try:
