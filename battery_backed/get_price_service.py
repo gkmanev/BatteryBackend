@@ -31,7 +31,7 @@ class GetPricesDam():
         # Check if the date is during daylight saving time
         self.is_dst = localized_date.dst() != timedelta(0)      
 
-        start_period = 202412170000
+        start_period = 202412160000
         end_period = 202412180000
 
 
