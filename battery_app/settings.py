@@ -158,8 +158,6 @@ CELERY_BEAT_SCHEDULE = {
     
 }
 
-CELERY_TIMEZONE = 'Europe/Sofia'
-
 # celery setting.
 CELERY_CACHE_BACKEND = 'default'
 
