@@ -40,7 +40,7 @@ class MonthManager(models.Manager):
         
         queryset = self.get_queryset()
 
-        data = list(queryset)
+        data = list(queryset.values())
         if not data:
             return []
         
@@ -105,7 +105,7 @@ class YearManager(models.Manager):
         
         queryset = self.get_queryset()
 
-        data = list(queryset)
+        data = list(queryset.values())
         if not data:
             return []
         

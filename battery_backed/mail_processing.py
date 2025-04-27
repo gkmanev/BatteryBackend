@@ -186,7 +186,7 @@ class FileManager:
             fn = "schedules"
             for root, dirs, files in os.walk(fn):
                 xlsfiles = [f for f in files if f.endswith(('.xls', '.xlsx'))]  # Include .xlsx files as well
-                
+                print(f"FILES: {xlsfiles}")
                 for xlsfile in xlsfiles:                    
                     my_file = self.get_file_name(xlsfile)
                     
