@@ -116,11 +116,11 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
-    'batt_schedule_update_via_mail': {
-        'task': 'battery_backed.tasks.task_mail_scheduling',
-        'schedule': crontab(),
+    # 'batt_schedule_update_via_mail': {
+    #     'task': 'battery_backed.tasks.task_mail_scheduling',
+    #     'schedule': crontab(),
         
-    },
+    # },
         'periodically_agg_year': {
         'task': 'battery_backed.tasks.task_year_agg',
         'schedule': crontab(minute='*/45')
