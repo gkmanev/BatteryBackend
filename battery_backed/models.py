@@ -422,9 +422,9 @@ class BatterySchedule(models.Model):
     dam = DayAheadManager()
     objects = models.Manager()   
     revenue = CalculateRevenue() 
-    invertor = models.FloatField(default=0)
-    soc = models.FloatField(default=0)
-    flow = models.FloatField(default=0)
+    invertor = models.FloatField(default=0, null=True, blank=True)
+    soc = models.FloatField(default=0, null=True, blank=True)
+    flow = models.FloatField(default=0, null=True, blank=True)
 
     class Meta:
         unique_together = ('devId', 'timestamp')
