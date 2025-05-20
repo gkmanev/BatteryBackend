@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from datetime import datetime, timedelta
-from battery_backed.models import Price, ForecastedPrice
+from battery_backed.models import Price, ForecastedPrice, BatteryLiveStatus
 import os
 import csv
 from pandas import Timestamp
@@ -10,59 +10,59 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):    
 
-        # Get all data from the Price model
-        prices = Price.objects.all().order_by('timestamp')
+        # # Get all data from the Price model
+        # prices = Price.objects.all().order_by('timestamp')
 
-        # Iterate over the Price objects and create ForecastedPrice objects
-        for price in prices:
-            if not ForecastedPrice.objects.filter(timestamp=price.timestamp + timedelta(days=1)).exists():
-                ForecastedPrice.objects.create(
-                    timestamp=price.timestamp + timedelta(days=1),
-                    price=price.price,
-                    currency=price.currency
-                )
+        # # Iterate over the Price objects and create ForecastedPrice objects
+        # for price in prices:
+        #     if not ForecastedPrice.objects.filter(timestamp=price.timestamp + timedelta(days=1)).exists():
+        #         ForecastedPrice.objects.create(
+        #             timestamp=price.timestamp + timedelta(days=1),
+        #             price=price.price,
+        #             currency=price.currency
+        #         )
 
-            print(f"ForecastedPrice objects populated successfully! {price.timestamp}")
+        #     print(f"ForecastedPrice objects populated successfully! {price.timestamp}")
 
 
         
-        # current_dir = os.path.dirname(os.path.abspath(__file__))  # Get current directory
-        # csv_file_path = os.path.join(current_dir, 'generate_today.csv')  # Replace with your CSV filename
+        current_dir = os.path.dirname(os.path.abspath(__file__))  # Get current directory
+        csv_file_path = os.path.join(current_dir, 'generate_today.csv')  # Replace with your CSV filename
         
-        # with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
-        #     reader = csv.DictReader(csvfile, delimiter=',')
+        with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=',')
                        
-        #     soc = 0  # Initialize state of charge
+            soc = 0  # Initialize state of charge
 
-        #     for row in reader:
-        #         try:
-        #             date_range = row['DateRange']  # Extracting using correct key
-        #             invertor_power = float(row['Net Power (MW)'])  # Extracting using correct key
-        #             flow = float(row['flow'])
-        #             soc += flow                    
+            for row in reader:
+                try:
+                    date_range = row['DateRange']  # Extracting using correct key
+                    invertor_power = float(row['Net Power (MW)'])  # Extracting using correct key
+                    flow = float(row['flow'])
+                    soc += flow                    
                 
-        #             start_time_str = date_range.split(' - ')[1]
-        #             timestamp = datetime.strptime(start_time_str, '%d.%m.%Y %H:%M')
-        #             #print(f"timestamp:{timestamp}||invertor:{net_power}")
-        #         except KeyError as e:
-        #             print(f"KeyError: {e} in row: {row}")
-        #             continue  # Skip this row if the key is not found               
+                    start_time_str = date_range.split(' - ')[1]
+                    timestamp = datetime.strptime(start_time_str, '%d.%m.%Y %H:%M')
+                    #print(f"timestamp:{timestamp}||invertor:{net_power}")
+                except KeyError as e:
+                    print(f"KeyError: {e} in row: {row}")
+                    continue  # Skip this row if the key is not found               
 
-        #         obj, created = BatteryLiveStatus.objects.get_or_create(
-        #                 devId='batt-0001',
-        #                 timestamp=timestamp,
-        #                 defaults={
-        #                     'invertor_power': invertor_power,
-        #                     'flow_last_min': flow/15,
-        #                     'state_of_charge': soc,
-        #                 }
-        #             )                    
-        #         # If the entry already exists, update its values
-        #         if not created:
-        #             obj.invertor_power = invertor_power
-        #             obj.flow_last_min = flow/15
-        #             obj.state_of_charge = soc
-        #             obj.save()
+                obj, created = BatteryLiveStatus.objects.get_or_create(
+                        devId='batt-0001',
+                        timestamp=timestamp,
+                        defaults={
+                            'invertor_power': invertor_power,
+                            'flow_last_min': flow/15,
+                            'state_of_charge': soc,
+                        }
+                    )                    
+                # If the entry already exists, update its values
+                if not created:
+                    obj.invertor_power = invertor_power
+                    obj.flow_last_min = flow/15
+                    obj.state_of_charge = soc
+                    obj.save()
 
 
 # def test():
