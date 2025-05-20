@@ -7,6 +7,8 @@ from pytz import timezone
 import pandas as pd
 import pytz
 from django.core.cache import cache
+import math
+
 
 
 
@@ -425,6 +427,13 @@ class BatterySchedule(models.Model):
     invertor = models.FloatField(default=0, null=True, blank=True)
     soc = models.FloatField(default=0, null=True, blank=True)
     flow = models.FloatField(default=0, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        for field in ['invertor', 'soc', 'flow']:
+            value = getattr(self, field)
+            if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+                setattr(self, field, None)  # or 0.0 if that makes more sense
+        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ('devId', 'timestamp')
