@@ -138,12 +138,12 @@ CELERY_BEAT_SCHEDULE = {
         
         'create_schedule_file_xlsx': {
         'task': 'battery_backed.tasks.task_prepare_optimized_schedule_xlsx',
-        'schedule': crontab(hour=9, minute=50)        
+        'schedule': crontab(hour=20, minute=43)        
     },
         
         'send_sched_to_mail': {
         'task': 'battery_backed.tasks.task_send_schedule_to_email',
-        'schedule': crontab(hour=9, minute=53)        
+        'schedule': crontab(hour=20, minute=45)        
     },
         'create_price_forecast_dam': {
         'task': 'battery_backed.tasks.task_create_dam_price',

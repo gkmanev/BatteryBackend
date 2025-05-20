@@ -5,6 +5,7 @@ import pulp as pl # optimization lib
 import os
 from datetime import datetime, timedelta
 from openpyxl import Workbook
+import math
 
 
 
@@ -47,15 +48,18 @@ def run_optimizer():
     df_dam = df_dam.dropna(subset=['Price'])
     # Convert the prices to float
     df_dam['Price'] = df_dam['Price'].astype(float)
+  
 
-    #df_dam = df_dam.iloc[1:len(df_dam)]
+    df_dam = df_dam.iloc[1:len(df_dam)]
     
-    # Extract the prices and count total hours
+    #Extract the prices and count total hours
     market_prices = df_dam['Price'].tolist()
 
     # Total number of hours based on CSV data
     total_hours = len(market_prices) 
+   
     print(total_hours)
+
     
     # Ensure there is data for the specified week range
     if total_hours == 0:
@@ -74,7 +78,8 @@ def run_optimizer():
     is_discharging = pl.LpVariable.dicts("IsDischarging", range(total_hours), cat='Binary')
     start_charge = pl.LpVariable.dicts("StartCharge", range(total_hours), cat='Binary')
     start_discharge = pl.LpVariable.dicts("StartDischarge", range(total_hours), cat='Binary')
-
+    
+    
     # Updated objective function
     model += pl.lpSum([
         (sell_to_market[h] * (market_prices[h] - access_cost_per_mwh)) - 
@@ -114,8 +119,10 @@ def run_optimizer():
         model += soc[h] <= max_capacity
         model += soc[h] >= min_soc  # Ensure SoC does not drop below minimum
 
+    num_days = max(1, math.ceil(total_hours / 24))
     # Limit the number of charge and discharge events
-    model += pl.lpSum([start_discharge[h] for h in range(total_hours)]) <= max_cycles_per_day * (total_hours // 24)
+    model += pl.lpSum([start_discharge[h] for h in range(total_hours)]) <= max_cycles_per_day * num_days
+
 
     # Solve the problem
     model.solve(pl.PULP_CBC_CMD(msg=False))  # Suppress solver output
@@ -128,7 +135,7 @@ def run_optimizer():
     soc_values = np.array([soc[h].varValue for h in range(total_hours)])
 
     power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()   
-    
+    print(power_arr)
 
     # # Create initial DataFrame
     df = pd.DataFrame(power_arr, columns=["schedule"])
@@ -176,6 +183,7 @@ def run_optimizer():
     #return minute_schedule    
 
     invertor = minute_schedule['schedule'].to_list()
+    
 
     date_today = datetime.today().date()
     dam = date_today + timedelta(days=1)
