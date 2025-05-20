@@ -238,89 +238,74 @@ class DayAheadManager(models.Manager):
     def get_queryset(self) -> models.QuerySet:
         today = datetime.now(tz=pytz.UTC).date()   
         print(f"today start with UTC: {today}")
-        today_start = str(today)+'T'+'00:00:00Z'        
+        today_start = str(today) + 'T' + '00:00:00Z'        
         return super().get_queryset().filter(timestamp__gte=today_start).order_by('timestamp')
 
-        
-    
     def prepare_consistent_response_dam(self, cumulative=None, devId=None):
-
         queryset = self.get_queryset()
         if devId is not None:
-            queryset=queryset.filter(devId=devId)
+            queryset = queryset.filter(devId=devId)
         data = list(queryset.values())
         if not data:
             return []
+
         # Convert data to pandas DataFrame
         df = pd.DataFrame(data)
         # Convert 'timestamp' field to datetime        
-        
         df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
 
-        # Get the current time in the specified timezone
-        # now = datetime.now(pytz.UTC) + timedelta(hours=2, minutes=45)       
-        
-        
         df.set_index('timestamp', inplace=True)
-        # Resample for each device separately (assuming there's a 'devId' field)
-        #df = df[df.index > now]  # Use df.index for the comparison
 
         resampled_data = []
         for dev_id in df['devId'].unique():
             df_device = df[df['devId'] == dev_id]
-
-            # df_no_id = df_device.drop(columns=['id'])            
-           
             df_resampled = df_device.resample('1T').asfreq()
-            
-             # Interpolate 'soc' and 'flow' columns
+
+            # Interpolate 'soc' and 'flow' columns
             df_resampled['soc'] = df_resampled['soc'].interpolate(method='linear')
             df_resampled['flow'] = df_resampled['flow'].bfill()
-
-            # Divide the flow by 15 to have it per min
-            df_resampled['flow'] = df_resampled['flow']/15
-
-            # Backward fill 'invertor' column
+            df_resampled['flow'] = df_resampled['flow'] / 15
             df_resampled['invertor'] = df_resampled['invertor'].bfill()
 
             # Add 'devId' column back
             df_resampled['devId'] = dev_id
-
-            # Reset index to make 'timestamp' a column again
             df_resampled = df_resampled.reset_index()
 
-            # Append to the resampled data list
+            # Replace infinite values with NaN, then fill NaNs with 0
+            df_resampled.replace([float('inf'), float('-inf')], pd.NA, inplace=True)
+            df_resampled.fillna(0, inplace=True)
+
             resampled_data.append(df_resampled)
 
-        # Combine resampled data
         df_combined = pd.concat(resampled_data)
-        # Sort by timestamp
         df_combined = df_combined.sort_values(by='timestamp')
 
-        # Round numerical columns to 2 decimal places
-        numeric_columns = ['invertor', 'soc', 'flow']  # Adjust based on your data fields        
+        numeric_columns = ['invertor', 'soc', 'flow']        
         df_combined[numeric_columns] = df_combined[numeric_columns].round(2)
 
+        # Replace any remaining inf or -inf in combined DataFrame before cumulative
+        df_combined.replace([float('inf'), float('-inf')], pd.NA, inplace=True)
+        df_combined.fillna(0, inplace=True)
+
         if cumulative is not None:
-            # Group by timestamp and calculate cumulative sum of state_of_charge
             df_cumulative = df_combined.groupby('timestamp').agg(
-            cumulative_soc=('soc', 'sum'),
-            cumulative_flow_last_min=('flow', 'sum'),
-            cumulative_invertor_power=('invertor', 'sum')
+                cumulative_soc=('soc', 'sum'),
+                cumulative_flow_last_min=('flow', 'sum'),
+                cumulative_invertor_power=('invertor', 'sum')
             ).reset_index()
-            # Round the cumulative sums to 2 decimal places
+
             df_cumulative['cumulative_soc'] = df_cumulative['cumulative_soc'].round(2)
             df_cumulative['cumulative_flow_last_min'] = df_cumulative['cumulative_flow_last_min'].round(2)
             df_cumulative['cumulative_invertor_power'] = df_cumulative['cumulative_invertor_power'].round(2)
-            df_cumulative.fillna(0, inplace=True)
-            # Convert back to a list of dictionaries
-            cumulative_result = df_cumulative.to_dict(orient='records')
-              
-            return cumulative_result
 
-        resampled_result = df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')   
-        
-        return resampled_result
+            # Again replace inf/-inf and fill NaNs
+            df_cumulative.replace([float('inf'), float('-inf')], pd.NA, inplace=True)
+            df_cumulative.fillna(0, inplace=True)
+
+            return df_cumulative.to_dict(orient='records')
+
+        return df_combined.drop(columns=['id'], errors='ignore').to_dict(orient='records')
+
 
 class CalculateRevenue(models.Manager):
 
