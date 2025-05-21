@@ -11,6 +11,7 @@ from .tasks import task_forecast_schedule_populate
 from django.utils import timezone
 from pytz import timezone as pytz_timezone
 from django.core.cache import cache
+import math
 
 
 
@@ -104,7 +105,20 @@ class StateViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
     
     
-#DAM             
+#DAM  
+# 
+# 
+def clean_json_data(data):
+    if isinstance(data, dict):
+        return {k: clean_json_data(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [clean_json_data(v) for v in data]
+    elif isinstance(data, float):
+        if math.isnan(data) or math.isinf(data):
+            return None
+    return data
+
+
 class ScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = BatteryScheduleSerializer
     queryset = BatterySchedule.objects.all().order_by('timestamp')
@@ -125,13 +139,15 @@ class ScheduleViewSet(viewsets.ModelViewSet):
                 response = BatterySchedule.dam.prepare_consistent_response_dam(cumulative=True)
             else:
                 response = BatterySchedule.dam.prepare_consistent_response_dam(devId=dev_id)
-            return Response(response, status=status.HTTP_200_OK)
+            cleaned_response = clean_json_data(response)
+            return Response(cleaned_response, status=status.HTTP_200_OK)
 
         # Fallback to default list handling
         queryset = self.get_queryset()
-
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        cleaned_data = clean_json_data(serializer.data)
+        return Response(cleaned_data, status=status.HTTP_200_OK)
 
 
 
