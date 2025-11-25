@@ -6,5 +6,5 @@ class Command(BaseCommand):
     help = 'Get Prices from entsoe'
 
     def handle(self, *args, **kwargs):
-        test = GetPricesDam()
-        #test.order_df()
+        service = GetPricesDam()
+        service.fetch_and_store_day_ahead_prices()

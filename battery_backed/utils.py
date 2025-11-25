@@ -120,6 +120,7 @@ def get_cumulative_data_year():
 
 def fetch_prices_service():
     fetch = GetPricesDam()
+    fetch.fetch_and_store_day_ahead_prices()
     
 def make_price_forecast():
     user_timezone = pytz_timezone("Europe/Warsaw")
