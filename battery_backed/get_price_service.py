@@ -13,7 +13,7 @@ class GetPricesDam:
     """Service for fetching and persisting day-ahead market prices."""
 
     BASE_URL = "https://web-api.tp.entsoe.eu/api"
-    DOMAIN = "10YPL-AREA-----S"
+    DOMAIN = "10YCA-BULGARIA-R"
     SECURITY_TOKEN = "6276342c-e10c-4d88-8688-cb0a1cf163ca"
 
     def __init__(self) -> None:
@@ -50,24 +50,65 @@ class GetPricesDam:
 
     def _parse_xml(self, xml_data):
         root = ET.fromstring(xml_data)
-        ns = {"ns": "urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:3"}
+        ns_uri = self._extract_namespace(root)
+        ns = {"ns": ns_uri} if ns_uri else {}
+        ts_path = "ns:TimeSeries" if ns else "TimeSeries"
+        period_path = "ns:Period" if ns else "Period"
+        interval_path = "ns:timeInterval" if ns else "timeInterval"
+        start_path = "ns:start" if ns else "start"
+        resolution_path = "ns:resolution" if ns else "resolution"
+        point_path = "ns:Point" if ns else "Point"
+        position_path = "ns:position" if ns else "position"
+        price_path = "ns:price.amount" if ns else "price.amount"
         prices = []
 
-        for time_series in root.findall("ns:TimeSeries", ns):
-            period = time_series.find("ns:Period", ns)
-            time_interval = period.find("ns:timeInterval", ns)
-            start_str = time_interval.find("ns:start", ns).text
-            start_time = datetime.strptime(start_str, "%Y-%m-%dT%H:%MZ").replace(tzinfo=pytz.utc)
-            resolution_str = period.find("ns:resolution", ns)
-            step = self._resolution_to_timedelta(resolution_str.text if resolution_str is not None else "PT60M")
+        for time_series in root.findall(ts_path, ns):
+            period = time_series.find(period_path, ns)
+            if period is None:
+                continue
 
-            for point in period.findall("ns:Point", ns):
-                position = int(point.find("ns:position", ns).text)
-                price_amount = Decimal(point.find("ns:price.amount", ns).text)
+            time_interval = period.find(interval_path, ns)
+            if time_interval is None:
+                continue
+
+            start_element = time_interval.find(start_path, ns)
+            if start_element is None or start_element.text is None:
+                continue
+
+            start_time = datetime.strptime(start_element.text, "%Y-%m-%dT%H:%MZ").replace(
+                tzinfo=pytz.utc
+            )
+
+            resolution_element = period.find(resolution_path, ns)
+            step = self._resolution_to_timedelta(
+                resolution_element.text if resolution_element is not None else "PT60M"
+            )
+
+            for point in period.findall(point_path, ns):
+                position_element = point.find(position_path, ns)
+                price_element = point.find(price_path, ns)
+
+                if (
+                    position_element is None
+                    or position_element.text is None
+                    or price_element is None
+                    or price_element.text is None
+                ):
+                    continue
+
+                position = int(position_element.text)
+                price_amount = Decimal(price_element.text)
                 price_timestamp = start_time + step * (position - 1)
                 prices.append({"timestamp": price_timestamp, "price": price_amount, "currency": "EUR"})
 
         return prices
+
+    def _extract_namespace(self, root: ET.Element) -> str:
+        """Extract XML namespace URI from the root element tag."""
+
+        if root.tag.startswith("{") and "}" in root.tag:
+            return root.tag[1 : root.tag.find("}")]
+        return ""
 
     def _resolution_to_timedelta(self, resolution: str) -> timedelta:
         """Translate ENTSO-E resolution strings (e.g. PT15M, PT60M) to timedeltas."""
