@@ -58,14 +58,31 @@ class GetPricesDam:
             time_interval = period.find("ns:timeInterval", ns)
             start_str = time_interval.find("ns:start", ns).text
             start_time = datetime.strptime(start_str, "%Y-%m-%dT%H:%MZ").replace(tzinfo=pytz.utc)
+            resolution_str = period.find("ns:resolution", ns)
+            step = self._resolution_to_timedelta(resolution_str.text if resolution_str is not None else "PT60M")
 
             for point in period.findall("ns:Point", ns):
                 position = int(point.find("ns:position", ns).text)
                 price_amount = Decimal(point.find("ns:price.amount", ns).text)
-                price_timestamp = start_time + timedelta(hours=position - 1)
+                price_timestamp = start_time + step * (position - 1)
                 prices.append({"timestamp": price_timestamp, "price": price_amount, "currency": "EUR"})
 
         return prices
+
+    def _resolution_to_timedelta(self, resolution: str) -> timedelta:
+        """Translate ENTSO-E resolution strings (e.g. PT15M, PT60M) to timedeltas."""
+
+        # resolution format is expected to be PT{minutes}M or PT{hours}H
+        if resolution.startswith("PT") and resolution.endswith("M"):
+            minutes = int(resolution[2:-1])
+            return timedelta(minutes=minutes)
+
+        if resolution.startswith("PT") and resolution.endswith("H"):
+            hours = int(resolution[2:-1])
+            return timedelta(hours=hours)
+
+        # Fallback to one hour if an unexpected resolution is encountered
+        return timedelta(hours=1)
 
     def _store_prices(self, prices):
         for price_data in prices:
