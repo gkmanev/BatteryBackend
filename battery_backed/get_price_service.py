@@ -22,6 +22,7 @@ class GetPricesDam:
     def fetch_and_store_day_ahead_prices(self):
         """Fetch day-ahead prices and persist them into the Price model."""
         start_period, end_period = self._get_day_ahead_period()
+        print(start_period, end_period)
         querystring = {
             "documentType": "A44",
             "in_Domain": self.DOMAIN,
@@ -30,6 +31,7 @@ class GetPricesDam:
             "periodEnd": end_period,
             "securityToken": self.SECURITY_TOKEN,
         }
+        print(f"querystring: {querystring}")
 
         response = requests.get(self.BASE_URL, params=querystring)
         response.raise_for_status()
