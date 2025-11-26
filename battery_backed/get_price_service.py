@@ -41,7 +41,7 @@ class GetPricesDam:
 
     def _get_day_ahead_period(self):
         now = timezone.now().astimezone(self.timezone)
-        start = now + timedelta(days=1)
+        start = now #+ timedelta(days=1)
         start_period = start.replace(hour=0, minute=0, second=0, microsecond=0)
         end_period = start_period + timedelta(days=1)
 
