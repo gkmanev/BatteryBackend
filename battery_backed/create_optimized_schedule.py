@@ -1,16 +1,17 @@
-import pandas as pd
-import numpy as np
-import pulp as pl # optimization lib
+import math
 import os
 from datetime import datetime, timedelta
-from openpyxl import Workbook
-import math
+
+import numpy as np
+import pandas as pd
+import pulp as pl  # optimization lib
 from django.utils import timezone
-from battery_backed.models import Price
+from openpyxl import Workbook
+
+from battery_backed.models import BatterySchedule, Price
 
 
-
-def run_optimizer():
+def run_optimizer(dev_id: str = "batt1"):
     df_dam = pd.DataFrame()
 
     # ------------------------------------------------------------------
@@ -172,7 +173,6 @@ def run_optimizer():
 
     # Positive = charging, Negative = discharging (MWh per 15 minutes)
     power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
-    print(power_arr)
 
     # Create schedule DataFrame with the SAME timestamps as prices (15-min)
     df_schedule = pd.DataFrame(
@@ -181,11 +181,38 @@ def run_optimizer():
     )
 
     # ------------------------------------------------------------------
-    # 8) Export schedule to Excel (one value per 15-min interval)
+    # 8) Save schedule to database (BatterySchedule)
+    # ------------------------------------------------------------------
+    soc_series = df_schedule["schedule"].cumsum()
+
+    BatterySchedule.objects.filter(
+        devId=dev_id,
+        timestamp__gte=tomorrow_start,
+        timestamp__lt=tomorrow_end,
+    ).delete()
+
+    schedule_objects = []
+    for timestamp, energy_mwh in df_schedule["schedule"].items():
+        invertor_power_mw = energy_mwh / dt_hours
+        soc_value = soc_series.loc[timestamp]
+        schedule_objects.append(
+            BatterySchedule(
+                devId=dev_id,
+                timestamp=timestamp,
+                invertor=invertor_power_mw,
+                flow=energy_mwh,
+                soc=soc_value,
+            )
+        )
+
+    BatterySchedule.objects.bulk_create(schedule_objects)
+
+    # ------------------------------------------------------------------
+    # 9) Export schedule to Excel (one value per 15-min interval)
     # ------------------------------------------------------------------
     dam = df_dam["DateRange"].min().date()
     fn = "sent_optimized_schedules"
-    file_name = f"batt1_{dam}.xlsx"
+    file_name = f"{dev_id}_{dam}.xlsx"
     filepath = os.path.join(fn, file_name)
 
     wb = Workbook()
