@@ -1,4 +1,3 @@
-import requests
 import pandas as pd
 import numpy as np
 import pulp as pl # optimization lib
@@ -6,6 +5,8 @@ import os
 from datetime import datetime, timedelta
 from openpyxl import Workbook
 import math
+from django.utils import timezone
+from battery_backed.models import Price
 
 
 
@@ -13,20 +14,24 @@ def run_optimizer():
     price_diff_threshold = 60
 
     df_dam = pd.DataFrame()
-    #url = "http://85.14.6.37:16543/api/price/?date_range=today"
-    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-    end_today = today + timedelta(hours=23)
-    # for i in range(30):
-    #     today = today - timedelta(days=i)
-    #     end_today = end_today - timedelta(days=i)
-    url = f"http://85.14.6.37:16543/api/price/?start_date={today}&end_date={end_today}"
-    print(url)
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()        
-        df_dam = pd.DataFrame(data)        
 
-    df_dam = df_dam.rename(columns={"timestamp": "DateRange","price": "Price"})
+    # Retrieve tomorrow's day-ahead prices from the database
+    now = timezone.now().astimezone(timezone.get_current_timezone())
+    tomorrow = now.date() + timedelta(days=1)
+    tomorrow_start = timezone.make_aware(
+        datetime.combine(tomorrow, datetime.min.time()),
+        timezone.get_current_timezone(),
+    )
+    tomorrow_end = tomorrow_start + timedelta(days=1)
+
+    prices_qs = Price.objects.filter(
+        timestamp__gte=tomorrow_start, timestamp__lt=tomorrow_end
+    ).order_by("timestamp")
+
+    if prices_qs.exists():
+        df_dam = pd.DataFrame(list(prices_qs.values("timestamp", "price")))
+
+    df_dam = df_dam.rename(columns={"timestamp": "DateRange", "price": "Price"})
     
     # Parameters - can be modified as needed
     max_capacity = 100  # MWh
@@ -50,13 +55,11 @@ def run_optimizer():
     df_dam['Price'] = df_dam['Price'].astype(float)
   
 
-    df_dam = df_dam.iloc[1:len(df_dam)]
-    
     #Extract the prices and count total hours
     market_prices = df_dam['Price'].tolist()
 
     # Total number of hours based on CSV data
-    total_hours = len(market_prices) 
+    total_hours = len(market_prices)
    
     print(total_hours)
 
@@ -144,27 +147,20 @@ def run_optimizer():
     
     # Generate a date range starting from today at 1:00 AM, ending at 1:00 AM the next day + 1 hour
     
-    next_day = today + timedelta(days=1)
-
-    # Generate date range from 1 AM today to 1:00 AM the next day (including an extra hour to capture 1 AM on the next day)
-    date_range = pd.date_range(start=today, end=next_day + timedelta(hours=1), freq='H')
-    df.index = date_range[:len(df)]    
+    schedule_start = df_dam['DateRange'].min().replace(minute=0, second=0, microsecond=0)
+    date_range = pd.date_range(start=schedule_start, periods=total_hours, freq='H')
+    df.index = date_range
 
        
     # Resample to 15-minute intervals and forward fill missing values
     minute_schedule = df.resample('15T').ffill()  
-    today = datetime.today()
-    
     #add 23:15, 23:30, 23:45
     last_value = minute_schedule['schedule'].iloc[-1]
-    today_23_15 = today.replace(hour=23, minute=15, second=0, microsecond=0)
-    today_23_15 = today_23_15.strftime("%Y-%m-%d %H:%M:%S")
+    day_end = schedule_start.replace(hour=23, minute=0, second=0, microsecond=0)
 
-    today_23_30 = today.replace(hour=23, minute=30, second=0, microsecond=0)
-    today_23_30 = today_23_30.strftime("%Y-%m-%d %H:%M:%S")
-
-    today_23_45 = today.replace(hour=23, minute=45, second=0, microsecond=0)
-    today_23_45 = today_23_45.strftime("%Y-%m-%d %H:%M:%S")
+    today_23_15 = day_end + timedelta(minutes=15)
+    today_23_30 = day_end + timedelta(minutes=30)
+    today_23_45 = day_end + timedelta(minutes=45)
 
     additional_times = pd.to_datetime([today_23_15, today_23_30, today_23_45])
     additional_values = [last_value] * len(additional_times)
@@ -185,8 +181,7 @@ def run_optimizer():
     invertor = minute_schedule['schedule'].to_list()
     
 
-    date_today = datetime.today().date()
-    dam = date_today + timedelta(days=1)
+    dam = schedule_start.date()
     fn = "sent_optimized_schedules"
     file_name = f"batt1_{dam}.xlsx"
     filepath = os.path.join(fn, file_name)
