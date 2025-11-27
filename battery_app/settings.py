@@ -116,44 +116,12 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
-    'batt_schedule_update_via_mail': {
-        'task': 'battery_backed.tasks.task_mail_scheduling',
-        'schedule': crontab(),
+
+    # 'batt_schedule_update_via_mail': {
+    #     'task': 'battery_backed.tasks.task_mail_scheduling',
+    #     'schedule': crontab(),
         
-    },
-        'periodically_agg_year': {
-        'task': 'battery_backed.tasks.task_year_agg',
-        'schedule': crontab(minute='*/45')
-        
-    },
-        'periodically_sum_year': {
-        'task': 'battery_backed.tasks.task_year_sum',
-        'schedule': crontab(minute='*/40')
-        
-    },
-        'every_day_fetch_prices': {
-        'task': 'battery_backed.tasks.task_fetch_prices',
-        'schedule': crontab(hour=14, minute=46)        
-    },
-        
-        'create_schedule_file_xlsx': {
-        'task': 'battery_backed.tasks.task_prepare_optimized_schedule_xlsx',
-        'schedule': crontab(hour=20, minute=43)        
-    },
-        
-        'send_sched_to_mail': {
-        'task': 'battery_backed.tasks.task_send_schedule_to_email',
-        'schedule': crontab(hour=20, minute=45)        
-    },
-        'create_price_forecast_dam': {
-        'task': 'battery_backed.tasks.task_create_dam_price',
-        'schedule': crontab(hour=9, minute=30)        
-    },
-    # 'cumulatice_revenue': {
-    #     'task': 'battery_backed.tasks.task_cumulaticve_revenue',
-    #     'schedule': crontab()        
-    # },
-    
+    # },   
 
     
 }

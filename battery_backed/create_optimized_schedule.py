@@ -27,201 +27,203 @@ def run_optimizer(dev_id: str = "batt1"):
     )
     tomorrow_end = tomorrow_start + timedelta(days=1)
 
-    prices_qs = (
-        Price.objects
-        .filter(timestamp__gte=tomorrow_start, timestamp__lt=tomorrow_end)
-        .order_by("timestamp")
-    )
+    print(f"{tomorrow_start}||{tomorrow_end}")
 
-    if prices_qs.exists():
-        df_dam = pd.DataFrame(list(prices_qs.values("timestamp", "price")))
-    else:
-        raise ValueError("No price data available for the selected day.")
+    # prices_qs = (
+    #     Price.objects
+    #     .filter(timestamp__gte=tomorrow_start, timestamp__lt=tomorrow_end)
+    #     .order_by("timestamp")
+    # )
 
-    df_dam = df_dam.rename(columns={"timestamp": "DateRange", "price": "Price"})
+    # if prices_qs.exists():
+    #     df_dam = pd.DataFrame(list(prices_qs.values("timestamp", "price")))
+    # else:
+    #     raise ValueError("No price data available for the selected day.")
 
-    # ------------------------------------------------------------------
-    # 2) Clean / prepare data (15-min prices)
-    # ------------------------------------------------------------------
-    df_dam["Price"] = df_dam["Price"].replace("-", np.nan)
-    df_dam = df_dam.dropna(subset=["Price"])
-    df_dam["Price"] = df_dam["Price"].astype(float)
+    # df_dam = df_dam.rename(columns={"timestamp": "DateRange", "price": "Price"})
 
-    # Ensure ordered by time
-    df_dam = df_dam.sort_values("DateRange").reset_index(drop=True)
+    # # ------------------------------------------------------------------
+    # # 2) Clean / prepare data (15-min prices)
+    # # ------------------------------------------------------------------
+    # df_dam["Price"] = df_dam["Price"].replace("-", np.nan)
+    # df_dam = df_dam.dropna(subset=["Price"])
+    # df_dam["Price"] = df_dam["Price"].astype(float)
 
-    market_prices = df_dam["Price"].tolist()
-    total_steps = len(market_prices)         # number of 15-min intervals
-    dt_hours = 0.25                          # 15 minutes in hours
+    # # Ensure ordered by time
+    # df_dam = df_dam.sort_values("DateRange").reset_index(drop=True)
 
-    if total_steps == 0:
-        raise ValueError("No data available after cleaning.")
+    # market_prices = df_dam["Price"].tolist()
+    # total_steps = len(market_prices)         # number of 15-min intervals
+    # dt_hours = 0.25                          # 15 minutes in hours
 
-    # ------------------------------------------------------------------
-    # 3) Battery parameters (energy in MWh, power in MW)
-    # ------------------------------------------------------------------
-    max_capacity = 100            # MWh
-    capacity_hours = 4
-    max_charge_rate = max_capacity / capacity_hours      # MW
-    max_discharge_rate = max_capacity / capacity_hours   # MW
+    # if total_steps == 0:
+    #     raise ValueError("No data available after cleaning.")
 
-    # Per-step energy limits (MWh per 15 min)
-    max_charge_energy_step = max_charge_rate * dt_hours
-    max_discharge_energy_step = max_discharge_rate * dt_hours
+    # # ------------------------------------------------------------------
+    # # 3) Battery parameters (energy in MWh, power in MW)
+    # # ------------------------------------------------------------------
+    # max_capacity = 100            # MWh
+    # capacity_hours = 4
+    # max_charge_rate = max_capacity / capacity_hours      # MW
+    # max_discharge_rate = max_capacity / capacity_hours   # MW
 
-    initial_soc = 0               # MWh
-    charge_efficiency = 1.0
-    discharge_efficiency = 1.0
-    max_cycles_per_day = 2
-    access_cost_per_mwh = 0      # EUR/MWh
-    min_soc = 0                  # MWh
+    # # Per-step energy limits (MWh per 15 min)
+    # max_charge_energy_step = max_charge_rate * dt_hours
+    # max_discharge_energy_step = max_discharge_rate * dt_hours
 
-    # ------------------------------------------------------------------
-    # 4) Define optimization problem
-    # ------------------------------------------------------------------
-    model = pl.LpProblem("Battery_Operation_Profit_Maximization", pl.LpMaximize)
+    # initial_soc = 0               # MWh
+    # charge_efficiency = 1.0
+    # discharge_efficiency = 1.0
+    # max_cycles_per_day = 2
+    # access_cost_per_mwh = 0      # EUR/MWh
+    # min_soc = 0                  # MWh
 
-    idx = range(total_steps)
+    # # ------------------------------------------------------------------
+    # # 4) Define optimization problem
+    # # ------------------------------------------------------------------
+    # model = pl.LpProblem("Battery_Operation_Profit_Maximization", pl.LpMaximize)
 
-    # Energy going into/out of battery during each 15-min interval (MWh)
-    charge_to_battery = pl.LpVariable.dicts(
-        "Charge_to_Battery", idx, lowBound=0,
-        upBound=max_charge_energy_step * charge_efficiency
-    )
-    discharge_from_battery = pl.LpVariable.dicts(
-        "Discharge_from_Battery", idx, lowBound=0,
-        upBound=max_discharge_energy_step
-    )
+    # idx = range(total_steps)
 
-    # Energy traded with market (MWh per 15 min)
-    purchase_from_market = pl.LpVariable.dicts(
-        "Purchase_from_Market", idx, lowBound=0,
-        upBound=max_charge_energy_step
-    )
-    sell_to_market = pl.LpVariable.dicts(
-        "Sell_to_Market", idx, lowBound=0,
-        upBound=max_discharge_energy_step * discharge_efficiency
-    )
+    # # Energy going into/out of battery during each 15-min interval (MWh)
+    # charge_to_battery = pl.LpVariable.dicts(
+    #     "Charge_to_Battery", idx, lowBound=0,
+    #     upBound=max_charge_energy_step * charge_efficiency
+    # )
+    # discharge_from_battery = pl.LpVariable.dicts(
+    #     "Discharge_from_Battery", idx, lowBound=0,
+    #     upBound=max_discharge_energy_step
+    # )
 
-    # State of charge (MWh) at each step boundary
-    soc = pl.LpVariable.dicts(
-        "SoC", range(total_steps + 1), lowBound=min_soc, upBound=max_capacity
-    )
+    # # Energy traded with market (MWh per 15 min)
+    # purchase_from_market = pl.LpVariable.dicts(
+    #     "Purchase_from_Market", idx, lowBound=0,
+    #     upBound=max_charge_energy_step
+    # )
+    # sell_to_market = pl.LpVariable.dicts(
+    #     "Sell_to_Market", idx, lowBound=0,
+    #     upBound=max_discharge_energy_step * discharge_efficiency
+    # )
 
-    # Binary indicators
-    is_charging = pl.LpVariable.dicts("IsCharging", idx, cat="Binary")
-    is_discharging = pl.LpVariable.dicts("IsDischarging", idx, cat="Binary")
-    start_charge = pl.LpVariable.dicts("StartCharge", idx, cat="Binary")
-    start_discharge = pl.LpVariable.dicts("StartDischarge", idx, cat="Binary")
+    # # State of charge (MWh) at each step boundary
+    # soc = pl.LpVariable.dicts(
+    #     "SoC", range(total_steps + 1), lowBound=min_soc, upBound=max_capacity
+    # )
 
-    # ------------------------------------------------------------------
-    # 5) Objective: maximize net profit (EUR)
-    # ------------------------------------------------------------------
-    model += pl.lpSum(
-        (sell_to_market[t] * (market_prices[t] - access_cost_per_mwh)) -
-        (purchase_from_market[t] * (market_prices[t] + access_cost_per_mwh))
-        for t in idx
-    )
+    # # Binary indicators
+    # is_charging = pl.LpVariable.dicts("IsCharging", idx, cat="Binary")
+    # is_discharging = pl.LpVariable.dicts("IsDischarging", idx, cat="Binary")
+    # start_charge = pl.LpVariable.dicts("StartCharge", idx, cat="Binary")
+    # start_discharge = pl.LpVariable.dicts("StartDischarge", idx, cat="Binary")
 
-    # Initial SoC
-    model += soc[0] == initial_soc
+    # # ------------------------------------------------------------------
+    # # 5) Objective: maximize net profit (EUR)
+    # # ------------------------------------------------------------------
+    # model += pl.lpSum(
+    #     (sell_to_market[t] * (market_prices[t] - access_cost_per_mwh)) -
+    #     (purchase_from_market[t] * (market_prices[t] + access_cost_per_mwh))
+    #     for t in idx
+    # )
 
-    # ------------------------------------------------------------------
-    # 6) Constraints per 15-min step
-    # ------------------------------------------------------------------
-    for t in idx:
-        # Link charge/discharge power to binary flags
-        model += purchase_from_market[t] <= max_charge_energy_step * is_charging[t]
-        model += sell_to_market[t] <= max_discharge_energy_step * is_discharging[t]
+    # # Initial SoC
+    # model += soc[0] == initial_soc
 
-        # No simultaneous charge & discharge
-        model += is_charging[t] + is_discharging[t] <= 1
+    # # ------------------------------------------------------------------
+    # # 6) Constraints per 15-min step
+    # # ------------------------------------------------------------------
+    # for t in idx:
+    #     # Link charge/discharge power to binary flags
+    #     model += purchase_from_market[t] <= max_charge_energy_step * is_charging[t]
+    #     model += sell_to_market[t] <= max_discharge_energy_step * is_discharging[t]
 
-        # Start event detection
-        if t == 0:
-            model += start_charge[t] >= is_charging[t]
-            model += start_discharge[t] >= is_discharging[t]
-        else:
-            model += start_charge[t] >= is_charging[t] - is_charging[t - 1]
-            model += start_discharge[t] >= is_discharging[t] - is_discharging[t - 1]
+    #     # No simultaneous charge & discharge
+    #     model += is_charging[t] + is_discharging[t] <= 1
 
-        # SoC dynamics
-        model += soc[t + 1] == soc[t] + charge_to_battery[t] - discharge_from_battery[t]
+    #     # Start event detection
+    #     if t == 0:
+    #         model += start_charge[t] >= is_charging[t]
+    #         model += start_discharge[t] >= is_discharging[t]
+    #     else:
+    #         model += start_charge[t] >= is_charging[t] - is_charging[t - 1]
+    #         model += start_discharge[t] >= is_discharging[t] - is_discharging[t - 1]
 
-        # Efficiency relationships
-        model += charge_to_battery[t] == purchase_from_market[t] * charge_efficiency
-        model += sell_to_market[t] == discharge_from_battery[t] * discharge_efficiency
+    #     # SoC dynamics
+    #     model += soc[t + 1] == soc[t] + charge_to_battery[t] - discharge_from_battery[t]
 
-    # SoC bounds are already handled in variable definition, but you can keep:
-    for t in range(total_steps + 1):
-        model += soc[t] <= max_capacity
-        model += soc[t] >= min_soc
+    #     # Efficiency relationships
+    #     model += charge_to_battery[t] == purchase_from_market[t] * charge_efficiency
+    #     model += sell_to_market[t] == discharge_from_battery[t] * discharge_efficiency
 
-    # Cycle limit: max_cycles_per_day * number_of_days in horizon
-    horizon_hours = total_steps * dt_hours
-    num_days = max(1, math.ceil(horizon_hours / 24.0))
-    model += pl.lpSum(start_discharge[t] for t in idx) <= max_cycles_per_day * num_days
+    # # SoC bounds are already handled in variable definition, but you can keep:
+    # for t in range(total_steps + 1):
+    #     model += soc[t] <= max_capacity
+    #     model += soc[t] >= min_soc
 
-    # ------------------------------------------------------------------
-    # 7) Solve and build 15-min schedule aligned with prices
-    # ------------------------------------------------------------------
-    model.solve(pl.PULP_CBC_CMD(msg=False))
+    # # Cycle limit: max_cycles_per_day * number_of_days in horizon
+    # horizon_hours = total_steps * dt_hours
+    # num_days = max(1, math.ceil(horizon_hours / 24.0))
+    # model += pl.lpSum(start_discharge[t] for t in idx) <= max_cycles_per_day * num_days
 
-    charge_to_battery_amounts = np.array([charge_to_battery[t].varValue for t in idx])
-    discharge_from_battery_amounts = np.array([discharge_from_battery[t].varValue for t in idx])
-    soc_values = np.array([soc[t + 1].varValue for t in idx])  # SoC at end of each step
+    # # ------------------------------------------------------------------
+    # # 7) Solve and build 15-min schedule aligned with prices
+    # # ------------------------------------------------------------------
+    # model.solve(pl.PULP_CBC_CMD(msg=False))
 
-    # Positive = charging, Negative = discharging (MWh per 15 minutes)
-    power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
+    # charge_to_battery_amounts = np.array([charge_to_battery[t].varValue for t in idx])
+    # discharge_from_battery_amounts = np.array([discharge_from_battery[t].varValue for t in idx])
+    # soc_values = np.array([soc[t + 1].varValue for t in idx])  # SoC at end of each step
 
-    # Create schedule DataFrame with the SAME timestamps as prices (15-min)
-    df_schedule = pd.DataFrame(
-        {"schedule": power_arr},
-        index=df_dam["DateRange"]
-    )
+    # # Positive = charging, Negative = discharging (MWh per 15 minutes)
+    # power_arr = (charge_to_battery_amounts - discharge_from_battery_amounts).tolist()
 
-    # ------------------------------------------------------------------
-    # 8) Save schedule to database (BatterySchedule)
-    # ------------------------------------------------------------------
-    soc_series = df_schedule["schedule"].cumsum()
+    # # Create schedule DataFrame with the SAME timestamps as prices (15-min)
+    # df_schedule = pd.DataFrame(
+    #     {"schedule": power_arr},
+    #     index=df_dam["DateRange"]
+    # )
 
-    BatterySchedule.objects.filter(
-        devId=dev_id,
-        timestamp__gte=tomorrow_start,
-        timestamp__lt=tomorrow_end,
-    ).delete()
+    # # ------------------------------------------------------------------
+    # # 8) Save schedule to database (BatterySchedule)
+    # # ------------------------------------------------------------------
+    # soc_series = df_schedule["schedule"].cumsum()
 
-    schedule_objects = []
-    for timestamp, energy_mwh in df_schedule["schedule"].items():
-        invertor_power_mw = energy_mwh / dt_hours
-        soc_value = soc_series.loc[timestamp]
-        schedule_objects.append(
-            BatterySchedule(
-                devId=dev_id,
-                timestamp=timestamp,
-                invertor=invertor_power_mw,
-                flow=energy_mwh,
-                soc=soc_value,
-            )
-        )
+    # BatterySchedule.objects.filter(
+    #     devId=dev_id,
+    #     timestamp__gte=tomorrow_start,
+    #     timestamp__lt=tomorrow_end,
+    # ).delete()
 
-    BatterySchedule.objects.bulk_create(schedule_objects)
+    # schedule_objects = []
+    # for timestamp, energy_mwh in df_schedule["schedule"].items():
+    #     invertor_power_mw = energy_mwh / dt_hours
+    #     soc_value = soc_series.loc[timestamp]
+    #     schedule_objects.append(
+    #         BatterySchedule(
+    #             devId=dev_id,
+    #             timestamp=timestamp,
+    #             invertor=invertor_power_mw,
+    #             flow=energy_mwh,
+    #             soc=soc_value,
+    #         )
+    #     )
 
-    # ------------------------------------------------------------------
-    # 9) Export schedule to Excel (one value per 15-min interval)
-    # ------------------------------------------------------------------
-    dam = df_dam["DateRange"].min().date()
-    fn = "sent_optimized_schedules"
-    file_name = f"{dev_id}_{dam}.xlsx"
-    filepath = os.path.join(fn, file_name)
+    # BatterySchedule.objects.bulk_create(schedule_objects)
 
-    wb = Workbook()
-    ws = wb.active
+    # # ------------------------------------------------------------------
+    # # 9) Export schedule to Excel (one value per 15-min interval)
+    # # ------------------------------------------------------------------
+    # dam = df_dam["DateRange"].min().date()
+    # fn = "sent_optimized_schedules"
+    # file_name = f"{dev_id}_{dam}.xlsx"
+    # filepath = os.path.join(fn, file_name)
 
-    # Example: write schedule values on row 11, starting from column 4 (D11)
-    for i, value in enumerate(df_schedule["schedule"], start=4):
-        ws.cell(row=11, column=i, value=value)
+    # wb = Workbook()
+    # ws = wb.active
 
-    wb.save(filepath)
+    # # Example: write schedule values on row 11, starting from column 4 (D11)
+    # for i, value in enumerate(df_schedule["schedule"], start=4):
+    #     ws.cell(row=11, column=i, value=value)
 
-    return df_schedule, soc_values
+    # wb.save(filepath)
+
+    # return df_schedule, soc_values
