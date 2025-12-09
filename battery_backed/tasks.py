@@ -45,6 +45,13 @@ def task_fetch_prices():
     call_command("fetch_prices")
     logger.info("Starting Task Fetch Prices!")
 
+
+@shared_task()
+def task_run_schedule_optimizer():
+    call_command("run_schedule_optimizer")
+    logger.info("Starting Task Run Schedule Optimizer!")
+
+
 @shared_task()
 def task_prepare_optimized_schedule_xlsx():
     prepare_optimized_battery_schedule()
