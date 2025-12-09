@@ -124,6 +124,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "battery_backed.tasks.task_fetch_prices",
         "schedule": crontab(minute=30, hour=17),
     },
+    "run_schedule_optimizer_early": {
+        "task": "battery_backed.tasks.task_run_schedule_optimizer",
+        "schedule": crontab(minute=5, hour=0),
+    },
+    "run_schedule_optimizer_morning": {
+        "task": "battery_backed.tasks.task_run_schedule_optimizer",
+        "schedule": crontab(minute=10, hour=1),
+    },
 }
 
 # celery setting.
