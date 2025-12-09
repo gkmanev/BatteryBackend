@@ -1,6 +1,16 @@
-from celery.utils.log import get_task_logger 
-from celery import shared_task 
-from .utils import mail_schedule, make_forecast, agg_for_year_endpoint, get_cumulative_data_year, fetch_prices_service, prepare_optimized_battery_schedule, send_optimized_schedule_to_mail, make_price_forecast
+from django.core.management import call_command
+from celery.utils.log import get_task_logger
+from celery import shared_task
+
+from .utils import (
+    agg_for_year_endpoint,
+    get_cumulative_data_year,
+    mail_schedule,
+    make_forecast,
+    make_price_forecast,
+    prepare_optimized_battery_schedule,
+    send_optimized_schedule_to_mail,
+)
 
 
 logger = get_task_logger(__name__)
@@ -32,7 +42,7 @@ def task_year_sum():
 
 @shared_task()
 def task_fetch_prices():
-    fetch_prices_service()
+    call_command("fetch_prices")
     logger.info("Starting Task Fetch Prices!")
 
 @shared_task()
