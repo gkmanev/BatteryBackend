@@ -109,7 +109,7 @@ WSGI_APPLICATION = 'battery_app.wsgi.application'
 CELERY_TIMEZONE = "Europe/Sofia"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
-
+CELERY_ENABLE_UTC = False
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
