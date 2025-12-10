@@ -404,7 +404,7 @@ class BatteryLiveStatus(models.Model):
 
 
 class BatterySchedule(models.Model):
-    devId = models.CharField(default='batt1', max_length=20)
+    devId = models.CharField(default='batt1', max_length=30)
     timestamp = models.DateTimeField()
     dam = DayAheadManager()
     objects = models.Manager()   
