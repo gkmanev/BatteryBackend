@@ -130,7 +130,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "run_schedule_optimizer_morning": {
         "task": "battery_backed.tasks.task_run_schedule_optimizer",
-        "schedule": crontab(minute=10, hour=1),
+        "schedule": crontab(minute=58, hour=10),
     },
 }
 
