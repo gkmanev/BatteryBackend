@@ -6,7 +6,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: gunicorn battery_app.wsgi:application --bind 0.0.0.0:8000
+    command: sh -c "python manage.py migrate &&
+           gunicorn battery_app.wsgi:application --bind 0.0.0.0:8000"
     ports:
       - '8000:8000'
     environment:
