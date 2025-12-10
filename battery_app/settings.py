@@ -118,7 +118,7 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 CELERY_BEAT_SCHEDULE = {
     "fetch_prices_afternoon": {
         "task": "battery_backed.tasks.task_fetch_prices",
-        "schedule": crontab(minute=2, hour=15),
+        "schedule": crontab(minute=5, hour=13),
     },
     "fetch_prices_evening": {
         "task": "battery_backed.tasks.task_fetch_prices",
