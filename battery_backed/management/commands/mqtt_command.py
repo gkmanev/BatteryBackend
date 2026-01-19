@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from battery_backed.models import BatteryLiveStatus
 from datetime import datetime
 from pytz import timezone
+import ast
 import paho.mqtt.client as mqtt
 import json
 
@@ -38,7 +39,10 @@ class Command(BaseCommand):
                 # Check if payload looks like a dictionary in string form, if so, evaluate it
                 # Use `json.loads()` if it was a JSON-encoded string, but seems like it's Python serialized.
                 # If it is indeed a dictionary-like payload, use `eval()`, but be careful with it!
-                data_out = eval(payload_str)  # In a safe environment, consider using literal_eval from ast
+                if self.validate_json(payload_str):
+                    data_out = json.loads(payload_str)
+                else:
+                    data_out = ast.literal_eval(payload_str)
                 print(f"Evaluated payload: {data_out}")
 
                 if isinstance(data_out, dict):
@@ -49,8 +53,11 @@ class Command(BaseCommand):
                     timestamp = data_out.get('timestamp', None)
                     print(f"SOC:{soc}, flow: {flow_last_min}, inv: {invertor}")
                     if dev_id is not None and soc is not None and flow_last_min is not None and invertor is not None and timestamp is not None:        
-                        l = BatteryLiveStatus.objects.last()
-                        print(f"TIME: {l.timestamp}")                                   
+                        last_status = BatteryLiveStatus.objects.last()
+                        if last_status is not None:
+                            print(f"TIME: {last_status.timestamp}")
+                        else:
+                            print("No previous BatteryLiveStatus entry found.")
                         battery = BatteryLiveStatus(  
                             timestamp=timestamp,
                             devId=dev_id,                           
