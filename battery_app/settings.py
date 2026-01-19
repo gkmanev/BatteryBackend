@@ -14,9 +14,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from celery.schedules import crontab
-from datetime import timedelta
-
-
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,20 +41,6 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=240),  # Access token valid for 1 hour
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=77),  # Refresh token valid for 7 days
-    'ROTATE_REFRESH_TOKENS': False,  # Do not change refresh token
-    'BLACKLIST_AFTER_ROTATION': False,  # Do not blacklist tokens after refresh
-}
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,7 +54,6 @@ INSTALLED_APPS = [
     'django_celery_beat',    
     'battery_backed',
     'corsheaders',
-    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
